@@ -1,0 +1,74 @@
+lte/bindings/modulegen__gcc_ILP32.py:    ## ff-mac-csched-sap.h (module 'lte'): ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters [struct]
+lte/bindings/modulegen__gcc_ILP32.py:    module.add_class('CschedLcConfigReqParameters', outer_class=root_module['ns3::FfMacCschedSapProvider'])
+lte/bindings/modulegen__gcc_ILP32.py:    register_Ns3FfMacCschedSapProviderCschedLcConfigReqParameters_methods(root_module, root_module['ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters'])
+lte/bindings/modulegen__gcc_ILP32.py:    ## ff-mac-csched-sap.h (module 'lte'): void ns3::FfMacCschedSapProvider::CschedLcConfigReq(ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters const & params) [member function]
+lte/bindings/modulegen__gcc_ILP32.py:                   [param('ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters const &', 'params')], 
+lte/bindings/modulegen__gcc_ILP32.py:def register_Ns3FfMacCschedSapProviderCschedLcConfigReqParameters_methods(root_module, cls):
+lte/bindings/modulegen__gcc_ILP32.py:    ## ff-mac-csched-sap.h (module 'lte'): ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters::CschedLcConfigReqParameters() [constructor]
+lte/bindings/modulegen__gcc_ILP32.py:    ## ff-mac-csched-sap.h (module 'lte'): ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters::CschedLcConfigReqParameters(ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters const & arg0) [copy constructor]
+lte/bindings/modulegen__gcc_ILP32.py:    cls.add_constructor([param('ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters const &', 'arg0')])
+lte/bindings/modulegen__gcc_ILP32.py:    ## ff-mac-csched-sap.h (module 'lte'): ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters::m_logicalChannelConfigList [variable]
+lte/bindings/modulegen__gcc_ILP32.py:    ## ff-mac-csched-sap.h (module 'lte'): ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters::m_reconfigureFlag [variable]
+lte/bindings/modulegen__gcc_ILP32.py:    ## ff-mac-csched-sap.h (module 'lte'): ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters::m_rnti [variable]
+lte/bindings/modulegen__gcc_ILP32.py:    ## ff-mac-csched-sap.h (module 'lte'): ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters::m_vendorSpecificList [variable]
+lte/bindings/modulegen__gcc_LP64.py:    ## ff-mac-csched-sap.h (module 'lte'): ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters [struct]
+lte/bindings/modulegen__gcc_LP64.py:    module.add_class('CschedLcConfigReqParameters', outer_class=root_module['ns3::FfMacCschedSapProvider'])
+lte/bindings/modulegen__gcc_LP64.py:    register_Ns3FfMacCschedSapProviderCschedLcConfigReqParameters_methods(root_module, root_module['ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters'])
+lte/bindings/modulegen__gcc_LP64.py:    ## ff-mac-csched-sap.h (module 'lte'): void ns3::FfMacCschedSapProvider::CschedLcConfigReq(ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters const & params) [member function]
+lte/bindings/modulegen__gcc_LP64.py:                   [param('ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters const &', 'params')], 
+lte/bindings/modulegen__gcc_LP64.py:def register_Ns3FfMacCschedSapProviderCschedLcConfigReqParameters_methods(root_module, cls):
+lte/bindings/modulegen__gcc_LP64.py:    ## ff-mac-csched-sap.h (module 'lte'): ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters::CschedLcConfigReqParameters() [constructor]
+lte/bindings/modulegen__gcc_LP64.py:    ## ff-mac-csched-sap.h (module 'lte'): ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters::CschedLcConfigReqParameters(ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters const & arg0) [copy constructor]
+lte/bindings/modulegen__gcc_LP64.py:    cls.add_constructor([param('ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters const &', 'arg0')])
+lte/bindings/modulegen__gcc_LP64.py:    ## ff-mac-csched-sap.h (module 'lte'): ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters::m_logicalChannelConfigList [variable]
+lte/bindings/modulegen__gcc_LP64.py:    ## ff-mac-csched-sap.h (module 'lte'): ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters::m_reconfigureFlag [variable]
+lte/bindings/modulegen__gcc_LP64.py:    ## ff-mac-csched-sap.h (module 'lte'): ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters::m_rnti [variable]
+lte/bindings/modulegen__gcc_LP64.py:    ## ff-mac-csched-sap.h (module 'lte'): ns3::FfMacCschedSapProvider::CschedLcConfigReqParameters::m_vendorSpecificList [variable]
+Binary file lte/bindings/modulegen__gcc_LP64.pyc matches
+lte/model/fdmt-ff-mac-scheduler.h:  void DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params);
+lte/model/rr-ff-mac-scheduler.h:  void DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params);
+lte/model/pf-ff-mac-scheduler.cc:  virtual void CschedLcConfigReq (const struct CschedLcConfigReqParameters& params);
+lte/model/pf-ff-mac-scheduler.cc:PfSchedulerMemberCschedSapProvider::CschedLcConfigReq (const struct CschedLcConfigReqParameters& params)
+lte/model/pf-ff-mac-scheduler.cc:PfFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params)
+lte/model/tta-ff-mac-scheduler.cc:  virtual void CschedLcConfigReq (const struct CschedLcConfigReqParameters& params);
+lte/model/tta-ff-mac-scheduler.cc:TtaSchedulerMemberCschedSapProvider::CschedLcConfigReq (const struct CschedLcConfigReqParameters& params)
+lte/model/tta-ff-mac-scheduler.cc:TtaFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params)
+lte/model/cqa-ff-mac-scheduler.cc:  virtual void CschedLcConfigReq (const struct CschedLcConfigReqParameters& params);
+lte/model/cqa-ff-mac-scheduler.cc:CqaSchedulerMemberCschedSapProvider::CschedLcConfigReq (const struct CschedLcConfigReqParameters& params)
+lte/model/cqa-ff-mac-scheduler.cc:CqaFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params)
+lte/model/pf-ff-mac-scheduler.h:  void DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params);
+lte/model/pss-ff-mac-scheduler.h:  void DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params);
+lte/model/lte-enb-mac.cc:      struct FfMacCschedSapProvider::CschedLcConfigReqParameters params;
+lte/model/tdmt-ff-mac-scheduler.cc:  virtual void CschedLcConfigReq (const struct CschedLcConfigReqParameters& params);
+lte/model/tdmt-ff-mac-scheduler.cc:TdMtSchedulerMemberCschedSapProvider::CschedLcConfigReq (const struct CschedLcConfigReqParameters& params)
+lte/model/tdmt-ff-mac-scheduler.cc:TdMtFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params)
+lte/model/fdbet-ff-mac-scheduler.h:  void DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params);
+lte/model/ff-mac-csched-sap.h:  struct CschedLcConfigReqParameters
+lte/model/ff-mac-csched-sap.h:  virtual void CschedLcConfigReq (const struct CschedLcConfigReqParameters& params) = 0;
+lte/model/tdbet-ff-mac-scheduler.cc:  virtual void CschedLcConfigReq (const struct CschedLcConfigReqParameters& params);
+lte/model/tdbet-ff-mac-scheduler.cc:TdBetSchedulerMemberCschedSapProvider::CschedLcConfigReq (const struct CschedLcConfigReqParameters& params)
+lte/model/tdbet-ff-mac-scheduler.cc:TdBetFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params)
+lte/model/fdtbfq-ff-mac-scheduler.h:  void DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params);
+lte/model/tdmt-ff-mac-scheduler.h:  void DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params);
+lte/model/cqa-ff-mac-scheduler.h:  void DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params);
+lte/model/pss-ff-mac-scheduler.cc:  virtual void CschedLcConfigReq (const struct CschedLcConfigReqParameters& params);
+lte/model/pss-ff-mac-scheduler.cc:PssSchedulerMemberCschedSapProvider::CschedLcConfigReq (const struct CschedLcConfigReqParameters& params)
+lte/model/pss-ff-mac-scheduler.cc:PssFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params)
+lte/model/tdbet-ff-mac-scheduler.h:  void DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params);
+lte/model/tdtbfq-ff-mac-scheduler.h:  void DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params);
+lte/model/fdtbfq-ff-mac-scheduler.cc:  virtual void CschedLcConfigReq (const struct CschedLcConfigReqParameters& params);
+lte/model/fdtbfq-ff-mac-scheduler.cc:FdTbfqSchedulerMemberCschedSapProvider::CschedLcConfigReq (const struct CschedLcConfigReqParameters& params)
+lte/model/fdtbfq-ff-mac-scheduler.cc:FdTbfqFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params)
+lte/model/tta-ff-mac-scheduler.h:  void DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params);
+lte/model/fdbet-ff-mac-scheduler.cc:  virtual void CschedLcConfigReq (const struct CschedLcConfigReqParameters& params);
+lte/model/fdbet-ff-mac-scheduler.cc:FdBetSchedulerMemberCschedSapProvider::CschedLcConfigReq (const struct CschedLcConfigReqParameters& params)
+lte/model/fdbet-ff-mac-scheduler.cc:FdBetFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params)
+lte/model/rr-ff-mac-scheduler.cc:  virtual void CschedLcConfigReq (const struct CschedLcConfigReqParameters& params);
+lte/model/rr-ff-mac-scheduler.cc:RrSchedulerMemberCschedSapProvider::CschedLcConfigReq (const struct CschedLcConfigReqParameters& params)
+lte/model/rr-ff-mac-scheduler.cc:RrFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params)
+lte/model/fdmt-ff-mac-scheduler.cc:  virtual void CschedLcConfigReq (const struct CschedLcConfigReqParameters& params);
+lte/model/fdmt-ff-mac-scheduler.cc:FdMtSchedulerMemberCschedSapProvider::CschedLcConfigReq (const struct CschedLcConfigReqParameters& params)
+lte/model/fdmt-ff-mac-scheduler.cc:FdMtFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params)
+lte/model/tdtbfq-ff-mac-scheduler.cc:  virtual void CschedLcConfigReq (const struct CschedLcConfigReqParameters& params);
+lte/model/tdtbfq-ff-mac-scheduler.cc:TdTbfqSchedulerMemberCschedSapProvider::CschedLcConfigReq (const struct CschedLcConfigReqParameters& params)
+lte/model/tdtbfq-ff-mac-scheduler.cc:TdTbfqFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params)
