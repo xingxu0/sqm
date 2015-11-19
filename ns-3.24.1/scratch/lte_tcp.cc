@@ -103,6 +103,9 @@ main (int argc, char *argv[])
   positionAlloc->Add (Vector(0, 0, 0));
   for (uint16_t i = 0; i < numberOfNodes + 1; i++)
     {
+      if (i==1)
+		positionAlloc->Add (Vector(distance/2.0, 0, 0));
+	else
       positionAlloc->Add (Vector(distance, 0, 0));
       //positionAlloc->Add (Vector(distance, 0, 0));
     }
