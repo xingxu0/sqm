@@ -150,7 +150,7 @@ for (uint16_t u = 0; u < ueNodes.GetN (); u++)
       qos.mbrUl = qos.gbrUl;
 
 enum EpsBearer::Qci q;
-	if (u  == 0) q = 7;
+	if (u  == 0) q = EpsBearer::NGBR_VOICE_VIDEO_GAMING;
 	else if (u==1) q=EpsBearer::NGBR_VIDEO_TCP_PREMIUM; 
 	else q = EpsBearer::NGBR_VIDEO_TCP_DEFAULT;
       EpsBearer bearer (q);
