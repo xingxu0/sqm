@@ -1178,14 +1178,14 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
 			//Xing
                       //double rcqi = achievableRate / (*it).second.lastAveragedThroughput;
 		      double rcqi;
-		      std::cout<<"xing "<<(*it).first<<(int)((*it).second.qci)<<std::endl;
+		      //std::cout<<"xing "<<(*it).first<<(int)((*it).second.qci)<<std::endl;
 		      if ((int)((*it).second.qci) < 8)
 			rcqi = 3 * achievableRate /(*it).second.lastAveragedThroughput;
 		      else if ((int)((*it).second.qci) == 8)
 		      //if ((*it).first % 3==0)
 		      {
 			      rcqi = 2 * achievableRate /(*it).second.lastAveragedThroughput;
-			      std::cout<<"***"<<std::endl;
+			      //std::cout<<"***"<<std::endl;
 		      }
 		      else
  			      rcqi = achievableRate /(*it).second.lastAveragedThroughput;

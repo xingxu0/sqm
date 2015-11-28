@@ -35,18 +35,25 @@ main (int argc, char *argv[])
 {
 	
 	uint16_t numberOfNodes = 20;
-	double simTime = 5;
+	double simTime = 600;
 	double distance = 500.0;
-	double interPacketInterval = 0.0000000000001;
+	double interPacketInterval = 0.01;
+	std::string dataRate = "100";
+	int gold_user = 0;
+	int silver_user = 0;
 	
 	CommandLine cmd;
   cmd.AddValue("numberOfNodes", "Number of eNodeBs + UE pairs", numberOfNodes);
   cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
   cmd.AddValue("distance", "Distance between eNBs [m]", distance);
-  cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
+  cmd.AddValue("dataRate", "data rate [Gb/s])", dataRate);
+  //cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
+  cmd.AddValue("goldUser", "gu", gold_user);
+  cmd.AddValue("silverUser", "gu", silver_user);
   cmd.Parse(argc, argv);
   std::cout<<"distance"<<distance<<std::endl;
   std::cout<<"interval"<<interPacketInterval<<std::endl;
+  std::cout<<"dataRate"<<dataRate<<std::endl;
 	
 	Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
 	  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
@@ -68,7 +75,7 @@ main (int argc, char *argv[])
 
 	// Create the internet
 	PointToPointHelper p2ph;
-	p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
+	p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate (dataRate + "Mb/s")));
 	p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
 	p2ph.SetChannelAttribute ("Delay", TimeValue (Seconds (interPacketInterval)));
 	NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
@@ -101,11 +108,13 @@ main (int argc, char *argv[])
     // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
   positionAlloc->Add (Vector(0, 0, 0));
+  
   for (uint16_t i = 0; i < numberOfNodes + 1; i++)
     {
+	    /*
       if (i==1)
 		positionAlloc->Add (Vector(distance/2.0, 0, 0));
-	else
+	else*/
       positionAlloc->Add (Vector(distance, 0, 0));
       //positionAlloc->Add (Vector(distance, 0, 0));
     }
@@ -153,9 +162,10 @@ for (uint16_t u = 0; u < ueNodes.GetN (); u++)
       qos.mbrUl = qos.gbrUl;
 
 enum EpsBearer::Qci q;
-	if (u  == 0) q = EpsBearer::NGBR_VOICE_VIDEO_GAMING;
-	else if (u==1) q=EpsBearer::NGBR_VIDEO_TCP_PREMIUM; 
-	else q = EpsBearer::NGBR_VIDEO_TCP_DEFAULT;
+      if (u < gold_user) q = EpsBearer::NGBR_VOICE_VIDEO_GAMING;
+      else if (u < gold_user + silver_user) q=EpsBearer::NGBR_VIDEO_TCP_PREMIUM; 
+      else q = EpsBearer::NGBR_VIDEO_TCP_DEFAULT;
+      
       EpsBearer bearer (q);
 
       /*
@@ -233,7 +243,11 @@ enum EpsBearer::Qci q;
   clientApps.Start (Seconds (1.0));
   lteHelper->EnableTraces ();
   // Uncomment to enable PCAP tracing
-  p2ph.EnablePcapAll("lena-epc-first");
+  
+  char buff[100];
+  sprintf(buff, "trace_d%d_gu%d_su%d_r%sGb", (int)distance, gold_user, silver_user, dataRate.c_str());
+  std::string buffAsStdStr = buff;
+  p2ph.EnablePcap(buffAsStdStr, remoteHostContainer);
 
   Simulator::Stop(Seconds(simTime));
   Simulator::Run();
