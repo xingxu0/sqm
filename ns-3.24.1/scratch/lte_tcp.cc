@@ -35,7 +35,7 @@ main (int argc, char *argv[])
 {
 	
 	uint16_t numberOfNodes = 20;
-	double simTime = 600;
+	double simTime = 60;
 	double distance = 500.0;
 	double interPacketInterval = 0.01;
 	std::string dataRate = "100";
@@ -245,7 +245,7 @@ enum EpsBearer::Qci q;
   // Uncomment to enable PCAP tracing
   
   char buff[100];
-  sprintf(buff, "trace_d%d_gu%d_su%d_r%sGb", (int)distance, gold_user, silver_user, dataRate.c_str());
+  sprintf(buff, "trace_log");
   std::string buffAsStdStr = buff;
   p2ph.EnablePcap(buffAsStdStr, remoteHostContainer);
 

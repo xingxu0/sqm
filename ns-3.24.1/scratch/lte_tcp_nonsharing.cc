@@ -36,7 +36,7 @@ main (int argc, char *argv[])
 {
 	
 	uint16_t numberOfNodes = 20;
-	double simTime = 10;
+	double simTime = 60;
 	double distance = 500.0;
 	double interPacketInterval = 0.01;
 	std::string dataRate = "100";
