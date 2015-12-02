@@ -32,6 +32,7 @@ ax.set_xlim([0, 2.0])
 ax.set_ylim([0, 0.8])
 ax.set_xlabel("bottleneck rate (Mb/s)")
 ax.set_ylabel("downlink rate (Mb/s)")
+plt.tight_layout()
 plt.savefig('plot.png')
 	
 	
