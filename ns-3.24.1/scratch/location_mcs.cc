@@ -35,20 +35,18 @@ int
 main (int argc, char *argv[])
 {
 	
-	uint16_t numberOfNodes = 20;
-	double simTime = 60;
-	double distance = 15000.0;
-	double p_distance = 15000.0;
+	uint16_t numberOfNodes = 100;
+	double simTime = 8;
+	double distance = 500.0;
 	double interPacketInterval = 0.01;
 	std::string dataRate = "100";
 	int gold_user = 0;
 	int silver_user = 0;
 	
 	CommandLine cmd;
-  cmd.AddValue("nodes", "Number of eNodeBs + UE pairs", numberOfNodes);
+  cmd.AddValue("numberOfNodes", "Number of eNodeBs + UE pairs", numberOfNodes);
   cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
   cmd.AddValue("distance", "Distance between eNBs [m]", distance);
-  cmd.AddValue("premium_distance", "Distance between eNBs [m]", p_distance);
   cmd.AddValue("dataRate", "data rate [Gb/s])", dataRate);
   //cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
   cmd.AddValue("goldUser", "gu", gold_user);
@@ -122,18 +120,15 @@ main (int argc, char *argv[])
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
   positionAlloc->Add (Vector(0, 0, 0));
   
+  int distance_ = 3000;
   for (uint16_t i = 0; i < numberOfNodes + 1; i++)
     {
 	    /*
       if (i==1)
 		positionAlloc->Add (Vector(distance/2.0, 0, 0));
 	else*/
-	    
-      //if (i < gold_user)
-     if (i < 1) 		
-	positionAlloc->Add (Vector(p_distance, 0, 0));
-      else
-	positionAlloc->Add (Vector(distance, 0, 0));      
+      positionAlloc->Add (Vector(distance_, 0, 0));
+      distance_ += 500;
       //positionAlloc->Add (Vector(distance, 0, 0));
     }
   MobilityHelper mobility;
@@ -203,8 +198,8 @@ enum EpsBearer::Qci q;
       bearer.arp.preemptionVulnerability = true;
 }*/
 
-      uint8_t bid = lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
-      std::cout<<u<<"'s bearer id: "<<(int)bid<<std::endl;
+      //uint8_t bid = lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
+      //std::cout<<u<<"'s bearer id: "<<(int)bid<<std::endl;
       }
   
   

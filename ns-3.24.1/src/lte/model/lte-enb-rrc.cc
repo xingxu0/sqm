@@ -184,6 +184,7 @@ UeManager::DoInitialize ()
     lcinfo.rnti = m_rnti;
     lcinfo.lcId = lcid;
     // leave the rest of lcinfo empty as CCCH (LCID 0) is pre-configured
+    std::cout<<"xing init lcid=0"<<std::endl;
     m_rrc->m_cmacSapProvider->AddLc (lcinfo, rlc->GetLteMacSapUser ());
 
   }
@@ -223,6 +224,7 @@ UeManager::DoInitialize ()
     lcinfo.mbrDl = 1e6;
     lcinfo.gbrUl = 1e4;
     lcinfo.gbrDl = 1e4;
+    std::cout<<"xing init lcid=1"<<std::endl;
     m_rrc->m_cmacSapProvider->AddLc (lcinfo, rlc->GetLteMacSapUser ());
   }
 
@@ -332,7 +334,7 @@ void
 UeManager::SetupDataRadioBearer (EpsBearer bearer, uint8_t bearerId, uint32_t gtpTeid, Ipv4Address transportLayerAddress)
 {
   NS_LOG_FUNCTION (this << (uint32_t) m_rnti);
-  std::cout<<"xing setupdataradiobearer: "<<bearer.qci<<std::endl;
+  std::cout<<"xing setupdataradiobearer: "<<(uint32_t)bearer.qci<<" "<<(uint32_t)bearerId<<std::endl;
 
   Ptr<LteDataRadioBearerInfo> drbInfo = CreateObject<LteDataRadioBearerInfo> ();
   uint8_t drbid = AddDataRadioBearerInfo (drbInfo);

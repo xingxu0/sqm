@@ -376,10 +376,6 @@ PfFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::Csch
       it = m_flowStatsDl.find (params.m_rnti);
 
       std::cout<<"xing +++"<<m_flowStatsDl.size()<<std::endl;
-      for (std::map<uint16_t, pfsFlowPerf_t>::iterator it2 = m_flowStatsDl.begin(); it2 != m_flowStatsDl.end(); it2++) {
-	      std::cout<<" " <<it2->first<<":"<<(int)it2->second.qci<<"   ";
-      }
-      std::cout<<std::endl;
       // xing modified
       //if (it == m_flowStatsDl.end ())
         {
@@ -411,6 +407,12 @@ PfFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::Csch
 
 	  }
         }
+        
+      for (std::map<uint16_t, pfsFlowPerf_t>::iterator it2 = m_flowStatsDl.begin(); it2 != m_flowStatsDl.end(); it2++) {
+	      std::cout<<" " <<it2->first<<":"<<(int)it2->second.qci<<"   ";
+      }
+      std::cout<<std::endl;
+
     }
 
   return;
