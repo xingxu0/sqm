@@ -35,7 +35,7 @@ int
 main (int argc, char *argv[])
 {
 	
-	uint16_t numberOfNodes = 20;
+	uint16_t numberOfNodes = 10;
 	double simTime = 60;
 	double distance = 15000.0;
 	double p_distance = 15000.0;

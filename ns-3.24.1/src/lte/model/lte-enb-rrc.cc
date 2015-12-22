@@ -1347,6 +1347,7 @@ TypeId
 LteEnbRrc::GetTypeId (void)
 {
   NS_LOG_FUNCTION ("LteEnbRrc::GetTypeId");
+  std::cout<<"xing gettypeid"<<std::endl;
   static TypeId tid = TypeId ("ns3::LteEnbRrc")
     .SetParent<Object> ()
     .SetGroupName("Lte")
@@ -1357,7 +1358,9 @@ LteEnbRrc::GetTypeId (void)
                    MakeObjectMapChecker<UeManager> ())
     .AddAttribute ("DefaultTransmissionMode",
                    "The default UEs' transmission mode (0: SISO)",
-                   UintegerValue (0),  // default tx-mode
+		   UintegerValue (0),  // default tx-mode
+                   //UintegerValue (0),  // default tx-mode
+		   // changed by xing, previously it's 0.
                    MakeUintegerAccessor (&LteEnbRrc::m_defaultTransmissionMode),
                    MakeUintegerChecker<uint8_t> ())
     .AddAttribute ("EpsBearerToRlcMapping", 
