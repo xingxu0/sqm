@@ -5,13 +5,13 @@
 for i in "0.90" "0.89" "0.88" "0.87" "0.86" "0.85" "0.84" "0.83" "0.82" "0.81" "0.80" "0.78" "0.76" "0.75" "0.73" "0.70" "0.68" "0.65" "0.63" "0.60" "0.58" "0.55" "0.50" "0.45" "0.40" "0.35" "0.30" "0.25" "0.20" "0.15" "0.10" "0.05"
 do
 	echo $i
-	for p in 0 1
+	for p in 0 4 
 	do
 		echo " " $p
-		./waf --run="scratch/lte_tcp_nonsharing_diff_rates2 --slowdataRate=$i --goldUser=$p --silverUser=0" > out.txt 2>&1
-		for j in {0..9}
+		./waf --run="scratch/lte_tcp_premium_take_normal --slowdataRate=$i --goldUser=$p --silverUser=0" > out.txt 2>&1
+		for j in {0..11}
 		do
-			tshark -r trace_nonsharing_$j.pcap -z conv,tcp -q | grep "<->" >> trace_log_w2_$i\_$p.out
+			tshark -r trace_premium_take_normal_$j.pcap -z conv,tcp -q | grep "<->" >> trace_log_w3_$i\_$p.out
 		done
 	done
 done

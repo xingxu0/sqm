@@ -1186,7 +1186,7 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
 		      else if ((int)((*it).second.qci) == 8)
 		      //if ((*it).first % 3==0)
 		      {
-			      rcqi = 2 * achievableRate /(*it).second.lastAveragedThroughput;
+			      rcqi = 3 * achievableRate /(*it).second.lastAveragedThroughput;
 			      //std::cout<<"***"<<std::endl;
 		      }
 		      else
