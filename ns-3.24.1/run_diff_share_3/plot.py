@@ -70,8 +70,8 @@ for i in range(len(slowrate)):
 ax = plt.subplot()
 ax.plot(slowrate, ue_1_n, "-rx", ms=10)
 ax.plot(slowrate, ue_1_p, ":r", ms=10)
-ax.plot(slowrate, ue_2_n, "-bx", ms=10)
-ax.plot(slowrate, ue_2_p, ":b", ms=10)
+ax.plot(slowrate, ue_2_n, "-gx", ms=10)
+ax.plot(slowrate, ue_2_p, ":g", ms=10)
 ax.plot(slowrate, sum_n, "-kx", ms=10)
 ax.plot(slowrate, sum_p, ":k", ms=10)
 
@@ -86,7 +86,7 @@ ax.set_ylabel("rate (Mb/s)", fontsize=24)
 plt.tick_params(axis='both', which='major', labelsize=22)
 plt.tick_params(axis='both', which='minor', labelsize=22)
 
-ax.legend(["UE1", "UE1 Premium", "UE2", "UE2 Premium", "Sum", "Sum Premium"], 1)
+ax.legend(["UE1 (N)", "UE1 (P)", "UE3 (N)", "UE3 (P)", "Sum (N)", "Sum (P)"], 1)
 plt.tight_layout()
 plt.savefig('rate_vs_bottleneck.png')
 
