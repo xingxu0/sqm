@@ -367,7 +367,7 @@ PfFfMacScheduler::DoCschedUeConfigReq (const struct FfMacCschedSapProvider::Csch
 void
 PfFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params)
 {
-  std::cout<<"xing lcconfigreq "<<params.m_rnti<<" "<<params.m_logicalChannelConfigList.size ()<<std::endl;
+//  std::cout<<"xing lcconfigreq "<<params.m_rnti<<" "<<params.m_logicalChannelConfigList.size ()<<std::endl;
   NS_LOG_FUNCTION (this << " New LC, rnti: "  << params.m_rnti);
 
   std::map <uint16_t, pfsFlowPerf_t>::iterator it;
@@ -375,18 +375,18 @@ PfFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::Csch
     {
       it = m_flowStatsDl.find (params.m_rnti);
 
-      std::cout<<"xing +++"<<m_flowStatsDl.size()<<std::endl;
+//      std::cout<<"xing +++"<<m_flowStatsDl.size()<<std::endl;
       // xing modified
       //if (it == m_flowStatsDl.end ())
         {
-	  std::cout<<"xing ---"<<std::endl;
+//	  std::cout<<"xing ---"<<std::endl;
           pfsFlowPerf_t flowStatsDl;
           flowStatsDl.flowStart = Simulator::Now ();
           flowStatsDl.totalBytesTransmitted = 0;
           flowStatsDl.lastTtiBytesTrasmitted = 0;
           flowStatsDl.lastAveragedThroughput = 1;
 	  flowStatsDl.qci = (uint8_t)(params.m_logicalChannelConfigList.at (i).m_qci);
-	  std::cout<<"xing "<<params.m_rnti<<" "<<(int)i<<":"<<(int)(params.m_logicalChannelConfigList.at (i).m_qci)<<std::endl;
+//	  std::cout<<"xing "<<params.m_rnti<<" "<<(int)i<<":"<<(int)(params.m_logicalChannelConfigList.at (i).m_qci)<<std::endl;
           //m_flowStatsDl.insert (std::pair<uint16_t, pfsFlowPerf_t> (params.m_rnti, flowStatsDl));
           pfsFlowPerf_t flowStatsUl;
           flowStatsUl.flowStart = Simulator::Now ();
@@ -401,7 +401,7 @@ PfFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::Csch
 
 	  }
 	  else {
-		  std::cout<<"xing *** modify"<<std::endl;
+//		  std::cout<<"xing *** modify"<<std::endl;
 		m_flowStatsUl[params.m_rnti]= flowStatsUl;
 		m_flowStatsDl[params.m_rnti]= flowStatsDl;
 

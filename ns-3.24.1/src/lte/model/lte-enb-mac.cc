@@ -794,7 +794,7 @@ void
 LteEnbMac::DoAddLc (LteEnbCmacSapProvider::LcInfo lcinfo, LteMacSapUser* msu)
 {
   NS_LOG_FUNCTION (this);
-  std::cout<<"xing lte-enb-mac doaddlc "<<(int)lcinfo.qci<<","<<lcinfo.rnti<<std::endl;
+//  std::cout<<"xing lte-enb-mac doaddlc "<<(int)lcinfo.qci<<","<<lcinfo.rnti<<std::endl;
 
   std::map <LteFlowId_t, LteMacSapUser* >::iterator it;
   
@@ -834,7 +834,7 @@ LteEnbMac::DoAddLc (LteEnbCmacSapProvider::LcInfo lcinfo, LteMacSapUser* msu)
       lccle.m_eRabGuaranteedBitrateDl = lcinfo.gbrDl;
       params.m_logicalChannelConfigList.push_back (lccle);
 
-      std::cout<<"xing cshedlcconfigreq called:"<<std::endl;
+//      std::cout<<"xing cshedlcconfigreq called:"<<std::endl;
       m_cschedSapProvider->CschedLcConfigReq (params);
     }
 }

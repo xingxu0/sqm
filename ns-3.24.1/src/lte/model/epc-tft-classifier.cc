@@ -147,17 +147,17 @@ EpcTftClassifier::Classify (Ptr<Packet> p, EpcTft::Direction direction)
   std::map <uint32_t, Ptr<EpcTft> >::const_reverse_iterator it;
   NS_LOG_LOGIC ("TFT MAP size: " << m_tftMap.size ());
   
-  std::cout<<"xing tftmap:"<<m_tftMap.size()<<std::endl;
+//  std::cout<<"xing tftmap:"<<m_tftMap.size()<<std::endl;
   for (it = m_tftMap.rbegin (); it != m_tftMap.rend (); ++it)
     {
       NS_LOG_LOGIC ("TFT id: " << it->first );
       NS_LOG_LOGIC (" Ptr<EpcTft>: " << it->second);
-      std::cout<<"xing tftmap id:"<<it->first<<std::endl;
+  //    std::cout<<"xing tftmap id:"<<it->first<<std::endl;
       Ptr<EpcTft> tft = it->second;         
       if (tft->Matches (direction, remoteAddress, localAddress, remotePort, localPort, tos))
         {
 	  NS_LOG_LOGIC ("matches with TFT ID = " << it->first);
-	  std::cout<<"xing tftmap match with:"<<it->first<<std::endl;
+//	  std::cout<<"xing tftmap match with:"<<it->first<<std::endl;
 	  return it->first; // the id of the matching TFT
         }
     }
