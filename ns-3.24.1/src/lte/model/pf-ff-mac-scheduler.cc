@@ -1183,7 +1183,10 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
 		      double rcqi;
 		      //std::cout<<"xing "<<(*it).first<<(int)((*it).second.qci)<<std::endl;
 		      double weight = id_weight[imsi_id[rnti_imsi[(*it).first]]];
+<<<<<<< HEAD
 		      if (weight <= 0.0) weight = 1;
+=======
+>>>>>>> 26c095d6eaf5c2efa6854d604d2a8df6fd9c3af4
 		      std::cout<<"***:"<<(int)(*it).first<<" "<<(int)rnti_imsi[(*it).first]<<" "<<(int)imsi_id[rnti_imsi[(*it).first]]<<" "<<weight<<std::endl;
 
 
