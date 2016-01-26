@@ -42,7 +42,11 @@ void modify_requirement(int n, std::vector<NetDeviceContainer> &ndc)
 int
 main (int argc, char *argv[])
 {
-	
+
+  imsi_id = new std::map <uint64_t, uint16_t>();
+  rnti_imsi = new std::map <uint16_t, uint64_t>();
+  id_weight = new std::map<uint16_t, float>();
+
 	uint16_t numberOfNodes = 12;
 	double simTime = 20;
 	double distance = 15000.0;
@@ -190,7 +194,7 @@ main (int argc, char *argv[])
 for (uint16_t u = 0; u < ueNodes.GetN (); u++) {
 	uint64_t imsi = ueLteDevs.Get (u)->GetObject<LteUeNetDevice> ()->GetImsi ();
 	std::cout<<imsi<<std::endl;
-	imsi_id[imsi] = u;
+	(*imsi_id)[imsi] = u;
 }
 	  
 // bearer      
@@ -207,9 +211,9 @@ for (uint16_t u = 0; u < ueNodes.GetN (); u++)
 enum EpsBearer::Qci q;
 	gold_user = 0;
 	silver_user = 0;
-      if (u < gold_user) id_weight[u] = 4;//q = EpsBearer::NGBR_VOICE_VIDEO_GAMING;
-      else if (u < gold_user + silver_user) id_weight[u] = 2;//q=EpsBearer::NGBR_VIDEO_TCP_PREMIUM; 
-      else id_weight[u] = 1;
+      if (u < gold_user) (*id_weight)[u] = 4;//q = EpsBearer::NGBR_VOICE_VIDEO_GAMING;
+      else if (u < gold_user + silver_user) (*id_weight)[u] = 2;//q=EpsBearer::NGBR_VIDEO_TCP_PREMIUM; 
+      else (*id_weight)[u] = 1;
 	      
 	      
      q = EpsBearer::NGBR_VIDEO_TCP_DEFAULT;
