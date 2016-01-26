@@ -30,6 +30,7 @@
 #include <cfloat>
 #include <set>
 #include <iostream>
+#include "weight-table.h"
 
 
 namespace ns3 {
@@ -1181,16 +1182,20 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
                       //double rcqi = achievableRate / (*it).second.lastAveragedThroughput;
 		      double rcqi;
 		      //std::cout<<"xing "<<(*it).first<<(int)((*it).second.qci)<<std::endl;
-		      if ((int)((*it).second.qci) < 8)
-			rcqi = 3 * achievableRate /(*it).second.lastAveragedThroughput;
-		      else if ((int)((*it).second.qci) == 8)
+		      double weight = id_weight[imsi_id[rnti_imsi[(*it).first]]];
+		      std::cout<<"***:"<<(int)(*it).first<<" "<<(int)rnti_imsi[(*it).first]<<" "<<(int)imsi_id[rnti_imsi[(*it).first]]<<" "<<weight<<std::endl;
+
+
+		      //if ((int)((*it).second.qci) < 8)
+			//rcqi = 3 * achievableRate /(*it).second.lastAveragedThroughput;
+		      //else if ((int)((*it).second.qci) == 8)
 		      //if ((*it).first % 3==0)
-		      {
-			      rcqi = 3 * achievableRate /(*it).second.lastAveragedThroughput;
+		      //{
+			//      rcqi = 3 * achievableRate /(*it).second.lastAveragedThroughput;
 			      //std::cout<<"***"<<std::endl;
-		      }
-		      else
- 			      rcqi = achievableRate /(*it).second.lastAveragedThroughput;
+		      //}
+		      //else
+ 		      rcqi = weight*achievableRate /(*it).second.lastAveragedThroughput;
 		//NS_LOG_FUNCTION (this << " xing rcqi" << (*it).first);
 
 
