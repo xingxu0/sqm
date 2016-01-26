@@ -25,14 +25,6 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("LTEExample");
 
-void modify_weight(int n)
-{
-	for (uint16_t i = 0; i < n; i++) {
-		id_weight[i] = 1.0;
-	}
-  
-}
-
 void modify_requirement(int n, std::vector<NetDeviceContainer> &ndc)
 {
 	DataRate x("0.1Mb/s");
@@ -45,19 +37,6 @@ void modify_requirement(int n, std::vector<NetDeviceContainer> &ndc)
 	//Config::Set("/NodeList/0/DeviceList/0/$ns3::PointToPointNetDevice/DataRate", StringValue("0.1Mb/s") );
 	//Config::Set("/NodeList/1/DeviceList/1/$ns3::PointToPointNetDevice/DataRate", StringValue("0.1Mb/s") );
 
-}
-
-void NotifyConnectionEstablishedEnb (std::string context,
-                                uint64_t imsi,
-                                uint16_t cellid,
-                                uint16_t rnti)
-{
-  std::cout << Simulator::Now ().GetSeconds () << " " << context
-            << " eNB CellId " << cellid
-            << ": successful connection of UE with IMSI " << imsi
-            << " RNTI " << rnti
-            << std::endl;
-  rnti_imsi[rnti] = imsi;
 }
 
 int
@@ -329,7 +308,6 @@ enum EpsBearer::Qci q;
   //std::cout<<remoteHostContainer.Get(0)->GetNDevices<<std::endl;
   //p2pv[0]->EnablePcap(buffAsStdStr, remoteHostContainer.Get(0)->GetDevice(0));//, remoteHostContainer.Get(i));
   
-  Config::Connect ("/NodeList/*/DeviceList/*/LteEnbRrc/ConnectionEstablished", MakeCallback (&NotifyConnectionEstablishedEnb));
   //Simulator::Schedule(Seconds(10), &modify_weight, numberOfNodes);
   Simulator::Schedule(Seconds(8), &modify_requirement, numberOfNodes, ndc);
   
