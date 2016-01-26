@@ -402,7 +402,6 @@ PfFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::Csch
 
 	  }
 	  else {
-//		  std::cout<<"xing *** modify"<<std::endl;
 		m_flowStatsUl[params.m_rnti]= flowStatsUl;
 		m_flowStatsDl[params.m_rnti]= flowStatsDl;
 
@@ -1184,7 +1183,7 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
 		      //std::cout<<"xing "<<(*it).first<<(int)((*it).second.qci)<<std::endl;
 		      double weight = id_weight[imsi_id[rnti_imsi[(*it).first]]];
 		      if (weight <= 0.0) weight = 1;
-		      std::cout<<"***:"<<(int)(*it).first<<" "<<(int)rnti_imsi[(*it).first]<<" "<<(int)imsi_id[rnti_imsi[(*it).first]]<<" "<<weight<<std::endl;
+		      //std::cout<<"***:"<<(int)(*it).first<<" "<<(int)rnti_imsi[(*it).first]<<" "<<(int)imsi_id[rnti_imsi[(*it).first]]<<" "<<weight<<std::endl;
 
 
 		      //if ((int)((*it).second.qci) < 8)
