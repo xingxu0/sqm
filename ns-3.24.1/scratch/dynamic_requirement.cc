@@ -25,6 +25,14 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("LTEExample");
 
+void modify_weight(int n)
+{
+	for (uint16_t i = 0; i < n; i++) {
+		id_weight[i] = 1.0;
+	}
+  
+}
+
 void modify_requirement(int n, std::vector<NetDeviceContainer> &ndc)
 {
 	DataRate x("0.1Mb/s");
@@ -47,6 +55,23 @@ main (int argc, char *argv[])
   rnti_imsi = new std::map <uint16_t, uint64_t>();
   id_weight = new std::map<uint16_t, float>();
 
+void NotifyConnectionEstablishedEnb (std::string context,
+                                uint64_t imsi,
+                                uint16_t cellid,
+                                uint16_t rnti)
+{
+  std::cout << Simulator::Now ().GetSeconds () << " " << context
+            << " eNB CellId " << cellid
+            << ": successful connection of UE with IMSI " << imsi
+            << " RNTI " << rnti
+            << std::endl;
+  rnti_imsi[rnti] = imsi;
+}
+
+int
+main (int argc, char *argv[])
+{
+	
 	uint16_t numberOfNodes = 12;
 	double simTime = 20;
 	double distance = 15000.0;
@@ -194,7 +219,11 @@ main (int argc, char *argv[])
 for (uint16_t u = 0; u < ueNodes.GetN (); u++) {
 	uint64_t imsi = ueLteDevs.Get (u)->GetObject<LteUeNetDevice> ()->GetImsi ();
 	std::cout<<imsi<<std::endl;
+<<<<<<< HEAD
 	(*imsi_id)[imsi] = u;
+=======
+	imsi_id[imsi] = u;
+>>>>>>> A
 }
 	  
 // bearer      
@@ -312,6 +341,7 @@ enum EpsBearer::Qci q;
   //std::cout<<remoteHostContainer.Get(0)->GetNDevices<<std::endl;
   //p2pv[0]->EnablePcap(buffAsStdStr, remoteHostContainer.Get(0)->GetDevice(0));//, remoteHostContainer.Get(i));
   
+  Config::Connect ("/NodeList/*/DeviceList/*/LteEnbRrc/ConnectionEstablished", MakeCallback (&NotifyConnectionEstablishedEnb));
   //Simulator::Schedule(Seconds(10), &modify_weight, numberOfNodes);
   Simulator::Schedule(Seconds(8), &modify_requirement, numberOfNodes, ndc);
   
