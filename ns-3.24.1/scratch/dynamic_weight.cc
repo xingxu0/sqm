@@ -23,6 +23,14 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("LTEExample");
 
+void modify_weight(int n)
+{
+	for (uint16_t i = 0; i < n; i++) {
+		id_weight[i] = 1.0;
+	}
+  
+}
+
 void NotifyConnectionEstablishedEnb (std::string context,
                                 uint64_t imsi,
                                 uint16_t cellid,
@@ -41,7 +49,7 @@ main (int argc, char *argv[])
 {
 	
 	uint16_t numberOfNodes = 12;
-	double simTime = 5;
+	double simTime = 20;
 	double distance = 15000.0;
 	double p_distance = 15000.0;
 	double interPacketInterval = 0.01;
@@ -301,7 +309,8 @@ enum EpsBearer::Qci q;
   //p2pv[0]->EnablePcap(buffAsStdStr, remoteHostContainer.Get(0)->GetDevice(0));//, remoteHostContainer.Get(i));
   
   Config::Connect ("/NodeList/*/DeviceList/*/LteEnbRrc/ConnectionEstablished", MakeCallback (&NotifyConnectionEstablishedEnb));
-
+  Simulator::Schedule(Seconds(10), &modify_weight, numberOfNodes);
+  
   Simulator::Stop(Seconds(simTime));
   Simulator::Run();
 
