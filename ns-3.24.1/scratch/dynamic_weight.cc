@@ -26,7 +26,7 @@ NS_LOG_COMPONENT_DEFINE ("LTEExample");
 void modify_weight(int n)
 {
 	for (uint16_t i = 0; i < n; i++) {
-		id_weight[i] = 1.0;
+		(*id_weight)[i] = 1.0;
 	}
   
 }
@@ -41,7 +41,7 @@ void NotifyConnectionEstablishedEnb (std::string context,
             << ": successful connection of UE with IMSI " << imsi
             << " RNTI " << rnti
             << std::endl;
-  rnti_imsi[rnti] = imsi;
+  (*rnti_imsi)[rnti] = imsi;
 }
 
 int
@@ -192,7 +192,7 @@ main (int argc, char *argv[])
 for (uint16_t u = 0; u < ueNodes.GetN (); u++) {
 	uint64_t imsi = ueLteDevs.Get (u)->GetObject<LteUeNetDevice> ()->GetImsi ();
 	std::cout<<imsi<<std::endl;
-	imsi_id[imsi] = u;
+	(*imsi_id)[imsi] = u;
 }
 	  
 // bearer      
@@ -207,9 +207,9 @@ for (uint16_t u = 0; u < ueNodes.GetN (); u++)
       qos.mbrUl = qos.gbrUl;
 
 enum EpsBearer::Qci q;
-      if (u < gold_user) id_weight[u] = 4;//q = EpsBearer::NGBR_VOICE_VIDEO_GAMING;
-      else if (u < gold_user + silver_user) id_weight[u] = 2;//q=EpsBearer::NGBR_VIDEO_TCP_PREMIUM; 
-      else id_weight[u] = 1;
+      if (u < gold_user) (*id_weight)[u] = 4;//q = EpsBearer::NGBR_VOICE_VIDEO_GAMING;
+      else if (u < gold_user + silver_user) (*id_weight)[u] = 2;//q=EpsBearer::NGBR_VIDEO_TCP_PREMIUM; 
+      else (*id_weight)[u] = 1;
 	      
 	      
      q = EpsBearer::NGBR_VIDEO_TCP_DEFAULT;
