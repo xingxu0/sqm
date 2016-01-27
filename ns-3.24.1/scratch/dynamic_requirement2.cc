@@ -25,19 +25,10 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("LTEExample");
 
-void modify_weight(int n)
-{
-	for (uint16_t i = 0; i < n; i++) {
-		id_weight[i] = 1.0;
-	}
-  
-}
-
 void modify_requirement(int n, std::vector<NetDeviceContainer> &ndc)
 {
-	DataRate x("0.00001Mb/s");
+	DataRate x("100Mb/s");
 	for (unsigned i = 0; i<ndc.size(); ++i) {
-		if (i%2==0) continue;
 		Ptr<PointToPointNetDevice> p2pdev1 = StaticCast<PointToPointNetDevice> (ndc[i].Get(0));
 		Ptr<PointToPointNetDevice> p2pdev2 = StaticCast<PointToPointNetDevice> (ndc[i].Get(1));
 		p2pdev1->SetDataRate(x);
@@ -56,25 +47,8 @@ main (int argc, char *argv[])
   rnti_imsi = new std::map <uint16_t, uint64_t>();
   id_weight = new std::map<uint16_t, float>();
 
-void NotifyConnectionEstablishedEnb (std::string context,
-                                uint64_t imsi,
-                                uint16_t cellid,
-                                uint16_t rnti)
-{
-  std::cout << Simulator::Now ().GetSeconds () << " " << context
-            << " eNB CellId " << cellid
-            << ": successful connection of UE with IMSI " << imsi
-            << " RNTI " << rnti
-            << std::endl;
-  rnti_imsi[rnti] = imsi;
-}
-
-int
-main (int argc, char *argv[])
-{
-	
 	uint16_t numberOfNodes = 12;
-	double simTime = 60;
+	double simTime = 30;
 	double distance = 15000.0;
 	double p_distance = 15000.0;
 	double interPacketInterval = 0.01;
@@ -127,10 +101,13 @@ main (int argc, char *argv[])
 	for (uint16_t i = 0; i < numberOfNodes; i++) {
 		PointToPointHelper* p2ph = new PointToPointHelper();
 		//if (i<numberOfNodes / 2)
-		if (1)//(i<8)
+		if (1)
 			p2ph->SetDeviceAttribute ("DataRate", DataRateValue (DataRate (dataRate + "Mb/s")));
 		else
-			p2ph->SetDeviceAttribute ("DataRate", DataRateValue (DataRate (slow_dataRate + "Mb/s")));
+		{
+			std::cout<<"!!!!"<<std::endl;
+			p2ph->SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("0.00001Mb/s")));
+		}
 		p2ph->SetDeviceAttribute ("Mtu", UintegerValue (1500));
 		p2ph->SetChannelAttribute ("Delay", TimeValue (Seconds (interPacketInterval)));
 		
@@ -220,11 +197,7 @@ main (int argc, char *argv[])
 for (uint16_t u = 0; u < ueNodes.GetN (); u++) {
 	uint64_t imsi = ueLteDevs.Get (u)->GetObject<LteUeNetDevice> ()->GetImsi ();
 	std::cout<<imsi<<std::endl;
-<<<<<<< HEAD
 	(*imsi_id)[imsi] = u;
-=======
-	imsi_id[imsi] = u;
->>>>>>> A
 }
 	  
 // bearer      
@@ -278,6 +251,9 @@ enum EpsBearer::Qci q;
   uint16_t otherPort = 3000;
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
+ApplicationContainer clientApps2;
+  ApplicationContainer serverApps2;
+
     for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
       ++ulPort;
@@ -285,7 +261,12 @@ enum EpsBearer::Qci q;
       PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
       //PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
       //PacketSinkHelper packetSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
+      if (u<6)
       serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
+      else
+serverApps2.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
+
+
       //serverApps.Add (ulPacketSinkHelper.Install (remoteHost));
       //serverApps.Add (packetSinkHelper.Install (ueNodes.Get(u)));
 
@@ -307,7 +288,12 @@ enum EpsBearer::Qci q;
       client.SetAttribute ("MaxPackets", UintegerValue(1000000));
       */
 	  Ptr<Node> remoteHost = remoteHostContainer.Get (u);
+	  if (u<6)
       clientApps.Add(dlClient.Install(remoteHost));
+	  else
+      clientApps2.Add(dlClient.Install(remoteHost));
+
+
 /*
       clientApps.Add (dlClient.Install (remoteHost));
       clientApps.Add (ulClient.Install (ueNodes.Get(u)));
@@ -323,6 +309,9 @@ enum EpsBearer::Qci q;
     
   serverApps.Start (Seconds (1.0));
   clientApps.Start (Seconds (1.0));
+  serverApps2.Start (Seconds (11.0));
+  clientApps2.Start (Seconds (11.0));
+
   lteHelper->EnableTraces ();
   // Uncomment to enable PCAP tracing
   
@@ -342,9 +331,8 @@ enum EpsBearer::Qci q;
   //std::cout<<remoteHostContainer.Get(0)->GetNDevices<<std::endl;
   //p2pv[0]->EnablePcap(buffAsStdStr, remoteHostContainer.Get(0)->GetDevice(0));//, remoteHostContainer.Get(i));
   
-  Config::Connect ("/NodeList/*/DeviceList/*/LteEnbRrc/ConnectionEstablished", MakeCallback (&NotifyConnectionEstablishedEnb));
   //Simulator::Schedule(Seconds(10), &modify_weight, numberOfNodes);
-  Simulator::Schedule(Seconds(8), &modify_requirement, numberOfNodes, ndc);
+  //Simulator::Schedule(Seconds(8), &modify_requirement, numberOfNodes, ndc);
   
   Simulator::Stop(Seconds(simTime));
   Simulator::Run();
