@@ -205,14 +205,22 @@ main (int argc, char *argv[])
 	
   NodeContainer ueNodes;
   NodeContainer enbNodes;
-  enbNodes.Create(3);
+  enbNodes.Create(12);
   ueNodes.Create(numberOfNodes);
   
     // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
+ /* 
+     positionAlloc->Add (Vector(8000, 0, 0));
+    positionAlloc->Add (Vector(8000,0, 0));
+  positionAlloc->Add (Vector(8000, 0, 0));
+positionAlloc->Add (Vector(0, 0, 0));
   positionAlloc->Add (Vector(0, 0, 0));
   positionAlloc->Add (Vector(0, 0, 0));
-  positionAlloc->Add (Vector(0, 0, 0));
+  */
+  
+
+
 
   for (uint16_t i = 0; i < numberOfNodes + 1; i++)
     {
@@ -230,19 +238,20 @@ main (int argc, char *argv[])
     }
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-  mobility.SetPositionAllocator(positionAlloc);
-  mobility.Install(enbNodes);
+    mobility.Install(enbNodes);
+mobility.SetPositionAllocator(positionAlloc);
+
   mobility.Install(ueNodes);
   
   Ptr<LteHexGridEnbTopologyHelper> lteHexGridEnbTopologyHelper = CreateObject<LteHexGridEnbTopologyHelper> ();
   lteHexGridEnbTopologyHelper->SetLteHelper (lteHelper);
-  double interSiteDistance = 500;
+  double interSiteDistance = 8000;
   lteHexGridEnbTopologyHelper->SetAttribute ("InterSiteDistance", DoubleValue (interSiteDistance));
   lteHexGridEnbTopologyHelper->SetAttribute ("MinX", DoubleValue (interSiteDistance/2));
   lteHexGridEnbTopologyHelper->SetAttribute ("GridWidth", UintegerValue (1));
   //Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (macroEnbTxPowerDbm));
   lteHelper->SetEnbAntennaModelType ("ns3::ParabolicAntennaModel");
-  lteHelper->SetEnbAntennaModelAttribute ("Beamwidth",   DoubleValue (120));
+  lteHelper->SetEnbAntennaModelAttribute ("Beamwidth",   DoubleValue (70));
   lteHelper->SetEnbAntennaModelAttribute ("MaxAttenuation",     DoubleValue (20.0));
   //lteHelper->SetEnbDeviceAttribute ("DlEarfcn", UintegerValue (macroEnbDlEarfcn));
   //lteHelper->SetEnbDeviceAttribute ("UlEarfcn", UintegerValue (macroEnbDlEarfcn + 18000));
@@ -404,7 +413,7 @@ enum EpsBearer::Qci q;
   remHelper->SetAttribute ("XRes", UintegerValue (100));
   remHelper->SetAttribute ("YMin", DoubleValue (-15000));
   remHelper->SetAttribute ("YMax", DoubleValue (15000.0));
-  remHelper->SetAttribute ("YRes", UintegerValue (75));
+  remHelper->SetAttribute ("YRes", UintegerValue (100));
   remHelper->SetAttribute ("Z", DoubleValue (0.0));
   remHelper->SetAttribute ("UseDataChannel", BooleanValue (false));
   remHelper->SetAttribute ("RbId", IntegerValue (-1));
