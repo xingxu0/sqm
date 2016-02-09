@@ -1164,6 +1164,8 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
                       // this UE has data to transmit
                       double achievableRate = 0.0;
                       uint8_t mcs = 0;
+
+		      //std::cout<<(int)(*it).first<<" "<<nLayer<<" "<<(int)rbgSize<<"     ";
                       for (uint8_t k = 0; k < nLayer; k++)
                         {
                           if (sbCqi.size () > k)
@@ -1176,8 +1178,12 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
                               mcs = 0;
                             }
 			  // achievableRate is Tmax in Magus slides
+			  //std::cout<<(int)mcs<<" ";
                           achievableRate += ((m_amc->GetTbSizeFromMcs (mcs, rbgSize) / 8) / 0.001);   // = TB size / TTI
                         }
+		      (*rnti_mcs)[(*it).first] = mcs;
+		      (*rnti_rate)[(*it).first] = achievableRate;
+		      //std::cout<<achievableRate<<std::endl;
 			//Xing
                       //double rcqi = achievableRate / (*it).second.lastAveragedThroughput;
 		      double rcqi;
