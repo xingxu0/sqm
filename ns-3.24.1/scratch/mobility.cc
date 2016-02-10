@@ -52,24 +52,8 @@ void NotifyConnectionEstablishedEnb (std::string context,
   (*rnti_mcs)[rnti] = 0;
 }
 
-
-void modify_requirement(int n, std::vector<NetDeviceContainer> &ndc)
-{
-	DataRate x("0.00001Mb/s");
-	for (unsigned i = 0; i<ndc.size(); ++i) {
-		if (i%2==0) continue;
-		Ptr<PointToPointNetDevice> p2pdev1 = StaticCast<PointToPointNetDevice> (ndc[i].Get(0));
-		Ptr<PointToPointNetDevice> p2pdev2 = StaticCast<PointToPointNetDevice> (ndc[i].Get(1));
-		p2pdev1->SetDataRate(x);
-		p2pdev2->SetDataRate(x);
-	}
-	//Config::Set("/NodeList/0/DeviceList/0/$ns3::PointToPointNetDevice/DataRate", StringValue("0.1Mb/s") );
-	//Config::Set("/NodeList/1/DeviceList/1/$ns3::PointToPointNetDevice/DataRate", StringValue("0.1Mb/s") );
-
-}
-
 void print_mcs() {
-	for (uint16_t i=0; i<1; ++i){
+	for (uint16_t i=0; i<2; ++i){
 		std::cout<<(int)i<<": ";
 		uint64_t imsi = get_key_from_value(i, imsi_id);
 		uint16_t rnti = get_key_from_value(imsi, rnti_imsi);
@@ -90,13 +74,13 @@ main (int argc, char *argv[])
 {
 	init();
 	uint16_t numberOfNodes = 1;
-	double simTime = 250;
+	double simTime = 1500;
 	double distance = 15000.0;
 	double p_distance = 15000.0;
 	double interPacketInterval = 0.01;
-	std::string dataRate = "100";
+	std::string dataRate = "10000";
 	std::string slow_dataRate = "0.1";
-	slow_dataRate = "100";
+	slow_dataRate = "10000";
 	int gold_user = 0;
 	int silver_user = 0;
 	
@@ -206,13 +190,17 @@ main (int argc, char *argv[])
   mobility.Install(enbNodes);
   MobilityHelper uemobility;
   Vector pos (0, 0, 0);
-    Vector vel (200, 0, 0);
+    Vector vel (20, 0, 0);
   uemobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");//, "Velocity", Vector3DValue (Vector(2000.0, 0.0, 0.0)));
   uemobility.Install(ueNodes);
-  Ptr<Node> mover = ueNodes.Get(0);
+  Ptr<Node> mover;
+  for (uint16_t i=0; i<numberOfNodes; ++i)
+  {
+  mover = ueNodes.Get(i);
   cvmm = mover->GetObject<ConstantVelocityMobilityModel> ();
     cvmm->SetPosition(pos);
       cvmm->SetVelocity(vel);
+  }
   
     NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
   NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);

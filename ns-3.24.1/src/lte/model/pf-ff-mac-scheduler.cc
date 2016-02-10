@@ -29,8 +29,6 @@
 #include <ns3/boolean.h>
 #include <cfloat>
 #include <set>
-#include <iostream>
-#include "weight-table.h"
 
 
 namespace ns3 {
@@ -368,7 +366,6 @@ PfFfMacScheduler::DoCschedUeConfigReq (const struct FfMacCschedSapProvider::Csch
 void
 PfFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::CschedLcConfigReqParameters& params)
 {
-//  std::cout<<"xing lcconfigreq "<<params.m_rnti<<" "<<params.m_logicalChannelConfigList.size ()<<std::endl;
   NS_LOG_FUNCTION (this << " New LC, rnti: "  << params.m_rnti);
 
   std::map <uint16_t, pfsFlowPerf_t>::iterator it;
@@ -376,44 +373,21 @@ PfFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::Csch
     {
       it = m_flowStatsDl.find (params.m_rnti);
 
-//      std::cout<<"xing +++"<<m_flowStatsDl.size()<<std::endl;
-      // xing modified
-      //if (it == m_flowStatsDl.end ())
+      if (it == m_flowStatsDl.end ())
         {
-//	  std::cout<<"xing ---"<<std::endl;
           pfsFlowPerf_t flowStatsDl;
           flowStatsDl.flowStart = Simulator::Now ();
           flowStatsDl.totalBytesTransmitted = 0;
           flowStatsDl.lastTtiBytesTrasmitted = 0;
           flowStatsDl.lastAveragedThroughput = 1;
-	  flowStatsDl.qci = (uint8_t)(params.m_logicalChannelConfigList.at (i).m_qci);
-//	  std::cout<<"xing "<<params.m_rnti<<" "<<(int)i<<":"<<(int)(params.m_logicalChannelConfigList.at (i).m_qci)<<std::endl;
-          //m_flowStatsDl.insert (std::pair<uint16_t, pfsFlowPerf_t> (params.m_rnti, flowStatsDl));
+          m_flowStatsDl.insert (std::pair<uint16_t, pfsFlowPerf_t> (params.m_rnti, flowStatsDl));
           pfsFlowPerf_t flowStatsUl;
           flowStatsUl.flowStart = Simulator::Now ();
           flowStatsUl.totalBytesTransmitted = 0;
           flowStatsUl.lastTtiBytesTrasmitted = 0;
           flowStatsUl.lastAveragedThroughput = 1;
-	  //m_flowStatsUl.insert (std::pair<uint16_t, pfsFlowPerf_t> (params.m_rnti, flowStatsUl));
-
-	  if (it == m_flowStatsDl.end()) {
-	          m_flowStatsUl.insert (std::pair<uint16_t, pfsFlowPerf_t> (params.m_rnti, flowStatsUl));
-		m_flowStatsDl.insert (std::pair<uint16_t, pfsFlowPerf_t> (params.m_rnti, flowStatsDl));
-
-	  }
-	  else {
-		  //std::cout<<"xing *** modify"<<std::endl;
-		m_flowStatsUl[params.m_rnti]= flowStatsUl;
-		m_flowStatsDl[params.m_rnti]= flowStatsDl;
-
-	  }
+          m_flowStatsUl.insert (std::pair<uint16_t, pfsFlowPerf_t> (params.m_rnti, flowStatsUl));
         }
-        
-      for (std::map<uint16_t, pfsFlowPerf_t>::iterator it2 = m_flowStatsDl.begin(); it2 != m_flowStatsDl.end(); it2++) {
-	      std::cout<<" " <<it2->first<<":"<<(int)it2->second.qci<<"   ";
-      }
-      std::cout<<std::endl;
-
     }
 
   return;
@@ -1114,7 +1088,7 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
             {
               if ((m_ffrSapProvider->IsDlRbgAvailableForUe (i, (*it).first)) == false)
                 continue;
-		
+
               std::set <uint16_t>::iterator itRnti = rntiAllocated.find ((*it).first);
               if ((itRnti != rntiAllocated.end ())||(!HarqProcessAvailability ((*it).first)))
                 {
@@ -1129,7 +1103,6 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
                     }
                   continue;
                 }
-
               std::map <uint16_t,SbMeasResult_s>::iterator itCqi;
               itCqi = m_a30CqiRxed.find ((*it).first);
               std::map <uint16_t,uint8_t>::iterator itTxMode;
@@ -1157,6 +1130,7 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
                 {
                   cqi2 = sbCqi.at (1);
                 }
+
               if ((cqi1 > 0)||(cqi2 > 0)) // CQI == 0 means "out of range" (see table 7.2.3-1 of 36.213)
                 {
                   if (LcActivePerFlow ((*it).first) > 0)
@@ -1164,8 +1138,6 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
                       // this UE has data to transmit
                       double achievableRate = 0.0;
                       uint8_t mcs = 0;
-
-		      //std::cout<<(int)(*it).first<<" "<<nLayer<<" "<<(int)rbgSize<<"     ";
                       for (uint8_t k = 0; k < nLayer; k++)
                         {
                           if (sbCqi.size () > k)
@@ -1177,36 +1149,10 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
                               // no info on this subband -> worst MCS
                               mcs = 0;
                             }
-			  // achievableRate is Tmax in Magus slides
-			  //std::cout<<(int)mcs<<" ";
                           achievableRate += ((m_amc->GetTbSizeFromMcs (mcs, rbgSize) / 8) / 0.001);   // = TB size / TTI
                         }
-		      (*rnti_mcs)[(*it).first] = mcs;
-		      (*rnti_rate)[(*it).first] = achievableRate;
-		      //std::cout<<achievableRate<<std::endl;
-			//Xing
-                      //double rcqi = achievableRate / (*it).second.lastAveragedThroughput;
-		      double rcqi;
-		      //std::cout<<"xing "<<(*it).first<<(int)((*it).second.qci)<<std::endl;
-		      double weight = (*id_weight)[(*imsi_id)[(*rnti_imsi)[(*it).first]]];
-		      if (weight <= 0.0) weight = 1;
-		      //std::cout<<"***:"<<(int)(*it).first<<" "<<(int)rnti_imsi[(*it).first]<<" "<<(int)imsi_id[rnti_imsi[(*it).first]]<<" "<<weight<<std::endl;
 
-
-		      //if ((int)((*it).second.qci) < 8)
-			//rcqi = 3 * achievableRate /(*it).second.lastAveragedThroughput;
-		      //else if ((int)((*it).second.qci) == 8)
-		      //if ((*it).first % 3==0)
-		      //{
-			//      rcqi = 3 * achievableRate /(*it).second.lastAveragedThroughput;
-			      //std::cout<<"***"<<std::endl;
-		      //}
-		      //else
- 		      rcqi = weight*achievableRate /(*it).second.lastAveragedThroughput;
-		//NS_LOG_FUNCTION (this << " xing rcqi" << (*it).first);
-
-
-
+                      double rcqi = achievableRate / (*it).second.lastAveragedThroughput;
                       NS_LOG_INFO (this << " RNTI " << (*it).first << " MCS " << (uint32_t)mcs << " achievableRate " << achievableRate << " avgThr " << (*it).second.lastAveragedThroughput << " RCQI " << rcqi);
 
                       if (rcqi > rcqiMax)
@@ -1215,8 +1161,6 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
                           itMax = it;
                         }
                     }
-		 // else NS_LOG_INFO("xing active flow issue");
-
                 }   // end if cqi
             } // end for m_rlcBufferReq
 

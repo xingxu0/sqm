@@ -32,6 +32,7 @@
 #include <ios>
 #include <string>
 #include <vector>
+#include <iostream>
 
 // The topology of this simulation program is inspired from 
 // 3GPP R4-092042, Section 4.2.1 Dual Stripe Model
@@ -233,7 +234,7 @@ static ns3::GlobalValue g_nFloors ("nFloors",
                                    ns3::MakeUintegerChecker<uint32_t> ());
 static ns3::GlobalValue g_nMacroEnbSites ("nMacroEnbSites",
                                           "How many macro sites there are",
-                                          ns3::UintegerValue (3),
+                                          ns3::UintegerValue (2),
                                           ns3::MakeUintegerChecker<uint32_t> ());
 static ns3::GlobalValue g_nMacroEnbSitesX ("nMacroEnbSitesX",
                                            "(minimum) number of sites along the X-axis of the hex grid",
@@ -295,7 +296,7 @@ static ns3::GlobalValue g_simTime ("simTime",
 static ns3::GlobalValue g_generateRem ("generateRem",
                                        "if true, will generate a REM and then abort the simulation;"
                                        "if false, will run the simulation normally (without generating any REM)",
-                                       ns3::BooleanValue (false),
+                                       ns3::BooleanValue (true),
                                        ns3::MakeBooleanChecker ());
 static ns3::GlobalValue g_remRbId ("remRbId",
                                    "Resource Block Id of Data Channel, for which REM will be generated;"
@@ -308,7 +309,7 @@ static ns3::GlobalValue g_epc ("epc",
                                "with real IP applications over PDCP and RLC UM (or RLC AM by changing "
                                "the default value of EpsBearerToRlcMapping e.g. to RLC_AM_ALWAYS). "
                                "If false, only the LTE radio access will be simulated with RLC SM. ",
-                               ns3::BooleanValue (false),
+                               ns3::BooleanValue (true),
                                ns3::MakeBooleanChecker ());
 static ns3::GlobalValue g_epcDl ("epcDl",
                                  "if true, will activate data flows in the downlink when EPC is being used. "
@@ -435,6 +436,9 @@ main (int argc, char *argv[])
 
   Config::SetDefault ("ns3::LteEnbRrc::SrsPeriodicity", UintegerValue (srsPeriodicity));
 
+  ConfigStore config;
+    config.ConfigureDefaults ();
+
   Box macroUeBox;
   double ueZ = 1.5;
   if (nMacroEnbSites > 0)
@@ -467,12 +471,15 @@ main (int argc, char *argv[])
 
 
   uint32_t nHomeEnbs = round (4 * nApartmentsX * nBlocks * nFloors * homeEnbDeploymentRatio * homeEnbActivationRatio);
+  nHomeEnbs = 0;
   NS_LOG_LOGIC ("nHomeEnbs = " << nHomeEnbs);
   uint32_t nHomeUes = round (nHomeEnbs * homeUesHomeEnbRatio);
   NS_LOG_LOGIC ("nHomeUes = " << nHomeUes);
   double macroUeAreaSize = (macroUeBox.xMax - macroUeBox.xMin) * (macroUeBox.yMax - macroUeBox.yMin);
   uint32_t nMacroUes = round (macroUeAreaSize * macroUeDensity);
   NS_LOG_LOGIC ("nMacroUes = " << nMacroUes << " (density=" << macroUeDensity << ")");
+  std::cout<<nHomeEnbs<<" "<<nHomeUes<<std::endl;
+  std::cout<<nMacroEnbSites<<" "<<nMacroUes<<std::endl;
 
   NodeContainer homeEnbs;
   homeEnbs.Create (nHomeEnbs);
@@ -832,8 +839,8 @@ main (int argc, char *argv[])
       PrintGnuplottableUeListToFile ("ues.txt");
 
       remHelper = CreateObject<RadioEnvironmentMapHelper> ();
-      remHelper->SetAttribute ("ChannelPath", StringValue ("/ChannelList/0"));
-      remHelper->SetAttribute ("OutputFile", StringValue ("lena-dual-stripe.rem"));
+      remHelper->SetAttribute ("ChannelPath", StringValue ("/ChannelList/1"));
+      remHelper->SetAttribute ("OutputFile", StringValue ("rem.out"));
       remHelper->SetAttribute ("XMin", DoubleValue (macroUeBox.xMin));
       remHelper->SetAttribute ("XMax", DoubleValue (macroUeBox.xMax));
       remHelper->SetAttribute ("YMin", DoubleValue (macroUeBox.yMin));
@@ -860,6 +867,8 @@ main (int argc, char *argv[])
     {
       lteHelper->EnablePdcpTraces ();
     }
+
+  config.ConfigureAttributes ();
 
   Simulator::Run ();
 

@@ -58,7 +58,6 @@ struct pfsFlowPerf_t
   unsigned long totalBytesTransmitted;
   unsigned int lastTtiBytesTrasmitted;
   double lastAveragedThroughput;
-  uint8_t qci;
 };
 
 

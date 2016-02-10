@@ -40,7 +40,6 @@
 #include <ns3/lte-rlc-um.h>
 #include <ns3/lte-rlc-am.h>
 #include <ns3/lte-pdcp.h>
-#include <iostream>
 
 
 
@@ -184,7 +183,6 @@ UeManager::DoInitialize ()
     lcinfo.rnti = m_rnti;
     lcinfo.lcId = lcid;
     // leave the rest of lcinfo empty as CCCH (LCID 0) is pre-configured
-//    std::cout<<"xing init lcid=0"<<std::endl;
     m_rrc->m_cmacSapProvider->AddLc (lcinfo, rlc->GetLteMacSapUser ());
 
   }
@@ -224,7 +222,6 @@ UeManager::DoInitialize ()
     lcinfo.mbrDl = 1e6;
     lcinfo.gbrUl = 1e4;
     lcinfo.gbrDl = 1e4;
-//    std::cout<<"xing init lcid=1"<<std::endl;
     m_rrc->m_cmacSapProvider->AddLc (lcinfo, rlc->GetLteMacSapUser ());
   }
 
@@ -334,7 +331,6 @@ void
 UeManager::SetupDataRadioBearer (EpsBearer bearer, uint8_t bearerId, uint32_t gtpTeid, Ipv4Address transportLayerAddress)
 {
   NS_LOG_FUNCTION (this << (uint32_t) m_rnti);
-//  std::cout<<"xing setupdataradiobearer: "<<(uint32_t)bearer.qci<<" "<<(uint32_t)bearerId<<std::endl;
 
   Ptr<LteDataRadioBearerInfo> drbInfo = CreateObject<LteDataRadioBearerInfo> ();
   uint8_t drbid = AddDataRadioBearerInfo (drbInfo);
@@ -393,7 +389,6 @@ UeManager::SetupDataRadioBearer (EpsBearer bearer, uint8_t bearerId, uint32_t gt
   lcinfo.mbrDl = bearer.gbrQosInfo.mbrDl;
   lcinfo.gbrUl = bearer.gbrQosInfo.gbrUl;
   lcinfo.gbrDl = bearer.gbrQosInfo.gbrDl;
-//  std::cout<<"xing addlc"<<std::endl;
   m_rrc->m_cmacSapProvider->AddLc (lcinfo, rlc->GetLteMacSapUser ());
 
   if (rlcTypeId == LteRlcAm::GetTypeId ())
@@ -1347,7 +1342,6 @@ TypeId
 LteEnbRrc::GetTypeId (void)
 {
   NS_LOG_FUNCTION ("LteEnbRrc::GetTypeId");
-//  std::cout<<"xing gettypeid"<<std::endl;
   static TypeId tid = TypeId ("ns3::LteEnbRrc")
     .SetParent<Object> ()
     .SetGroupName("Lte")
@@ -1358,9 +1352,7 @@ LteEnbRrc::GetTypeId (void)
                    MakeObjectMapChecker<UeManager> ())
     .AddAttribute ("DefaultTransmissionMode",
                    "The default UEs' transmission mode (0: SISO)",
-		   UintegerValue (0),  // default tx-mode
-                   //UintegerValue (0),  // default tx-mode
-		   // changed by xing, previously it's 0.
+                   UintegerValue (0),  // default tx-mode
                    MakeUintegerAccessor (&LteEnbRrc::m_defaultTransmissionMode),
                    MakeUintegerChecker<uint8_t> ())
     .AddAttribute ("EpsBearerToRlcMapping", 
@@ -1380,7 +1372,7 @@ LteEnbRrc::GetTypeId (void)
     // SRS related attributes
     .AddAttribute ("SrsPeriodicity",
                    "The SRS periodicity in milliseconds",
-                   UintegerValue (320),
+                   UintegerValue (40),
                    MakeUintegerAccessor (&LteEnbRrc::SetSrsPeriodicity, 
                                          &LteEnbRrc::GetSrsPeriodicity),
                    MakeUintegerChecker<uint32_t> ())

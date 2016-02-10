@@ -137,7 +137,7 @@ main (int argc, char *argv[])
       Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
       ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
     }
- 
+
   // Attach a UE to a eNB
   lteHelper->Attach (ueLteDevs, enbLteDevs.Get (0));
 
@@ -223,8 +223,6 @@ main (int argc, char *argv[])
    */
   Time deActivateTime (Seconds (1.5));
   Simulator::Schedule (deActivateTime, &LteHelper::DeActivateDedicatedEpsBearer, lteHelper, ueDevice, enbDevice, 2);
-  
-  p2ph.EnablePcapAll("lena-epc-first");
 
   //stop simulation after 3 seconds
   Simulator::Stop (Seconds (3.0));
