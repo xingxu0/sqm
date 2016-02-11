@@ -89,8 +89,8 @@ int
 main (int argc, char *argv[])
 {
 	init();
-	uint16_t numberOfNodes = 1;
-	double simTime = 1000;
+	uint16_t numberOfNodes = 4;
+	double simTime = 10000;
 	double distance = 15000.0;
 	double p_distance = 15000.0;
 	double interPacketInterval = 0.01;
@@ -206,13 +206,16 @@ main (int argc, char *argv[])
   mobility.Install(enbNodes);
   MobilityHelper uemobility;
   Vector pos (0, 0, 0);
-    Vector vel (30, 0, 0);
+    Vector vel (3, 0, 0);
   uemobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");//, "Velocity", Vector3DValue (Vector(2000.0, 0.0, 0.0)));
   uemobility.Install(ueNodes);
-  Ptr<Node> mover = ueNodes.Get(0);
+  Ptr<Node> mover;
+  for (uint16_t i=0; i<numberOfNodes; i++) {
+  mover = ueNodes.Get(i);
   cvmm = mover->GetObject<ConstantVelocityMobilityModel> ();
     cvmm->SetPosition(pos);
       cvmm->SetVelocity(vel);
+  }
   
     NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
   NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
@@ -365,7 +368,7 @@ enum EpsBearer::Qci q;
   //Simulator::Schedule(Seconds(10), &modify_weight, numberOfNodes);
 Config::Connect ("/NodeList/*/DeviceList/*/LteEnbRrc/ConnectionEstablished", MakeCallback (&NotifyConnectionEstablishedEnb));
 
-for (int i=3; i<1000; ++i)
+for (int i=3; i<10000; ++i)
  Simulator::Schedule(Seconds(i), &print_mcs);
 
 
