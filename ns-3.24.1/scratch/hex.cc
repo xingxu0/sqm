@@ -110,8 +110,10 @@ main (int argc, char *argv[])
   imsi_id = new std::map <uint64_t, uint16_t>();
   rnti_imsi = new std::map <uint16_t, uint64_t>();
   id_weight = new std::map<uint16_t, float>();
+  rnti_mcs = new std::map <uint16_t, uint8_t>();
+ rnti_rate = new std::map<uint16_t, double>();
 
-	uint16_t numberOfNodes = 12;
+ uint16_t numberOfNodes = 12;
 	double simTime = 60;
 	double distance = 15000.0;
 	double p_distance = 15000.0;
@@ -402,7 +404,7 @@ enum EpsBearer::Qci q;
   
   Simulator::Stop(Seconds(simTime));
 
-
+/*
         PrintGnuplottableEnbListToFile ("enbs.txt");
 	      PrintGnuplottableUeListToFile ("ues.txt");
   Ptr<RadioEnvironmentMapHelper> remHelper = CreateObject<RadioEnvironmentMapHelper> ();
@@ -417,7 +419,7 @@ enum EpsBearer::Qci q;
   remHelper->SetAttribute ("Z", DoubleValue (0.0));
   remHelper->SetAttribute ("UseDataChannel", BooleanValue (false));
   remHelper->SetAttribute ("RbId", IntegerValue (-1));
-  remHelper->Install ();
+  remHelper->Install ();*/
   
   config.ConfigureAttributes ();
 

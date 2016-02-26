@@ -408,11 +408,12 @@ PfFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::Csch
 
 	  }
         }
-        
+       /* 
       for (std::map<uint16_t, pfsFlowPerf_t>::iterator it2 = m_flowStatsDl.begin(); it2 != m_flowStatsDl.end(); it2++) {
 	      std::cout<<" " <<it2->first<<":"<<(int)it2->second.qci<<"   ";
       }
       std::cout<<std::endl;
+      */
 
     }
 
