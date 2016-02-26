@@ -1,8 +1,3 @@
-// ./waf --run "scratch/hex --ns3::ConfigStore::Mode=Save --ns3::ConfigStore::Filename=config.txt"; gnuplot -p enbs.txt ues.txt my_plot_script; cp myplot.png ~/Dropbox/myplot3.png
-
-
-
-
 /* 12 users, 3 groups, A, B, C
  * group A & B: infinite traffic to receive
  * group C: controlled demand
@@ -23,104 +18,69 @@
 #include "ns3/config-store.h"
 #include "ns3/data-rate.h"
 #include "ns3/point-to-point-net-device.h"
-#include "ns3/radio-environment-map-helper.h"
 #include "../src/lte/model/weight-table.h"
+#include "ns3/constant-velocity-mobility-model.h"
 #include <vector>
+#include <map>
 
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("LTEExample");
 
-void modify_requirement(int n, std::vector<NetDeviceContainer> &ndc)
-{
-	DataRate x("0.00001Mb/s");
-	for (unsigned i = 0; i<ndc.size(); ++i) {
-		if (i%2==0) continue;
-		Ptr<PointToPointNetDevice> p2pdev1 = StaticCast<PointToPointNetDevice> (ndc[i].Get(0));
-		Ptr<PointToPointNetDevice> p2pdev2 = StaticCast<PointToPointNetDevice> (ndc[i].Get(1));
-		p2pdev1->SetDataRate(x);
-		p2pdev2->SetDataRate(x);
+template<typename KK, typename VV>
+KK get_key_from_value(VV v, std::map<KK,VV> *m){
+	typename std::map<KK,VV>::iterator it; 
+	for (it=m->begin(); it!=m->end(); it++){
+		if (it->second == v)
+			return it->first;
 	}
-	//Config::Set("/NodeList/0/DeviceList/0/$ns3::PointToPointNetDevice/DataRate", StringValue("0.1Mb/s") );
-	//Config::Set("/NodeList/1/DeviceList/1/$ns3::PointToPointNetDevice/DataRate", StringValue("0.1Mb/s") );
-
+	return (KK)-1;
 }
 
-void 
-PrintGnuplottableUeListToFile (std::string filename)
+void NotifyConnectionEstablishedEnb (std::string context,
+                                uint64_t imsi,
+                                uint16_t cellid,
+                                uint16_t rnti)
 {
-	  std::ofstream outFile;
-	    outFile.open (filename.c_str (), std::ios_base::out | std::ios_base::trunc);
-	      if (!outFile.is_open ())
-		          {
-				        NS_LOG_ERROR ("Can't open file " << filename);
-					      return;
-					          }
-	        for (NodeList::Iterator it = NodeList::Begin (); it != NodeList::End (); ++it)
-			    {
-				          Ptr<Node> node = *it;
-					        int nDevs = node->GetNDevices ();
-						      for (int j = 0; j < nDevs; j++)
-							              {
-									                Ptr<LteUeNetDevice> uedev = node->GetDevice (j)->GetObject <LteUeNetDevice> ();
-											          if (uedev)
-													              {
-															                    Vector pos = node->GetObject<MobilityModel> ()->GetPosition ();
-																	                  outFile << "set label \"" << uedev->GetImsi ()
-																				                        << "\" at "<< pos.x << "," << pos.y << " left font \"Helvetica,4\" textcolor rgb \"grey\" front point pt 1 ps 0.3 lc rgb \"grey\" offset 0,0"
-																							                      << std::endl;
-																			              }
-												          }
-						          }
+  std::cout << Simulator::Now ().GetSeconds () << " " << context
+            << " eNB CellId " << cellid
+            << ": successful connection of UE with IMSI " << imsi
+            << " RNTI " << rnti
+            << std::endl;
+  (*rnti_imsi)[rnti] = imsi;
+  (*rnti_rate)[rnti] = 0;
+  (*rnti_mcs)[rnti] = 0;
 }
 
-void 
-PrintGnuplottableEnbListToFile (std::string filename)
-{
-	  std::ofstream outFile;
-	    outFile.open (filename.c_str (), std::ios_base::out | std::ios_base::trunc);
-	      if (!outFile.is_open ())
-		          {
-				        NS_LOG_ERROR ("Can't open file " << filename);
-					      return;
-					          }
-	        for (NodeList::Iterator it = NodeList::Begin (); it != NodeList::End (); ++it)
-			    {
-				          Ptr<Node> node = *it;
-					        int nDevs = node->GetNDevices ();
-						      for (int j = 0; j < nDevs; j++)
-							              {
-									                Ptr<LteEnbNetDevice> enbdev = node->GetDevice (j)->GetObject <LteEnbNetDevice> ();
-											          if (enbdev)
-													              {
-															                    Vector pos = node->GetObject<MobilityModel> ()->GetPosition ();
-																	                  outFile << "set label \"" << enbdev->GetCellId ()
-																				                        << "\" at "<< pos.x << "," << pos.y
-																							                      << " left font \"Helvetica,4\" textcolor rgb \"white\" front  point pt 2 ps 0.3 lc rgb \"white\" offset 0,0"
-																									                            << std::endl;
-																			              }
-												          }
-						          }
+void print_mcs() {
+	for (uint16_t i=0; i<2; ++i){
+		std::cout<<(int)i<<": ";
+		uint64_t imsi = get_key_from_value(i, imsi_id);
+		uint16_t rnti = get_key_from_value(imsi, rnti_imsi);
+		std::cout<<(int)(*rnti_mcs)[rnti]<<" "<<(*rnti_rate)[rnti]<<std::endl;
+	}
+}
+
+void init() {
+imsi_id = new std::map <uint64_t, uint16_t>();
+  rnti_imsi = new std::map <uint16_t, uint64_t>();
+  id_weight = new std::map<uint16_t, float>();
+  rnti_mcs = new std::map <uint16_t, uint8_t>();
+  rnti_rate = new std::map<uint16_t, double>();
 }
 
 int
 main (int argc, char *argv[])
 {
-
-  imsi_id = new std::map <uint64_t, uint16_t>();
-  rnti_imsi = new std::map <uint16_t, uint64_t>();
-  id_weight = new std::map<uint16_t, float>();
-  rnti_mcs = new std::map <uint16_t, uint8_t>();
- rnti_rate = new std::map<uint16_t, double>();
-
- uint16_t numberOfNodes = 12;
-	double simTime = 60;
+	init();
+	uint16_t numberOfNodes = 2;
+	double simTime = 15;
 	double distance = 15000.0;
 	double p_distance = 15000.0;
 	double interPacketInterval = 0.01;
-	std::string dataRate = "100";
+	std::string dataRate = "10000";
 	std::string slow_dataRate = "0.1";
-	slow_dataRate = "100";
+	slow_dataRate = "10000";
 	int gold_user = 0;
 	int silver_user = 0;
 	
@@ -138,15 +98,11 @@ main (int argc, char *argv[])
   std::cout<<"distance"<<distance<<std::endl;
   std::cout<<"interval"<<interPacketInterval<<std::endl;
   std::cout<<"dataRate"<<dataRate<<std::endl;
-    ConfigStore config;
-      config.ConfigureDefaults ();
 	
 	Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
 	  lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
 	Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
 	lteHelper->SetEpcHelper (epcHelper);
-	
-	
 	
 	  ConfigStore inputConfig;
   inputConfig.ConfigureDefaults();
@@ -207,23 +163,16 @@ main (int argc, char *argv[])
 	
   NodeContainer ueNodes;
   NodeContainer enbNodes;
-  enbNodes.Create(12);
+  enbNodes.Create(1);
   ueNodes.Create(numberOfNodes);
   
     // Install Mobility Model
   Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
- /* 
-     positionAlloc->Add (Vector(8000, 0, 0));
-    positionAlloc->Add (Vector(8000,0, 0));
-  positionAlloc->Add (Vector(8000, 0, 0));
-positionAlloc->Add (Vector(0, 0, 0));
   positionAlloc->Add (Vector(0, 0, 0));
-  positionAlloc->Add (Vector(0, 0, 0));
-  */
+  Ptr<ListPositionAllocator> positionue = CreateObject<ListPositionAllocator> ();
+  Ptr<ConstantVelocityMobilityModel> cvmm;
+
   
-
-
-
   for (uint16_t i = 0; i < numberOfNodes + 1; i++)
     {
 	    /*
@@ -232,36 +181,29 @@ positionAlloc->Add (Vector(0, 0, 0));
 	else*/
 	    
       //if (i < gold_user)
-     if (i < 1) 		
-	positionAlloc->Add (Vector(p_distance, 0, 0));
-      else
-	positionAlloc->Add (Vector(distance, 0, 0));      
-      //positionAlloc->Add (Vector(distance, 0, 0));
+	//positionue->Add (Vector(distance, 0, 0));
+      positionAlloc->Add (Vector(distance, 0, 0));
     }
   MobilityHelper mobility;
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-    mobility.Install(enbNodes);
-mobility.SetPositionAllocator(positionAlloc);
-
+  mobility.SetPositionAllocator(positionAlloc);
+  mobility.Install(enbNodes);
+  //MobilityHelper uemobility;
+  Vector pos (0, 0, 0);
+    Vector vel (20, 0, 0);
+  //uemobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");//, "Velocity", Vector3DValue (Vector(2000.0, 0.0, 0.0)));
   mobility.Install(ueNodes);
+  Ptr<Node> mover;
+  /*
+  for (uint16_t i=0; i<numberOfNodes; ++i)
+  {
+  mover = ueNodes.Get(i);
+  cvmm = mover->GetObject<ConstantVelocityMobilityModel> ();
+    cvmm->SetPosition(pos);
+      cvmm->SetVelocity(vel);
+  }*/
   
-  Ptr<LteHexGridEnbTopologyHelper> lteHexGridEnbTopologyHelper = CreateObject<LteHexGridEnbTopologyHelper> ();
-  lteHexGridEnbTopologyHelper->SetLteHelper (lteHelper);
-  double interSiteDistance = 8000;
-  lteHexGridEnbTopologyHelper->SetAttribute ("InterSiteDistance", DoubleValue (interSiteDistance));
-  lteHexGridEnbTopologyHelper->SetAttribute ("MinX", DoubleValue (interSiteDistance/2));
-  lteHexGridEnbTopologyHelper->SetAttribute ("GridWidth", UintegerValue (1));
-  //Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (macroEnbTxPowerDbm));
-  lteHelper->SetEnbAntennaModelType ("ns3::ParabolicAntennaModel");
-  lteHelper->SetEnbAntennaModelAttribute ("Beamwidth",   DoubleValue (70));
-  lteHelper->SetEnbAntennaModelAttribute ("MaxAttenuation",     DoubleValue (20.0));
-  //lteHelper->SetEnbDeviceAttribute ("DlEarfcn", UintegerValue (macroEnbDlEarfcn));
-  //lteHelper->SetEnbDeviceAttribute ("UlEarfcn", UintegerValue (macroEnbDlEarfcn + 18000));
-  lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
-  lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (25));
-  NetDeviceContainer enbLteDevs = lteHexGridEnbTopologyHelper->SetPositionAndInstallEnbDevice (enbNodes);
-  
-    //NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
+    NetDeviceContainer enbLteDevs = lteHelper->InstallEnbDevice (enbNodes);
   NetDeviceContainer ueLteDevs = lteHelper->InstallUeDevice (ueNodes);
   
   // Install the IP stack on the UEs
@@ -393,6 +335,16 @@ enum EpsBearer::Qci q;
   lteHelper->EnableTraces ();
   // Uncomment to enable PCAP tracing
   
+  char buff[100];
+  
+  std::cout<<"PCAP"<<std::endl;
+  for (uint8_t i=0; i<ueNodes.GetN (); ++i) {
+	//sprintf(buff, "trace_nonsharing_d%d_gu%d_su%d_r%sGb_id%d.pcap", (int)distance, gold_user, silver_user, dataRate.c_str(), i);
+	sprintf(buff, "still_test_%d.pcap", i);
+	std::string buffAsStdStr = buff;
+	std::cout<<remoteHostContainer.Get(i)->GetNDevices()<<std::endl;
+	p2pv[i]->EnablePcap(buffAsStdStr, remoteHostContainer.Get(i)->GetDevice(1), false, true);
+  }
   
   //sprintf(buff, "trace_nonsharing_d%d_gu%d_su%d_r%sGb_id%d", (int)distance, gold_user, silver_user, dataRate.c_str(), 0);
   //std::string buffAsStdStr = buff;
@@ -400,39 +352,14 @@ enum EpsBearer::Qci q;
   //p2pv[0]->EnablePcap(buffAsStdStr, remoteHostContainer.Get(0)->GetDevice(0));//, remoteHostContainer.Get(i));
   
   //Simulator::Schedule(Seconds(10), &modify_weight, numberOfNodes);
-  Simulator::Schedule(Seconds(8), &modify_requirement, numberOfNodes, ndc);
+//Config::Connect ("/NodeList/*/DeviceList/*/LteEnbRrc/ConnectionEstablished", MakeCallback (&NotifyConnectionEstablishedEnb));
+
+for (int i=3; i<15; ++i)
+ Simulator::Schedule(Seconds(i), &print_mcs);
+
+
   
   Simulator::Stop(Seconds(simTime));
-
-        PrintGnuplottableEnbListToFile ("enbs.txt");
-	      PrintGnuplottableUeListToFile ("ues.txt");
-  Ptr<RadioEnvironmentMapHelper> remHelper = CreateObject<RadioEnvironmentMapHelper> ();
-  remHelper->SetAttribute ("ChannelPath", StringValue ("/ChannelList/12"));
-  remHelper->SetAttribute ("OutputFile", StringValue ("rem.out"));
-  remHelper->SetAttribute ("XMin", DoubleValue (-15000));
-  remHelper->SetAttribute ("XMax", DoubleValue (15000));
-  remHelper->SetAttribute ("XRes", UintegerValue (100));
-  remHelper->SetAttribute ("YMin", DoubleValue (-15000));
-  remHelper->SetAttribute ("YMax", DoubleValue (15000.0));
-  remHelper->SetAttribute ("YRes", UintegerValue (100));
-  remHelper->SetAttribute ("Z", DoubleValue (0.0));
-  remHelper->SetAttribute ("UseDataChannel", BooleanValue (false));
-  remHelper->SetAttribute ("RbId", IntegerValue (-1));
-  remHelper->Install ();
-  
-  config.ConfigureAttributes ();
-
-  char buff[100];
-  
-  std::cout<<"PCAP"<<std::endl;
-  for (uint8_t i=0; i<ueNodes.GetN (); ++i) {
-	//sprintf(buff, "trace_nonsharing_d%d_gu%d_su%d_r%sGb_id%d.pcap", (int)distance, gold_user, silver_user, dataRate.c_str(), i);
-	sprintf(buff, "dynamic_weight_%d.pcap", i);
-	std::string buffAsStdStr = buff;
-	std::cout<<remoteHostContainer.Get(i)->GetNDevices()<<std::endl;
-	p2pv[i]->EnablePcap(buffAsStdStr, remoteHostContainer.Get(i)->GetDevice(1), false, true);
-  }
-
   Simulator::Run();
 
   /*GtkConfigStore config;
