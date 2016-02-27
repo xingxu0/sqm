@@ -18,7 +18,7 @@ os.system("rm temp_plot -rf; mkdir temp_plot")
 
 leg = []
 for f in glob.glob("*.pcap"):
-	os.system("captcp throughput -s 2 -i -f 1.1 -o temp_plot %s"%(f))
+	os.system("captcp throughput -s 1 -i -f 1.1 -o temp_plot %s"%(f))
 	ls = open("temp_plot/throughput.data").readlines()
 	x, y = convert(ls)
 	leg.append(f)
