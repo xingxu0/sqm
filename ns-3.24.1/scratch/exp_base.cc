@@ -1,4 +1,6 @@
-// ./waf --run "scratch/hex --ns3::ConfigStore::Mode=Save --ns3::ConfigStore::Filename=config.txt"; gnuplot -p enbs.txt ues.txt my_plot_script; cp myplot.png ~/Dropbox/myplot3.png
+// plot configuration/SINR:
+// ./waf --run="scratch/exp_base --plotSinr=1"; gnuplot -p enbs.out ues.out my_plot_script
+
 
 
 
@@ -111,7 +113,7 @@ int
 main (int argc, char *argv[])
 {
 	init();
-	srand (time(NULL));
+	srand (0);
 	uint16_t numberOfNodes = 12;
 	double simTime = 60;
 	double distance = 1000.0;
@@ -203,7 +205,7 @@ main (int argc, char *argv[])
 
 	NodeContainer ueNodes;
 	NodeContainer enbNodes;
-	enbNodes.Create(21);
+	enbNodes.Create(3);
 	ueNodes.Create(numberOfNodes);
 
 	// Install Mobility Model
