@@ -52,11 +52,36 @@ void NotifyConnectionEstablishedEnb (std::string context,
             << ": successful connection of UE with IMSI " << imsi
             << " RNTI " << rnti
             << std::endl;
-  (*rnti_imsi)[rnti] = imsi;
-  (*rnti_rate)[rnti] = 0;
-  (*rnti_mcs)[rnti] = 0;
+  uint16_t my_rnti = cellid*1000+rnti;
+  (*rnti_imsi)[my_rnti] = imsi;
+  (*rnti_rate)[my_rnti] = 0;
+  (*rnti_mcs)[my_rnti] = 0;
 }
 
+template<typename KK, typename VV>
+KK get_key_from_value(VV v, std::map<KK,VV> *m){
+	typename std::map<KK,VV>::iterator it; 
+	for (it=m->begin(); it!=m->end(); it++){
+		if (it->second == v)
+			return it->first;
+	}
+	return (KK)-1;
+}
+
+void print_mcs() {
+	for (std::map<uint64_t, uint16_t>::iterator it=imsi_id->begin(); it!=imsi_id->end(); it++) {
+		std::cout<<" "<<it->first<<":"<<it->second<<", ";
+	}
+	std::cout<<std::endl;
+
+	for (uint16_t i=0; i<12; ++i){
+		std::cout<<(int)i<<": ";
+		uint64_t imsi = get_key_from_value(i, imsi_id);
+		uint16_t rnti = get_key_from_value(imsi, rnti_imsi);
+		std::cout<<"imsi:"<<imsi<<" rnti:"<<rnti<<"  ";
+		std::cout<<(int)(*rnti_mcs)[rnti]<<" "<<(*rnti_rate)[rnti]<<std::endl;
+	}
+}
 
 void modify_requirement(int n, std::vector<NetDeviceContainer> &ndc)
 {
@@ -131,7 +156,7 @@ main (int argc, char *argv[])
 	init();
 	srand (0);
 	uint16_t numberOfNodes = 12;
-	double simTime = 60;
+	double simTime = 20;
 	double distance = 1000.0;
 	double p_distance = 1000.0;
 	double interPacketInterval = 0.01;
@@ -156,7 +181,6 @@ main (int argc, char *argv[])
 	cmd.AddValue("plotSinr", "plot sinr", plot_sinr);
 	cmd.AddValue("interSiteDistance", "interSiteDistance", interSiteDistance);
 	cmd.Parse(argc, argv);
-	std::cout<<plot_sinr<<std::endl;
 	ConfigStore config;
 	config.ConfigureDefaults ();
 
@@ -374,6 +398,10 @@ positionAlloc->Add (Vector(500, 0, 0));
 	serverApps.Start (Seconds (1.0));
 	clientApps.Start (Seconds (1.0));
 	lteHelper->EnableTraces ();
+
+
+	for (uint8_t i=0; i<simTime; ++i)
+		Simulator::Schedule(Seconds(i), &print_mcs);
 
 	//Simulator::Schedule(Seconds(8), &modify_requirement, numberOfNodes, ndc);
         Config::Connect ("/NodeList/*/DeviceList/*/LteEnbRrc/ConnectionEstablished", MakeCallback (&NotifyConnectionEstablishedEnb));
