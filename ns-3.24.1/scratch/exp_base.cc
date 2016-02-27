@@ -42,6 +42,22 @@ void init() {
 	rnti_rate = new std::map<uint16_t, double>();
 }
 
+void NotifyConnectionEstablishedEnb (std::string context,
+                                uint64_t imsi,
+                                uint16_t cellid,
+                                uint16_t rnti)
+{
+  std::cout << Simulator::Now ().GetSeconds () << " " << context
+            << " eNB CellId " << cellid
+            << ": successful connection of UE with IMSI " << imsi
+            << " RNTI " << rnti
+            << std::endl;
+  (*rnti_imsi)[rnti] = imsi;
+  (*rnti_rate)[rnti] = 0;
+  (*rnti_mcs)[rnti] = 0;
+}
+
+
 void modify_requirement(int n, std::vector<NetDeviceContainer> &ndc)
 {
 	DataRate x("0.00001Mb/s");
@@ -148,6 +164,9 @@ main (int argc, char *argv[])
 	lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
 	Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
 	lteHelper->SetEpcHelper (epcHelper);
+	
+	// scheduler
+	//lteHelper->SetSchedulerType ("ns3::RrFfMacScheduler");
 
 	ConfigStore inputConfig;
 	inputConfig.ConfigureDefaults();
@@ -205,7 +224,7 @@ main (int argc, char *argv[])
 
 	NodeContainer ueNodes;
 	NodeContainer enbNodes;
-	enbNodes.Create(3);
+	enbNodes.Create(21);
 	ueNodes.Create(numberOfNodes);
 
 	// Install Mobility Model
@@ -214,6 +233,15 @@ main (int argc, char *argv[])
 	for (uint16_t i = 0; i < numberOfNodes; i++)
 	{
 		positionAlloc->Add (Vector(rand()%2000-1000, rand()%2000-1000, 0));
+		continue;
+		/*
+		if (i%2==0)
+		positionAlloc->Add (Vector(0, 0, 0));
+		else
+positionAlloc->Add (Vector(500, 0, 0));
+*/
+
+
 	}
 	MobilityHelper mobility;
 	mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
@@ -226,8 +254,8 @@ main (int argc, char *argv[])
 	lteHexGridEnbTopologyHelper->SetLteHelper (lteHelper);
 	
 	lteHexGridEnbTopologyHelper->SetAttribute ("InterSiteDistance", DoubleValue (interSiteDistance));
-	lteHexGridEnbTopologyHelper->SetAttribute ("MinX", DoubleValue (-1000));
-	lteHexGridEnbTopologyHelper->SetAttribute ("MinY", DoubleValue (-1732));
+	lteHexGridEnbTopologyHelper->SetAttribute ("MinX", DoubleValue (0));//-1000));
+	lteHexGridEnbTopologyHelper->SetAttribute ("MinY", DoubleValue (0));//-1732));
 	lteHexGridEnbTopologyHelper->SetAttribute ("GridWidth", UintegerValue (2));
 	//Config::SetDefault ("ns3::LteEnbPhy::TxPower", DoubleValue (macroEnbTxPowerDbm));
 	lteHelper->SetEnbAntennaModelType ("ns3::ParabolicAntennaModel");
@@ -257,8 +285,8 @@ main (int argc, char *argv[])
 
 	for (uint16_t i = 0; i < numberOfNodes; i++)
 	{
-		//lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(i));
-		lteHelper->Attach (ueLteDevs.Get(i));//, enbLteDevs.Get(i));
+		//lteHelper->Attach (ueLteDevs.Get(i), enbLteDevs.Get(0));
+		lteHelper->Attach (ueLteDevs.Get(i));
 		// side effect: the default EPS bearer will be activated
 	}  
 
@@ -348,6 +376,7 @@ main (int argc, char *argv[])
 	lteHelper->EnableTraces ();
 
 	//Simulator::Schedule(Seconds(8), &modify_requirement, numberOfNodes, ndc);
+        Config::Connect ("/NodeList/*/DeviceList/*/LteEnbRrc/ConnectionEstablished", MakeCallback (&NotifyConnectionEstablishedEnb));
 	Simulator::Stop(Seconds(simTime));
 
 	Ptr<RadioEnvironmentMapHelper> remHelper;
