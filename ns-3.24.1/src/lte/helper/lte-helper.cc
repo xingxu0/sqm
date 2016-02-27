@@ -522,6 +522,9 @@ LteHelper::InstallSingleEnbDevice (Ptr<Node> n)
   dev->SetAttribute ("LteHandoverAlgorithm", PointerValue (handoverAlgorithm));
   dev->SetAttribute ("LteFfrAlgorithm", PointerValue (ffrAlgorithm));
 
+  //xing
+  sched->SetCellID(cellId);
+
   if (m_isAnrEnabled)
     {
       Ptr<LteAnr> anr = CreateObject<LteAnr> (cellId);

@@ -53,6 +53,9 @@ class LteFfrSapUser;
 class FfMacScheduler : public Object
 {
 public:
+// xing
+	uint16_t cellid;
+	void SetCellID(uint16_t cid);
   /**
   * The type of UL CQI to be filtered (ALL means accept all the CQI,
   * where a new CQI of any type overwrite the old one, even of another type)

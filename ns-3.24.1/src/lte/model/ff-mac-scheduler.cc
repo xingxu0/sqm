@@ -43,6 +43,12 @@ FfMacScheduler::~FfMacScheduler ()
   NS_LOG_FUNCTION (this);
 }
 
+//xing
+void
+FfMacScheduler::SetCellID(uint16_t cid) {
+	cellid = cid;
+}
+
 void
 FfMacScheduler::DoDispose ()
 {
