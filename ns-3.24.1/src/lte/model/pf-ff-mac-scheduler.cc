@@ -1181,14 +1181,15 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
 			  //std::cout<<(int)mcs<<" ";
                           achievableRate += ((m_amc->GetTbSizeFromMcs (mcs, rbgSize) / 8) / 0.001);   // = TB size / TTI
                         }
-		      (*rnti_mcs)[(*it).first] = mcs;
-		      (*rnti_rate)[(*it).first] = achievableRate;
+		      uint16_t my_rnti = cellid*10000+(*it).first;
+		      (*rnti_mcs)[my_rnti] = mcs;
+		      (*rnti_rate)[my_rnti] = achievableRate;
 		      //std::cout<<achievableRate<<std::endl;
 			//Xing
                       //double rcqi = achievableRate / (*it).second.lastAveragedThroughput;
 		      double rcqi;
 		      //std::cout<<"xing "<<(*it).first<<(int)((*it).second.qci)<<std::endl;
-		      double weight = (*id_weight)[(*imsi_id)[(*rnti_imsi)[(*it).first]]];
+		      double weight = (*id_weight)[(*imsi_id)[(*rnti_imsi)[my_rnti]]];
 		      if (weight <= 0.0) weight = 1;
 		      //std::cout<<"***:"<<(int)(*it).first<<" "<<(int)rnti_imsi[(*it).first]<<" "<<(int)imsi_id[rnti_imsi[(*it).first]]<<" "<<weight<<std::endl;
 
