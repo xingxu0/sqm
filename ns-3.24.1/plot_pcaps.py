@@ -1,4 +1,4 @@
-import os, sys, glob
+import os, sys, glob, re
 import matplotlib.pyplot as plt
 from pylab import *
 
@@ -11,24 +11,36 @@ def convert(ls):
 		y.append(float(l_[1]))
 	return x, y
 
+def get_id_from_pcap_name(f):
+	m = re.match("(.*)_([0-9]*)\.pcap", f)
+	return m.group(2)
+
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
 os.system("rm temp_plot -rf; mkdir temp_plot")
 
 leg = []
+max_x = -1
 for f in glob.glob("*.pcap"):
 	os.system("captcp throughput -s 1 -i -f 1.1 -o temp_plot %s"%(f))
 	ls = open("temp_plot/throughput.data").readlines()
 	x, y = convert(ls)
-	leg.append(f)
 	ax.plot(x, y)
-	#break
+	max_x = max(max_x, max(x))
+	
+	os.system("tshark -r %s -z conv,tcp -q | grep \"<->\" > temp_plot/overall_throughput.data"%(f))
+	ls = open("temp_plot/overall_throughput.data").readlines()
+	s_ = re.split(" +", ls[0])
+	avg_thr = int(s_[4])*1.0/float(s_[10])
+	leg.append(get_id_from_pcap_name(f) + ":" + str(int(avg_thr)))
 
-#ax.set_xlim([0, 2300000])
+#break
+
+ax.set_xlim([0, max_x*1.3])
 #ax.set_ylim([0, encoding[len(encoding)-1]*1.2])
 ax.set_xlabel("Time (s)")
 ax.grid()
 ax.set_ylabel("Throughput (B/s)")
-#ax.legend(leg, 4)
+ax.legend(leg, 4)
 savefig("plot_pcaps_throughput.png")
