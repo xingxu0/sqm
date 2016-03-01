@@ -156,7 +156,7 @@ main (int argc, char *argv[])
 	init();
 	srand (0);
 	uint16_t numberOfNodes = 12;
-	double simTime = 20;
+	double simTime = 120;
 	double distance = 1000.0;
 	double p_distance = 1000.0;
 	double interPacketInterval = 0.01;
@@ -167,6 +167,7 @@ main (int argc, char *argv[])
 	int silver_user = 0;
 	bool plot_sinr = false;
 	double interSiteDistance = 2000;
+	int interferer = 1;
 	
 	CommandLine cmd;
 	cmd.AddValue("nodes", "Number of eNodeBs + UE pairs", numberOfNodes);
@@ -180,6 +181,7 @@ main (int argc, char *argv[])
 	cmd.AddValue("silverUser", "su", silver_user);
 	cmd.AddValue("plotSinr", "plot sinr", plot_sinr);
 	cmd.AddValue("interSiteDistance", "interSiteDistance", interSiteDistance);
+	cmd.AddValue("interferer", "interferer", interferer);
 	cmd.Parse(argc, argv);
 	ConfigStore config;
 	config.ConfigureDefaults ();
@@ -248,15 +250,18 @@ main (int argc, char *argv[])
 
 	NodeContainer ueNodes;
 	NodeContainer enbNodes;
-	enbNodes.Create(21);
+	enbNodes.Create(3);
 	ueNodes.Create(numberOfNodes);
 
 	// Install Mobility Model
 	Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
 
-	for (uint16_t i = 0; i < numberOfNodes; i++)
+	for (uint16_t i = 0; i < numberOfNodes-1; i++)
 	{
-		positionAlloc->Add (Vector(rand()%2000-1000, rand()%2000-1000, 0));
+		//positionAlloc->Add (Vector(rand()%2000-1000, rand()%2000-1000, 0));
+		//positionAlloc->Add (Vector((i+1)*1.0*27000/numberOfNodes, 0, 0));
+		positionAlloc->Add (Vector(distance, 0, 0));
+
 		continue;
 		/*
 		if (i%2==0)
@@ -267,6 +272,8 @@ positionAlloc->Add (Vector(500, 0, 0));
 
 
 	}
+	positionAlloc->Add (Vector(-500, 500*1.732, 0));
+
 	MobilityHelper mobility;
 	mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
 	mobility.Install(enbNodes);
@@ -354,6 +361,9 @@ positionAlloc->Add (Vector(500, 0, 0));
 	ApplicationContainer serverApps;
 	for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
 	{
+		if (interferer == 0)
+			if (u==ueNodes.GetN() - 1) break;
+
 		++ulPort;
 		++otherPort;
 		PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
@@ -408,7 +418,7 @@ positionAlloc->Add (Vector(500, 0, 0));
 	Simulator::Stop(Seconds(simTime));
 
 	Ptr<RadioEnvironmentMapHelper> remHelper;
-	int bound = 2000;
+	int bound = 20000;
 	if (plot_sinr) {
 		PrintGnuplottableToFile ();
 		remHelper = CreateObject<RadioEnvironmentMapHelper> ();
@@ -431,6 +441,9 @@ positionAlloc->Add (Vector(500, 0, 0));
 	char buff[100];
 	std::cout<<"PCAP"<<std::endl;
 	for (uint8_t i=0; i<ueNodes.GetN (); ++i) {
+		if (interferer == 0)
+			if (i==ueNodes.GetN() - 1) break;
+
 		//sprintf(buff, "trace_nonsharing_d%d_gu%d_su%d_r%sGb_id%d.pcap", (int)distance, gold_user, silver_user, dataRate.c_str(), i);
 		sprintf(buff, "dynamic_weight_%d.pcap", i);
 		std::string buffAsStdStr = buff;

@@ -37,7 +37,7 @@ for f in glob.glob("*.pcap"):
 
 #break
 
-ax.set_xlim([0, max_x*1.3])
+ax.set_xlim([0, max_x*1.39])
 #ax.set_ylim([0, encoding[len(encoding)-1]*1.2])
 ax.set_xlabel("Time (s)")
 ax.grid()
