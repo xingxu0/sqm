@@ -25,6 +25,7 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("LTEExample");
 
+<<<<<<< HEAD
 void modify_weight(int n)
 {
 	for (uint16_t i = 0; i < n; i++) {
@@ -33,6 +34,8 @@ void modify_weight(int n)
   
 }
 
+=======
+>>>>>>> be6b1f71c01f5a4d4c32d40842c3cb88ce6ea3f7
 void modify_requirement(int n, std::vector<NetDeviceContainer> &ndc)
 {
 	DataRate x("0.00001Mb/s");
@@ -48,6 +51,7 @@ void modify_requirement(int n, std::vector<NetDeviceContainer> &ndc)
 
 }
 
+<<<<<<< HEAD
 void NotifyConnectionEstablishedEnb (std::string context,
                                 uint64_t imsi,
                                 uint16_t cellid,
@@ -65,6 +69,16 @@ int
 main (int argc, char *argv[])
 {
 	
+=======
+int
+main (int argc, char *argv[])
+{
+
+  imsi_id = new std::map <uint64_t, uint16_t>();
+  rnti_imsi = new std::map <uint16_t, uint64_t>();
+  id_weight = new std::map<uint16_t, float>();
+
+>>>>>>> be6b1f71c01f5a4d4c32d40842c3cb88ce6ea3f7
 	uint16_t numberOfNodes = 12;
 	double simTime = 60;
 	double distance = 15000.0;
@@ -330,7 +344,10 @@ enum EpsBearer::Qci q;
   //std::cout<<remoteHostContainer.Get(0)->GetNDevices<<std::endl;
   //p2pv[0]->EnablePcap(buffAsStdStr, remoteHostContainer.Get(0)->GetDevice(0));//, remoteHostContainer.Get(i));
   
+<<<<<<< HEAD
   Config::Connect ("/NodeList/*/DeviceList/*/LteEnbRrc/ConnectionEstablished", MakeCallback (&NotifyConnectionEstablishedEnb));
+=======
+>>>>>>> be6b1f71c01f5a4d4c32d40842c3cb88ce6ea3f7
   //Simulator::Schedule(Seconds(10), &modify_weight, numberOfNodes);
   Simulator::Schedule(Seconds(8), &modify_requirement, numberOfNodes, ndc);
   

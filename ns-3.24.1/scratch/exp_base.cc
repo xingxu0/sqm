@@ -250,7 +250,11 @@ main (int argc, char *argv[])
 
 	NodeContainer ueNodes;
 	NodeContainer enbNodes;
+<<<<<<< HEAD
 	enbNodes.Create(1);
+=======
+	enbNodes.Create(3);
+>>>>>>> be6b1f71c01f5a4d4c32d40842c3cb88ce6ea3f7
 	ueNodes.Create(numberOfNodes);
 
 	// Install Mobility Model
