@@ -402,10 +402,6 @@ PfFfMacScheduler::DoCschedLcConfigReq (const struct FfMacCschedSapProvider::Csch
 
 	  }
 	  else {
-<<<<<<< HEAD
-=======
-		  //std::cout<<"xing *** modify"<<std::endl;
->>>>>>> be6b1f71c01f5a4d4c32d40842c3cb88ce6ea3f7
 		m_flowStatsUl[params.m_rnti]= flowStatsUl;
 		m_flowStatsDl[params.m_rnti]= flowStatsDl;
 

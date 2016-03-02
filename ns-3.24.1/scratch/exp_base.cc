@@ -68,13 +68,13 @@ KK get_key_from_value(VV v, std::map<KK,VV> *m){
 	return (KK)-1;
 }
 
-void print_mcs() {
+void print_mcs(int n) {
 	for (std::map<uint64_t, uint16_t>::iterator it=imsi_id->begin(); it!=imsi_id->end(); it++) {
 		std::cout<<" "<<it->first<<":"<<it->second<<", ";
 	}
 	std::cout<<std::endl;
 
-	for (uint16_t i=0; i<12; ++i){
+	for (uint16_t i=0; i<n; ++i){
 		std::cout<<(int)i<<": ";
 		uint64_t imsi = get_key_from_value(i, imsi_id);
 		uint16_t rnti = get_key_from_value(imsi, rnti_imsi);
@@ -155,7 +155,7 @@ main (int argc, char *argv[])
 {
 	init();
 	srand (0);
-	uint16_t numberOfNodes = 12;
+	uint16_t numberOfNodes = 13;
 	double simTime = 120;
 	double distance = 1000.0;
 	double p_distance = 1000.0;
@@ -250,17 +250,13 @@ main (int argc, char *argv[])
 
 	NodeContainer ueNodes;
 	NodeContainer enbNodes;
-<<<<<<< HEAD
-	enbNodes.Create(1);
-=======
 	enbNodes.Create(3);
->>>>>>> be6b1f71c01f5a4d4c32d40842c3cb88ce6ea3f7
 	ueNodes.Create(numberOfNodes);
 
 	// Install Mobility Model
 	Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
 
-	for (uint16_t i = 0; i < numberOfNodes-1; i++)
+	for (uint16_t i = 0; i < numberOfNodes-2; i++)
 	{
 		//positionAlloc->Add (Vector(rand()%2000-1000, rand()%2000-1000, 0));
 		//positionAlloc->Add (Vector((i+1)*1.0*27000/numberOfNodes, 0, 0));
@@ -277,6 +273,7 @@ positionAlloc->Add (Vector(500, 0, 0));
 
 	}
 	positionAlloc->Add (Vector(-500, 500*1.732, 0));
+	positionAlloc->Add (Vector(-500, -500*1.732, 0));
 
 	MobilityHelper mobility;
 	mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
@@ -415,7 +412,7 @@ positionAlloc->Add (Vector(500, 0, 0));
 
 
 	for (uint8_t i=0; i<simTime; ++i)
-		Simulator::Schedule(Seconds(i), &print_mcs);
+		Simulator::Schedule(Seconds(i), &print_mcs, numberOfNodes);
 
 	//Simulator::Schedule(Seconds(8), &modify_requirement, numberOfNodes, ndc);
         Config::Connect ("/NodeList/*/DeviceList/*/LteEnbRrc/ConnectionEstablished", MakeCallback (&NotifyConnectionEstablishedEnb));
@@ -426,7 +423,7 @@ positionAlloc->Add (Vector(500, 0, 0));
 	if (plot_sinr) {
 		PrintGnuplottableToFile ();
 		remHelper = CreateObject<RadioEnvironmentMapHelper> ();
-		remHelper->SetAttribute ("ChannelPath", StringValue ("/ChannelList/12"));
+		remHelper->SetAttribute ("ChannelPath", StringValue ("/ChannelList/13"));
 		remHelper->SetAttribute ("OutputFile", StringValue ("rem.out"));
 		remHelper->SetAttribute ("XMin", DoubleValue (-bound));
 		remHelper->SetAttribute ("XMax", DoubleValue (bound));
@@ -446,7 +443,7 @@ positionAlloc->Add (Vector(500, 0, 0));
 	std::cout<<"PCAP"<<std::endl;
 	for (uint8_t i=0; i<ueNodes.GetN (); ++i) {
 		if (interferer == 0)
-			if (i==ueNodes.GetN() - 1) break;
+			if (i==ueNodes.GetN() - 2) break;
 
 		//sprintf(buff, "trace_nonsharing_d%d_gu%d_su%d_r%sGb_id%d.pcap", (int)distance, gold_user, silver_user, dataRate.c_str(), i);
 		sprintf(buff, "dynamic_weight_%d.pcap", i);
