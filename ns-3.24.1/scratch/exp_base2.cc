@@ -155,7 +155,7 @@ main (int argc, char *argv[])
 {
 	init();
 	srand (0);
-	uint16_t numberOfNodes = 13;
+	uint16_t numberOfNodes = 12;
 	double simTime = 120;
 	double distance = 1000.0;
 	double p_distance = 1000.0;
@@ -256,7 +256,7 @@ main (int argc, char *argv[])
 	// Install Mobility Model
 	Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
 
-	for (uint16_t i = 0; i < numberOfNodes-2; i++)
+	for (uint16_t i = 0; i < numberOfNodes-1; i++)
 	{
 		//positionAlloc->Add (Vector(rand()%2000-1000, rand()%2000-1000, 0));
 		//positionAlloc->Add (Vector((i+1)*1.0*27000/numberOfNodes, 0, 0));
@@ -273,7 +273,6 @@ positionAlloc->Add (Vector(500, 0, 0));
 
 	}
 	positionAlloc->Add (Vector(-500, 500*1.732, 0));
-	positionAlloc->Add (Vector(-500, -500*1.732, 0));
 
 	MobilityHelper mobility;
 	mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
@@ -363,7 +362,7 @@ positionAlloc->Add (Vector(500, 0, 0));
 	for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
 	{
 		if (interferer == 0)
-			if (u==ueNodes.GetN() - 2) break;
+			if (u==ueNodes.GetN() - 1) break;
 
 		++ulPort;
 		++otherPort;
@@ -423,7 +422,7 @@ positionAlloc->Add (Vector(500, 0, 0));
 	if (plot_sinr) {
 		PrintGnuplottableToFile ();
 		remHelper = CreateObject<RadioEnvironmentMapHelper> ();
-		remHelper->SetAttribute ("ChannelPath", StringValue ("/ChannelList/13"));
+		remHelper->SetAttribute ("ChannelPath", StringValue ("/ChannelList/12"));
 		remHelper->SetAttribute ("OutputFile", StringValue ("rem.out"));
 		remHelper->SetAttribute ("XMin", DoubleValue (-bound));
 		remHelper->SetAttribute ("XMax", DoubleValue (bound));
@@ -443,7 +442,7 @@ positionAlloc->Add (Vector(500, 0, 0));
 	std::cout<<"PCAP"<<std::endl;
 	for (uint8_t i=0; i<ueNodes.GetN (); ++i) {
 		if (interferer == 0)
-			if (i==ueNodes.GetN() - 2) break;
+			if (i==ueNodes.GetN() - 1) break;
 
 		//sprintf(buff, "trace_nonsharing_d%d_gu%d_su%d_r%sGb_id%d.pcap", (int)distance, gold_user, silver_user, dataRate.c_str(), i);
 		sprintf(buff, "dynamic_weight_%d.pcap", i);

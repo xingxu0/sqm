@@ -29,6 +29,7 @@
 #include "../src/lte/model/weight-table.h"
 #include <vector>
 #include <stdlib.h> 
+#include <sstream>
 
 using namespace ns3;
 
@@ -156,9 +157,13 @@ main (int argc, char *argv[])
 	init();
 	srand (0);
 	uint16_t numberOfNodes = 13;
+	uint16_t n1 = 10;
+	uint16_t n2 = 4;
+	uint16_t n3 = 4;
+	
 	double simTime = 120;
 	double distance = 1000.0;
-	double p_distance = 1000.0;
+	double distance2 = 1000.0;
 	double interPacketInterval = 0.01;
 	std::string dataRate = "100";
 	std::string slow_dataRate = "0.1";
@@ -173,7 +178,7 @@ main (int argc, char *argv[])
 	cmd.AddValue("nodes", "Number of eNodeBs + UE pairs", numberOfNodes);
 	cmd.AddValue("simTime", "Total duration of the simulation [s])", simTime);
 	cmd.AddValue("distance", "Distance between eNBs [m]", distance);
-	cmd.AddValue("premium_distance", "Distance between eNBs [m]", p_distance);
+	cmd.AddValue("distance2", "Distance between eNBs [m]", distance2);
 	cmd.AddValue("dataRate", "data rate [Gb/s])", dataRate);
 	cmd.AddValue("slowdataRate", "data rate [Gb/s])", slow_dataRate);
 	//cmd.AddValue("interPacketInterval", "Inter packet interval [ms])", interPacketInterval);
@@ -182,9 +187,13 @@ main (int argc, char *argv[])
 	cmd.AddValue("plotSinr", "plot sinr", plot_sinr);
 	cmd.AddValue("interSiteDistance", "interSiteDistance", interSiteDistance);
 	cmd.AddValue("interferer", "interferer", interferer);
+	cmd.AddValue("n1", "n1", n1);
+	cmd.AddValue("n2", "n2", n2);
+	cmd.AddValue("n3", "n3", n3);
 	cmd.Parse(argc, argv);
 	ConfigStore config;
 	config.ConfigureDefaults ();
+	numberOfNodes = n1 + n2 + n3;
 
 	Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
 	lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
@@ -256,24 +265,12 @@ main (int argc, char *argv[])
 	// Install Mobility Model
 	Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator> ();
 
-	for (uint16_t i = 0; i < numberOfNodes-2; i++)
-	{
-		//positionAlloc->Add (Vector(rand()%2000-1000, rand()%2000-1000, 0));
-		//positionAlloc->Add (Vector((i+1)*1.0*27000/numberOfNodes, 0, 0));
+	for (uint16_t i = 0; i < n1; i++)
 		positionAlloc->Add (Vector(distance, 0, 0));
-
-		continue;
-		/*
-		if (i%2==0)
-		positionAlloc->Add (Vector(0, 0, 0));
-		else
-positionAlloc->Add (Vector(500, 0, 0));
-*/
-
-
-	}
-	positionAlloc->Add (Vector(-500, 500*1.732, 0));
-	positionAlloc->Add (Vector(-500, -500*1.732, 0));
+	for (uint16_t i = 0; i < n2; i++)
+		positionAlloc->Add (Vector(-distance2/2.0, distance2*1.732/2, 0));
+	for (uint16_t i = 0; i < n3; i++)
+		positionAlloc->Add (Vector(-distance2/2.0, -distance2*1.732/2, 0));
 
 	MobilityHelper mobility;
 	mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
@@ -363,7 +360,7 @@ positionAlloc->Add (Vector(500, 0, 0));
 	for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
 	{
 		if (interferer == 0)
-			if (u==ueNodes.GetN() - 2) break;
+			if (u==n1) break;
 
 		++ulPort;
 		++otherPort;
@@ -423,7 +420,9 @@ positionAlloc->Add (Vector(500, 0, 0));
 	if (plot_sinr) {
 		PrintGnuplottableToFile ();
 		remHelper = CreateObject<RadioEnvironmentMapHelper> ();
-		remHelper->SetAttribute ("ChannelPath", StringValue ("/ChannelList/13"));
+		std::ostringstream temp;
+		temp << numberOfNodes;
+		remHelper->SetAttribute ("ChannelPath", StringValue ("/ChannelList/" + temp.str()));
 		remHelper->SetAttribute ("OutputFile", StringValue ("rem.out"));
 		remHelper->SetAttribute ("XMin", DoubleValue (-bound));
 		remHelper->SetAttribute ("XMax", DoubleValue (bound));
@@ -443,7 +442,7 @@ positionAlloc->Add (Vector(500, 0, 0));
 	std::cout<<"PCAP"<<std::endl;
 	for (uint8_t i=0; i<ueNodes.GetN (); ++i) {
 		if (interferer == 0)
-			if (i==ueNodes.GetN() - 2) break;
+			if (i==n1) break;
 
 		//sprintf(buff, "trace_nonsharing_d%d_gu%d_su%d_r%sGb_id%d.pcap", (int)distance, gold_user, silver_user, dataRate.c_str(), i);
 		sprintf(buff, "dynamic_weight_%d.pcap", i);

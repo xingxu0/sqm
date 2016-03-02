@@ -93,6 +93,6 @@ d = []
 for l in ls[1:]:
 	if int(float(l[1])) == 0:
 		continue
-	d.append(int(float(l[9])))
+	d.append(int(float(l[9])/float(l[1])))
 print d
-plot_cdf(d, "session length (B)")
+plot_cdf(d, "session-avg-req(B per s)")
