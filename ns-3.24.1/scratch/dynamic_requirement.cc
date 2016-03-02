@@ -28,7 +28,7 @@ NS_LOG_COMPONENT_DEFINE ("LTEExample");
 void modify_weight(int n)
 {
 	for (uint16_t i = 0; i < n; i++) {
-		id_weight[i] = 1.0;
+		(*id_weight)[i] = 1.0;
 	}
   
 }
@@ -48,14 +48,6 @@ void modify_requirement(int n, std::vector<NetDeviceContainer> &ndc)
 
 }
 
-int
-main (int argc, char *argv[])
-{
-
-  imsi_id = new std::map <uint64_t, uint16_t>();
-  rnti_imsi = new std::map <uint16_t, uint64_t>();
-  id_weight = new std::map<uint16_t, float>();
-
 void NotifyConnectionEstablishedEnb (std::string context,
                                 uint64_t imsi,
                                 uint16_t cellid,
@@ -66,7 +58,7 @@ void NotifyConnectionEstablishedEnb (std::string context,
             << ": successful connection of UE with IMSI " << imsi
             << " RNTI " << rnti
             << std::endl;
-  rnti_imsi[rnti] = imsi;
+  (*rnti_imsi)[rnti] = imsi;
 }
 
 int
@@ -220,11 +212,7 @@ main (int argc, char *argv[])
 for (uint16_t u = 0; u < ueNodes.GetN (); u++) {
 	uint64_t imsi = ueLteDevs.Get (u)->GetObject<LteUeNetDevice> ()->GetImsi ();
 	std::cout<<imsi<<std::endl;
-<<<<<<< HEAD
 	(*imsi_id)[imsi] = u;
-=======
-	imsi_id[imsi] = u;
->>>>>>> A
 }
 	  
 // bearer      
