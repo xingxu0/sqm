@@ -32,7 +32,7 @@ for f in glob.glob("*.pcap"):
 	os.system("tshark -r %s -z conv,tcp -q | grep \"<->\" > temp_plot/overall_throughput.data"%(f))
 	ls = open("temp_plot/overall_throughput.data").readlines()
 	s_ = re.split(" +", ls[0])
-	avg_thr = int(s_[4])*1.0/float(s_[10])
+	avg_thr = int(s_[6])*1.0/float(s_[10])
 	leg.append(get_id_from_pcap_name(f) + ":" + str(int(avg_thr)))
 
 #break
