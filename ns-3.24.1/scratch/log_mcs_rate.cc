@@ -39,13 +39,14 @@ KK get_key_from_value(VV v, std::map<KK,VV> *m){
 void NotifyConnectionEstablishedEnb (std::string context,
                                 uint64_t imsi,
                                 uint16_t cellid,
-                                uint16_t rnti)
+                                uint16_t rnti_)
 {
   std::cout << Simulator::Now ().GetSeconds () << " " << context
             << " eNB CellId " << cellid
             << ": successful connection of UE with IMSI " << imsi
-            << " RNTI " << rnti
+            << " RNTI " << rnti_
             << std::endl;
+  uint16_t rnti = cellid*1000+rnti_;
   (*rnti_imsi)[rnti] = imsi;
   (*rnti_rate)[rnti] = 0;
   (*rnti_mcs)[rnti] = 0;
@@ -89,7 +90,7 @@ main (int argc, char *argv[])
 {
 	init();
 	uint16_t numberOfNodes = 20;
-	double simTime = 10;
+	double simTime = 120;
 	double distance = 15000.0;
 	double p_distance = 15000.0;
 	double interPacketInterval = 0.01;
@@ -193,7 +194,8 @@ main (int argc, char *argv[])
 	else*/
 	    
       //if (i < gold_user)
-	positionAlloc->Add (Vector((int)i*2000, 0, 0));
+	//positionAlloc->Add (Vector((int)i*2000, 0, 0));
+	positionAlloc->Add (Vector(2000, 0, 0));
       //positionAlloc->Add (Vector(distance, 0, 0));
     }
   MobilityHelper mobility;
@@ -247,8 +249,6 @@ for (uint16_t u = 0; u < ueNodes.GetN (); u++)
       qos.mbrUl = qos.gbrUl;
 
 enum EpsBearer::Qci q;
-	gold_user = 0;
-	silver_user = 0;
       if (u < gold_user) (*id_weight)[u] = 4;//q = EpsBearer::NGBR_VOICE_VIDEO_GAMING;
       else if (u < gold_user + silver_user) (*id_weight)[u] = 2;//q=EpsBearer::NGBR_VIDEO_TCP_PREMIUM; 
       else (*id_weight)[u] = 1;

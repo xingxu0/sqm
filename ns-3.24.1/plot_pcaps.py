@@ -37,10 +37,10 @@ for f in glob.glob("*.pcap"):
 
 #break
 
-ax.set_xlim([0, max_x*1.39])
+ax.set_xlim([0, max_x*1.8])
 #ax.set_ylim([0, encoding[len(encoding)-1]*1.2])
 ax.set_xlabel("Time (s)")
 ax.grid()
 ax.set_ylabel("Throughput (B/s)")
-ax.legend(leg, 4)
+ax.legend(leg, 4, ncol=2)
 savefig("plot_pcaps_throughput.png")

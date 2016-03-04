@@ -1195,7 +1195,7 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
 				      if (id_weight->find((*imsi_id)[(*rnti_imsi)[my_rnti]]) != id_weight->end())
 		      weight = (*id_weight)[(*imsi_id)[(*rnti_imsi)[my_rnti]]];
 		      if (weight <= 0.0) weight = 1;
-		      //std::cout<<"***:"<<(int)(*it).first<<" "<<(int)rnti_imsi[(*it).first]<<" "<<(int)imsi_id[rnti_imsi[(*it).first]]<<" "<<weight<<std::endl;
+		      //std::cout<<"***:"<<(*it).first<<"("<<my_rnti<<")"<<" "<<(*rnti_imsi)[my_rnti]<<" "<<(*imsi_id)[(*rnti_imsi)[my_rnti]]<<" "<<weight<<std::endl;
 
 
 		      //if ((int)((*it).second.qci) < 8)
