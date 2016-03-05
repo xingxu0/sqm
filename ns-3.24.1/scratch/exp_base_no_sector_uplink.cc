@@ -57,8 +57,8 @@ void ThroughputMonitor (FlowMonitorHelper *fmhelper, Ptr<FlowMonitor> flowMon)
 		std::cout<<"Tx Bytes = " << stats->second.txBytes<<std::endl;
 		std::cout<<"Rx Packets = " << stats->second.rxPackets<<std::endl;
 		std::cout<<"Rx Bytes = " << stats->second.rxBytes<<std::endl;
-		std::cout<<"Duration		: "<<stats->second.timeLastTxPacket.GetSeconds()-stats->second.timeFirstTxPacket.GetSeconds()<<std::endl;
-		std::cout<<"Last Received Packet	: "<< stats->second.timeLastTxPacket.GetSeconds()<<" Seconds"<<std::endl;
+		std::cout<<"Duration		: "<<stats->second.timeLastRxPacket.GetSeconds()-stats->second.timeFirstRxPacket.GetSeconds()<<std::endl;
+		std::cout<<"Last Received Packet	: "<< stats->second.timeLastRxPacket.GetSeconds()<<" Seconds"<<std::endl;
 		std::cout<<"Throughput: " << stats->second.rxBytes*1.0/(stats->second.timeLastRxPacket.GetSeconds()-stats->second.timeFirstRxPacket.GetSeconds()) << " B/s"<<std::endl;
 		std::cout<<"---------------------------------------------------------------------------"<<std::endl;
 	}
@@ -376,7 +376,7 @@ main (int argc, char *argv[])
 
 		++ulPort;
 		++otherPort;
-		PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+		PacketSinkHelper dlPacketSinkHelper ("ns3::TcpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
 		//PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
 		//PacketSinkHelper packetSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), otherPort));
 		serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
@@ -385,11 +385,10 @@ main (int argc, char *argv[])
 
 		//TcpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
 
-		UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
-		dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(1)));
-		dlClient.SetAttribute ("MaxPackets", UintegerValue(100000000));
-		
-		//dlClient.SetAttribute ("MaxBytes", UintegerValue (0));
+		BulkSendHelper dlClient ("ns3::TcpSocketFactory",InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
+		//dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(1)));
+		//dlClient.SetAttribute ("MaxPackets", UintegerValue(1000000000));
+		dlClient.SetAttribute ("MaxBytes", UintegerValue (0));
 
 		// sender infor, check later.
 		/*

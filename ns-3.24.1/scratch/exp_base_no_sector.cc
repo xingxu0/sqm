@@ -59,6 +59,7 @@ void ThroughputMonitor (FlowMonitorHelper *fmhelper, Ptr<FlowMonitor> flowMon)
 		std::cout<<"Rx Bytes = " << stats->second.rxBytes<<std::endl;
 		std::cout<<"Duration		: "<<stats->second.timeLastRxPacket.GetSeconds()-stats->second.timeFirstRxPacket.GetSeconds()<<std::endl;
 		std::cout<<"Last Received Packet	: "<< stats->second.timeLastRxPacket.GetSeconds()<<" Seconds"<<std::endl;
+		std::cout<<"Lost Packet	: "<< stats->second.lostPackets<<" Seconds"<<std::endl;
 		std::cout<<"Throughput: " << stats->second.rxBytes*1.0/(stats->second.timeLastRxPacket.GetSeconds()-stats->second.timeFirstRxPacket.GetSeconds()) << " B/s"<<std::endl;
 		std::cout<<"---------------------------------------------------------------------------"<<std::endl;
 	}
