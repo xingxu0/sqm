@@ -27,6 +27,8 @@
 #include "ns3/point-to-point-net-device.h"
 #include "ns3/radio-environment-map-helper.h"
 #include "../src/lte/model/weight-table.h"
+#include "ns3/flow-monitor-module.h"
+#include <ns3/flow-monitor-helper.h>
 #include <vector>
 #include <stdlib.h> 
 #include <sstream>
@@ -41,6 +43,27 @@ void init() {
 	id_weight = new std::map<uint16_t, float>();
 	rnti_mcs = new std::map <uint16_t, uint8_t>();
 	rnti_rate = new std::map<uint16_t, double>();
+}
+
+void ThroughputMonitor (FlowMonitorHelper *fmhelper, Ptr<FlowMonitor> flowMon)
+{
+	std::map<FlowId, FlowMonitor::FlowStats> flowStats = flowMon->GetFlowStats();
+	Ptr<Ipv4FlowClassifier> classing = DynamicCast<Ipv4FlowClassifier> (fmhelper->GetClassifier());
+	for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator stats = flowStats.begin (); stats != flowStats.end (); ++stats)
+	{
+		Ipv4FlowClassifier::FiveTuple fiveTuple = classing->FindFlow (stats->first);
+		std::cout<<"Flow ID			: " << stats->first <<" ; "<< fiveTuple.sourceAddress <<" -----> "<<fiveTuple.destinationAddress<<std::endl;
+		std::cout<<"Tx Packets = " << stats->second.txPackets<<std::endl;
+		std::cout<<"Tx Bytes = " << stats->second.txBytes<<std::endl;
+		std::cout<<"Rx Packets = " << stats->second.rxPackets<<std::endl;
+		std::cout<<"Rx Bytes = " << stats->second.rxBytes<<std::endl;
+		std::cout<<"Duration		: "<<stats->second.timeLastTxPacket.GetSeconds()-stats->second.timeFirstTxPacket.GetSeconds()<<std::endl;
+		std::cout<<"Last Received Packet	: "<< stats->second.timeLastTxPacket.GetSeconds()<<" Seconds"<<std::endl;
+		std::cout<<"Lost Packet : "<< stats->second.lostPackets<<std::endl;
+		std::cout<<"Throughput: " << stats->second.rxBytes*1.0/(stats->second.timeLastRxPacket.GetSeconds()-stats->second.timeFirstRxPacket.GetSeconds()) << " B/s"<<std::endl;
+		std::cout<<"---------------------------------------------------------------------------"<<std::endl;
+	}
+	Simulator::Schedule(Seconds(1),&ThroughputMonitor, fmhelper, flowMon);
 }
 
 void NotifyConnectionEstablishedEnb (std::string context,
@@ -201,7 +224,10 @@ main (int argc, char *argv[])
 	lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
 	Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
 	lteHelper->SetEpcHelper (epcHelper);
+	//lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
+	//lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (100));
 	
+
 	// scheduler
 	//lteHelper->SetSchedulerType ("ns3::RrFfMacScheduler");
 
@@ -410,6 +436,13 @@ main (int argc, char *argv[])
 
 	for (uint8_t i=0; i<simTime; ++i)
 		Simulator::Schedule(Seconds(i), &print_mcs, numberOfNodes);
+
+	Ptr <FlowMonitor> flowmon;
+	FlowMonitorHelper fmHelper;
+	flowmon = fmHelper.Install (ueNodes);
+	flowmon = fmHelper.Install (remoteHostContainer);
+	Simulator::Schedule(Seconds(3), &ThroughputMonitor, &fmHelper, flowmon); 
+
 
 	//Simulator::Schedule(Seconds(8), &modify_requirement, numberOfNodes, ndc);
         Config::Connect ("/NodeList/*/DeviceList/*/LteEnbRrc/ConnectionEstablished", MakeCallback (&NotifyConnectionEstablishedEnb));
