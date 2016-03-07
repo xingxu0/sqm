@@ -224,6 +224,11 @@ main (int argc, char *argv[])
 	lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
 	Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
 	lteHelper->SetEpcHelper (epcHelper);
+	Ptr<LteEnbRrc> rrc = CreateObject<LteEnbRrc> ();
+	rrc->SetAttribute ("EpsBearerToRlcMapping", EnumValue (LteEnbRrc::RLC_UM_ALWAYS));
+	Config::SetDefault ("ns3::LteEnbRrc::EpsBearerToRlcMapping",EnumValue(LteEnbRrc::RLC_AM_ALWAYS));
+
+
 	//lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
 	//lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (100));
 	

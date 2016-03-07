@@ -197,6 +197,8 @@ main (int argc, char *argv[])
 	double interSiteDistance = 2000;
 	int interferer = 1;
 	int bs = 3;
+	int weight = 4;
+	int ack = 1;
 	
 	CommandLine cmd;
 	cmd.AddValue("nodes", "Number of eNodeBs + UE pairs", numberOfNodes);
@@ -215,6 +217,9 @@ main (int argc, char *argv[])
 	cmd.AddValue("n2", "n2", n2);
 	cmd.AddValue("n3", "n3", n3);
 	cmd.AddValue("bs", "bs", bs);
+	cmd.AddValue("weight", "weight", weight);
+	cmd.AddValue("ack", "ack", ack);
+
 	cmd.Parse(argc, argv);
 	ConfigStore config;
 	config.ConfigureDefaults ();
@@ -224,6 +229,12 @@ main (int argc, char *argv[])
 	lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
 	Ptr<PointToPointEpcHelper> epcHelper = CreateObject<PointToPointEpcHelper> ();
 	lteHelper->SetEpcHelper (epcHelper);
+	Ptr<LteEnbRrc> rrc = CreateObject<LteEnbRrc> ();
+	if (ack == 1) {
+		rrc->SetAttribute ("EpsBearerToRlcMapping", EnumValue (LteEnbRrc::RLC_UM_ALWAYS));
+		Config::SetDefault ("ns3::LteEnbRrc::EpsBearerToRlcMapping",EnumValue(LteEnbRrc::RLC_AM_ALWAYS));
+	}
+
 	//lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
 	//lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (100));
 	
@@ -366,7 +377,7 @@ main (int argc, char *argv[])
 		qos.mbrUl = qos.gbrUl;
 
 		enum EpsBearer::Qci q;
-		if (u < gold_user) (*id_weight)[u] = 4;//q = EpsBearer::NGBR_VOICE_VIDEO_GAMING;
+		if (u < gold_user) (*id_weight)[u] = weight;//q = EpsBearer::NGBR_VOICE_VIDEO_GAMING;
 		else if (u < gold_user + silver_user) (*id_weight)[u] = 2;//q=EpsBearer::NGBR_VIDEO_TCP_PREMIUM; 
 		else (*id_weight)[u] = 1;
 
