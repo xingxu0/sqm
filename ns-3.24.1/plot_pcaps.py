@@ -25,6 +25,8 @@ os.system("rm temp_plot -rf; mkdir temp_plot")
 leg = []
 max_x = -1
 for f in glob.glob("*.pcap"):
+	if int(get_id_from_pcap_name(f)) >= 20:
+		continue
 	os.system("captcp throughput -s 1 -i -f 1.1 -o temp_plot %s"%(f))
 	ls = open("temp_plot/throughput.data").readlines()
 	x, y = convert(ls)

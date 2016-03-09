@@ -3,15 +3,16 @@ matplotlib.use('Agg')
 import glob, os, sys, re, math, operator
 import matplotlib.pyplot as plt
 import numpy as np
+import copy
 
 def get_time(s):
 	s_ = s.split("@")[1]
 	s__ = s_.split(":")
 	return 3600*int(s__[0])+60*int(s__[1])+int(s__[2][:-1])
 
-ls_ = open("cvl00236_7a_1_NoIMSI_2016-02-15.txt").readlines()
+ls_ = open("cvl00236_7a_1_Anonymized_2016-02-15.txt").readlines()
 
-def plot_per_second():
+def plot_per_second(data):
 	start = 0
 	end = 3600*25
 
@@ -22,18 +23,15 @@ def plot_per_second():
 		r.append(0)
 
 	empty = 0
-	for l in ls[1:]:
-		s = get_time(l[0])
-		e = s + int(float(l[1]))
-		
-		if int(float(l[1])) == 0:
-			empty += 1
-			continue
-
-		r_ = round(int(l[9])*1.0/float(l[1]))
-		for i in range(s, min(e, end) + 1):
-			c[i] += 1
-			r[i] += r_/1000000.0
+	for l in data:
+		for x in data[l]:
+			s = x
+			e = s + data[l][x][0]
+			
+			r_ = round(data[l][x][1]*1.0/(e-s))
+			for i in range(s, min(e, end) + 1):
+				c[i] += 1
+				r[i] += r_/1000000.0
 			
 	fig = plt.figure()
 	ax1 = fig.add_subplot(111)    # The big subplot
@@ -52,11 +50,6 @@ def plot_per_second():
 	#ax.set_xlabel("Timestamp", fontsize=20)
 	fig.savefig("cdr.png")
 
-ls = []
-for l in ls_:
-	ls.append(l.split("|"))
-
-	
 def plot_cdf(data, s, r = -1):
 	num_bins = 10000
 	counts, bin_edges = np.histogram(data, bins=num_bins)
@@ -80,8 +73,46 @@ def plot_cdf(data, s, r = -1):
 	ax1.set_xlabel(s)
 	ax1.set_ylabel("CDF (1)")
 	fig.savefig("cdf_%s.png"%(s))
-	
-plot_per_second()
+
+ls = []
+for l in ls_:
+	ls.append(l.split("|"))
+
+data = {}
+empty = 0
+for l in ls[1:]:
+	s = get_time(l[0])
+	d = int(float(l[1]))
+	if d == 0:
+		empty += 1
+		continue
+		
+	i = l[9]
+	b = int(l[11])
+	if not i in data:
+		data[i] = {}
+	data[i][s] = [d, b]
+
+for i in data:
+	s_ = sorted(data[i].items(), key=operator.itemgetter(0))
+	n = 0
+	while n < len(s_) - 1:
+		if s_[n][0] + s_[n][1][0] == s_[n + 1][0]:
+			#print "b", s_[n], s_[n+1]
+			s_[n][1][0] += s_[n + 1][1][0]
+			s_[n][1][1] += s_[n + 1][1][1]
+			del s_[n + 1]
+			#print "a", s_[n]
+		else:
+			n += 1
+	data[i] = {}
+	for j in range(len(s_)):
+		data[i][s_[j][0]] = s_[j][1]
+
+plot_per_second(data)
+
+
+exit()
 
 d = []
 for l in ls[1:]:

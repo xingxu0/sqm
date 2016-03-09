@@ -231,12 +231,12 @@ main (int argc, char *argv[])
 	lteHelper->SetEpcHelper (epcHelper);
 	Ptr<LteEnbRrc> rrc = CreateObject<LteEnbRrc> ();
 	if (ack == 1) {
-		rrc->SetAttribute ("EpsBearerToRlcMapping", EnumValue (LteEnbRrc::RLC_UM_ALWAYS));
+		rrc->SetAttribute ("EpsBearerToRlcMapping", EnumValue (LteEnbRrc::RLC_AM_ALWAYS));
 		Config::SetDefault ("ns3::LteEnbRrc::EpsBearerToRlcMapping",EnumValue(LteEnbRrc::RLC_AM_ALWAYS));
 	}
 
-	//lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
-	//lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (100));
+lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
+lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (100));
 	
 
 	// scheduler
