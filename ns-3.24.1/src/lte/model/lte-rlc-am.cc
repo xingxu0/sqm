@@ -41,9 +41,9 @@ LteRlcAm::LteRlcAm ()
 
   // Buffers
   m_txonBufferSize = 0;
-  m_retxBuffer.resize (1024);
+  m_retxBuffer.resize (1024*5);
   m_retxBufferSize = 0;
-  m_txedBuffer.resize (1024);
+  m_txedBuffer.resize (1024*5);
   m_txedBufferSize = 0;
 
   m_statusPduRequested = false;

@@ -80,9 +80,12 @@ for l in ls_:
 
 data = {}
 empty = 0
+con = 0
 for l in ls[1:]:
 	s = get_time(l[0])
 	d = int(float(l[1]))
+	if d == 3600:
+		con += 1
 	if d == 0:
 		empty += 1
 		continue
@@ -93,8 +96,19 @@ for l in ls[1:]:
 		data[i] = {}
 	data[i][s] = [d, b]
 
+t_s = 0
+o_s = 0
+print "UE number:", len(data)
 for i in data:
 	s_ = sorted(data[i].items(), key=operator.itemgetter(0))
+	t_s += len(s_)
+	for x in range(len(s_) - 1):
+		if s_[x+1][0] < s_[x][0] + s_[x][1][0]:
+			o_s += 1
+
+	over = False
+	wrong_chop = False
+
 	n = 0
 	while n < len(s_) - 1:
 		if s_[n][0] + s_[n][1][0] == s_[n + 1][0]:
@@ -104,35 +118,57 @@ for i in data:
 			del s_[n + 1]
 			#print "a", s_[n]
 		else:
+			if int(s_[n][1][0] ) % 3600 == 0:
+				#print i, s_[n][0], s_[n][1][0], s_[n+1][0],
+				if s_[n+1][0] < s_[n][0] + s_[n][1][0]:
+					over = True
+				else:
+					wrong_chop = True
 			n += 1
+	
 	data[i] = {}
 	for j in range(len(s_)):
 		data[i][s_[j][0]] = s_[j][1]
+	if over:
+		print "overlap session", i, ":",
+		for j in range(len(s_)):
+			print "[", s_[j][0], ",", s_[j][0] + s_[j][1][0], "]",
+		print ""
+	if wrong_chop:
+		print "wrong chopping ", i, ":",
+		for j in range(len(s_)):
+			print "[", s_[j][0], ",", s_[j][0] + s_[j][1][0], "(", s_[j][1][0],")","]",
+		print ""
+
+	
+
+print o_s, t_s, o_s*1.0/t_s
+
+con2 = 0
+for i in data:
+	for x in data[i]:
+		if data[i][x][0] == 3600:
+			con2 += 1
+
+print con, con2
 
 plot_per_second(data)
 
-
-exit()
+d = []
+for l in data:
+	for x in data[l]:
+		d.append(data[l][x][0])
+plot_cdf(d, "session duration (s)", 3699)
 
 d = []
-for l in ls[1:]:
-	if int(float(l[1])) == 0:
-		continue
-	d.append(int(float(l[1])))
-plot_cdf(d, "session duration (s)")#, 3699)
+for l in data:
+	for x in data[l]:
+		d.append(data[l][x][1])
+plot_cdf(d, "session volume (B)", 1e7)
+print min(d)
 
 d = []
-for l in ls[1:]:
-	if int(float(l[1])) == 0:
-		continue
-	d.append(int(float(l[9])))
-print d
-plot_cdf(d, "session volume (B)")
-
-d = []
-for l in ls[1:]:
-	if int(float(l[1])) == 0:
-		continue
-	d.append(int(float(l[9])/float(l[1])))
-print d
-plot_cdf(d, "session req(B per s)")
+for l in data:
+	for x in data[l]:
+		d.append(data[l][x][1]*1.0/data[l][x][0])
+plot_cdf(d, "requirement (B per s)", 1e5)
