@@ -224,6 +224,7 @@ main (int argc, char *argv[])
 	ConfigStore config;
 	config.ConfigureDefaults ();
 	numberOfNodes = n1 + n2 + n3;
+	Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue (TcpNewReno::GetTypeId ()));
 
 	Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
 	lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
@@ -235,8 +236,8 @@ main (int argc, char *argv[])
 		Config::SetDefault ("ns3::LteEnbRrc::EpsBearerToRlcMapping",EnumValue(LteEnbRrc::RLC_AM_ALWAYS));
 	}
 
-lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
-lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (100));
+//lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
+//lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (100));
 	
 
 	// scheduler
