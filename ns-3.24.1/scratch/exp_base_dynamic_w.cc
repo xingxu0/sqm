@@ -37,6 +37,13 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("LTEExample");
 
+double get_w(int n, int r) {
+	if (n>r)
+		return r*1.0*(n-1)/(n-r);
+	else
+		return r;
+}
+
 void init() {
 	imsi_id = new std::map <uint64_t, uint16_t>();
 	rnti_imsi = new std::map <uint16_t, uint64_t>();
@@ -199,6 +206,7 @@ main (int argc, char *argv[])
 	int bs = 3;
 	int weight = 4;
 	int ack = 1;
+	bool dynamic = false;
 	
 	CommandLine cmd;
 	cmd.AddValue("nodes", "Number of eNodeBs + UE pairs", numberOfNodes);
@@ -219,6 +227,7 @@ main (int argc, char *argv[])
 	cmd.AddValue("bs", "bs", bs);
 	cmd.AddValue("weight", "weight", weight);
 	cmd.AddValue("ack", "ack", ack);
+	cmd.AddValue("dynamic", "dynamic", dynamic);
 
 	cmd.Parse(argc, argv);
 	ConfigStore config;
@@ -235,7 +244,7 @@ main (int argc, char *argv[])
 		rrc->SetAttribute ("EpsBearerToRlcMapping", EnumValue (LteEnbRrc::RLC_AM_ALWAYS));
 		Config::SetDefault ("ns3::LteEnbRrc::EpsBearerToRlcMapping",EnumValue(LteEnbRrc::RLC_AM_ALWAYS));
 	}
-	
+
 	// below two lines disable errors on CTRL and DATA:
 	//Config::SetDefault ("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue (false));
 	//Config::SetDefault ("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue (false));
@@ -376,7 +385,7 @@ main (int argc, char *argv[])
 		(*imsi_id)[imsi] = u;
 	}
 
-	// bearer      
+	// bearer      ack
 	for (uint16_t u = 0; u < ueNodes.GetN (); u++)
 	{
 		Ptr<NetDevice> ueDevice = ueLteDevs.Get (u);
@@ -451,8 +460,19 @@ main (int argc, char *argv[])
 		}*/
 	}
 
-	serverApps.Start (Seconds (1.0));
-	clientApps.Start (Seconds (1.0));
+	ApplicationContainer::Iterator i;
+	int n = 1;
+	for (i = serverApps.Begin (); i != serverApps.End (); ++i) {
+		(*i)->SetStartTime(Seconds(n*10.0));
+		n += 1;
+	}
+	n = 1;
+	for (i = clientApps.Begin (); i != clientApps.End (); ++i) {
+		(*i)->SetStartTime(Seconds(n*10.0));
+		n += 1;
+	}
+	//serverApps.Start (Seconds (1.0));
+	//clientApps.Start (Seconds (1.0));
 	lteHelper->EnableTraces ();
 
 
