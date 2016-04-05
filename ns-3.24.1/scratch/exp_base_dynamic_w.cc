@@ -44,6 +44,14 @@ double get_w(int n, int r) {
 		return r;
 }
 
+void update_w(int t, int n1) {
+	int nn = ((int)t - 10)/10;
+	nn = n1 - nn;
+	double w = get_w(nn, 2);
+	(*id_weight)[0] = w;
+	Simulator::Schedule(Seconds(1), &update_w, t+1, n1);
+}
+
 void init() {
 	imsi_id = new std::map <uint64_t, uint16_t>();
 	rnti_imsi = new std::map <uint16_t, uint64_t>();
@@ -460,19 +468,20 @@ main (int argc, char *argv[])
 		}*/
 	}
 
+	serverApps.Start (Seconds (1.0));
+	clientApps.Start (Seconds (1.0));
 	ApplicationContainer::Iterator i;
 	int n = 1;
+	/*
 	for (i = serverApps.Begin (); i != serverApps.End (); ++i) {
-		(*i)->SetStartTime(Seconds(n*10.0));
+		(*i)->SetStopTime(Seconds(n*10.0+10.0));
 		n += 1;
-	}
+	}*/
 	n = 1;
-	for (i = clientApps.Begin (); i != clientApps.End (); ++i) {
-		(*i)->SetStartTime(Seconds(n*10.0));
+	for (i = clientApps.Begin ()+1; i != clientApps.End (); ++i) {
+		(*i)->SetStopTime(Seconds(n*10.0+10.0));
 		n += 1;
 	}
-	//serverApps.Start (Seconds (1.0));
-	//clientApps.Start (Seconds (1.0));
 	lteHelper->EnableTraces ();
 
 
@@ -486,7 +495,10 @@ main (int argc, char *argv[])
 	Simulator::Schedule(Seconds(3), &ThroughputMonitor, &fmHelper, flowmon); 
 
 
-	//Simulator::Schedule(Seconds(8), &modify_requirement, numberOfNodes, ndc);
+	if (dynamic) {
+		Simulator::Schedule(Seconds(3), &update_w, 3, n1);
+	}
+	
         Config::Connect ("/NodeList/*/DeviceList/*/LteEnbRrc/ConnectionEstablished", MakeCallback (&NotifyConnectionEstablishedEnb));
 	Simulator::Stop(Seconds(simTime));
 
