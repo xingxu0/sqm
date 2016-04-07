@@ -481,6 +481,7 @@ main (int argc, char *argv[])
 	for (i = clientApps.Begin ()+1; i != clientApps.End (); ++i) {
 		(*i)->SetStopTime(Seconds(n*10.0+10.0));
 		n += 1;
+		if (n>n1) break; // only stop users of first sector
 	}
 	lteHelper->EnableTraces ();
 
