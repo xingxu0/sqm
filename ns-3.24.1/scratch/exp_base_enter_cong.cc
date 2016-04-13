@@ -109,14 +109,18 @@ void print_mcs(int n) {
 
 void modify_requirement(int n, std::vector<NetDeviceContainer> &ndc)
 {
-	DataRate x("0.00001Mb/s");
+	DataRate x("1.5Mb/s");
+	Ptr<PointToPointNetDevice> p2pdev1 = StaticCast<PointToPointNetDevice> (ndc[n].Get(0));
+	Ptr<PointToPointNetDevice> p2pdev2 = StaticCast<PointToPointNetDevice> (ndc[n].Get(1));
+	p2pdev1->SetDataRate(x);
+	p2pdev2->SetDataRate(x);
+	/*
 	for (unsigned i = 0; i<ndc.size(); ++i) {
-		if (i%2==0) continue;
 		Ptr<PointToPointNetDevice> p2pdev1 = StaticCast<PointToPointNetDevice> (ndc[i].Get(0));
 		Ptr<PointToPointNetDevice> p2pdev2 = StaticCast<PointToPointNetDevice> (ndc[i].Get(1));
 		p2pdev1->SetDataRate(x);
 		p2pdev2->SetDataRate(x);
-	}
+	}*/
 	//Config::Set("/NodeList/0/DeviceList/0/$ns3::PointToPointNetDevice/DataRate", StringValue("0.1Mb/s") );
 	//Config::Set("/NodeList/1/DeviceList/1/$ns3::PointToPointNetDevice/DataRate", StringValue("0.1Mb/s") );
 }
@@ -180,7 +184,7 @@ main (int argc, char *argv[])
 	init();
 	srand (0);
 	uint16_t numberOfNodes = 13;
-	uint16_t n1 = 10;
+	uint16_t n1 = 20;
 	uint16_t n2 = 4;
 	uint16_t n3 = 4;
 	
@@ -189,8 +193,8 @@ main (int argc, char *argv[])
 	double distance2 = 1000.0;
 	double interPacketInterval = 0.01;
 	std::string dataRate = "100";
-	std::string slow_dataRate = "0.1";
-	slow_dataRate = "100";
+	dataRate = "1.5"; // then 10 users would saturate the link
+	std::string slow_dataRate = "0.001";
 	int gold_user = 0;
 	int silver_user = 0;
 	bool plot_sinr = false;
@@ -220,7 +224,7 @@ main (int argc, char *argv[])
 	cmd.AddValue("weight", "weight", weight);
 	cmd.AddValue("ack", "ack", ack);
 
-	Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (15));
+//	Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (15));
 
 
 	cmd.Parse(argc, argv);
@@ -270,7 +274,7 @@ main (int argc, char *argv[])
 	for (uint16_t i = 0; i < numberOfNodes; i++) {
 		PointToPointHelper* p2ph = new PointToPointHelper();
 		//if (i<numberOfNodes / 2)
-		if (1)//(i<8)
+		if (i == 0) // first node has data at very beginning
 			p2ph->SetDeviceAttribute ("DataRate", DataRateValue (DataRate (dataRate + "Mb/s")));
 		else
 			p2ph->SetDeviceAttribute ("DataRate", DataRateValue (DataRate (slow_dataRate + "Mb/s")));
@@ -456,6 +460,21 @@ main (int argc, char *argv[])
 
 	serverApps.Start (Seconds (1.0));
 	clientApps.Start (Seconds (1.0));
+	
+	/*
+	clientApps.Get(0)->SetStartTime(Seconds(1));
+	serverApps.Get(0)->SetStartTime(Seconds(1));
+	ApplicationContainer::Iterator i;
+	int n = 1;
+	for (i = clientApps.Begin ()+1; i != clientApps.End (); ++i) {
+		(*i)->SetStartTime(Seconds(n*10.0+10.0));
+		n += 1;
+	}
+	n = 1;
+	for (i = serverApps.Begin ()+1; i != serverApps.End (); ++i) {
+		(*i)->SetStartTime(Seconds(n*10.0+10.0));
+		n += 1;
+	}*/
 	lteHelper->EnableTraces ();
 
 
@@ -492,6 +511,11 @@ main (int argc, char *argv[])
 		remHelper->SetAttribute ("UseDataChannel", BooleanValue (false));
 		remHelper->SetAttribute ("RbId", IntegerValue (-1));
 		remHelper->Install ();
+	}
+	
+	int i;
+	for (i = 1; i < n1; ++i) {
+		Simulator::Schedule(Seconds(i*10), &modify_requirement, i, ndc);	
 	}
 
 	config.ConfigureAttributes ();

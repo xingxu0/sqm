@@ -199,6 +199,7 @@ main (int argc, char *argv[])
 	int bs = 3;
 	int weight = 4;
 	int ack = 1;
+	bool udp = false;
 	
 	CommandLine cmd;
 	cmd.AddValue("nodes", "Number of eNodeBs + UE pairs", numberOfNodes);
@@ -219,6 +220,7 @@ main (int argc, char *argv[])
 	cmd.AddValue("bs", "bs", bs);
 	cmd.AddValue("weight", "weight", weight);
 	cmd.AddValue("ack", "ack", ack);
+	cmd.AddValue("udp", "udp", udp);
 
 	Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (15));
 
@@ -424,10 +426,20 @@ main (int argc, char *argv[])
 
 		//TcpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
 
-		BulkSendHelper dlClient ("ns3::TcpSocketFactory",InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
-		//dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(1)));
-		//dlClient.SetAttribute ("MaxPackets", UintegerValue(1000000000));
-		dlClient.SetAttribute ("MaxBytes", UintegerValue (0));
+		if (! udp)
+		{
+			BulkSendHelper dlClient ("ns3::TcpSocketFactory",InetSocketAddress (ueIpIface.GetAddress (u), dlPort));
+			dlClient.SetAttribute ("MaxBytes", UintegerValue (0));
+			Ptr<Node> remoteHost = remoteHostContainer.Get (u);
+			clientApps.Add(dlClient.Install(remoteHost));
+
+		} else {
+			UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
+			dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(1)));
+			dlClient.SetAttribute ("MaxPackets", UintegerValue(10000000));
+			Ptr<Node> remoteHost = remoteHostContainer.Get (u);
+			clientApps.Add(dlClient.Install(remoteHost));
+		}
 
 		// sender infor, check later.
 		/*
@@ -439,8 +451,6 @@ main (int argc, char *argv[])
 		client.SetAttribute ("Interval", TimeValue (MilliSeconds(interPacketInterval)));
 		client.SetAttribute ("MaxPackets", UintegerValue(1000000));
 		*/
-		Ptr<Node> remoteHost = remoteHostContainer.Get (u);
-		clientApps.Add(dlClient.Install(remoteHost));
 		/*
 		clientApps.Add (dlClient.Install (remoteHost));
 		clientApps.Add (ulClient.Install (ueNodes.Get(u)));
