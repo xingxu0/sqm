@@ -109,7 +109,7 @@ void print_mcs(int n) {
 
 void modify_requirement(int n, std::vector<NetDeviceContainer> &ndc)
 {
-	DataRate x("1.5Mb/s");
+	DataRate x("2Mb/s");
 	Ptr<PointToPointNetDevice> p2pdev1 = StaticCast<PointToPointNetDevice> (ndc[n].Get(0));
 	Ptr<PointToPointNetDevice> p2pdev2 = StaticCast<PointToPointNetDevice> (ndc[n].Get(1));
 	p2pdev1->SetDataRate(x);
@@ -193,7 +193,7 @@ main (int argc, char *argv[])
 	double distance2 = 1000.0;
 	double interPacketInterval = 0.01;
 	std::string dataRate = "100";
-	dataRate = "1.5"; // then 10 users would saturate the link
+	dataRate = "2"; // then 10 users would saturate the link
 	std::string slow_dataRate = "0.001";
 	int gold_user = 0;
 	int silver_user = 0;
@@ -279,7 +279,7 @@ main (int argc, char *argv[])
 		if (i == 0) // first node has data at very beginning
 			p2ph->SetDeviceAttribute ("DataRate", DataRateValue (DataRate (dataRate + "Mb/s")));
 		else
-			p2ph->SetDeviceAttribute ("DataRate", DataRateValue (DataRate (slow_dataRate + "Mb/s")));
+			p2ph->SetDeviceAttribute ("DataRate", DataRateValue (DataRate (dataRate + "Mb/s")));
 		p2ph->SetDeviceAttribute ("Mtu", UintegerValue (1500));
 		p2ph->SetChannelAttribute ("Delay", TimeValue (Seconds (interPacketInterval)));
 
@@ -468,10 +468,11 @@ main (int argc, char *argv[])
 		}*/
 	}
 	
-	serverApps.Start (Seconds (1.0));
-	clientApps.Start (Seconds (1.0));
+
 	
-	/*
+	//serverApps.Start (Seconds (1.0));
+	//clientApps.Start (Seconds (1.0));
+	
 	clientApps.Get(0)->SetStartTime(Seconds(1));
 	serverApps.Get(0)->SetStartTime(Seconds(1));
 	ApplicationContainer::Iterator i;
@@ -484,7 +485,7 @@ main (int argc, char *argv[])
 	for (i = serverApps.Begin ()+1; i != serverApps.End (); ++i) {
 		(*i)->SetStartTime(Seconds(n*10.0+10.0));
 		n += 1;
-	}*/
+	}
 	lteHelper->EnableTraces ();
 
 
@@ -523,10 +524,12 @@ main (int argc, char *argv[])
 		remHelper->Install ();
 	}
 	
+	/*
 	int i;
 	for (i = 1; i < n1; ++i) {
 		Simulator::Schedule(Seconds(i*10), &modify_requirement, i, ndc);	
 	}
+	*/
 
 	config.ConfigureAttributes ();
 
