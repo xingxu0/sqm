@@ -22,21 +22,24 @@ def convert_to_second_throughput(i):
 	global t_y
 	x = []
 	y = []
-	last = 0
-	last_t = 0
+	last = 0 
+	last_t = -0.0000000000001
 	for a in i:
 		t = a[0]
 		thr = a[1]
 		global_t = a[2]
-		x.append(global_t - 1)
+		real_t = int(round(global_t - 1))
+		x.append(real_t)
+		if t-last_t == 0:
+			print i, thr, last, t, last_t
 		r = (thr - last)*1.0/(t-last_t)
 		y.append(r)
 		last = thr
 		last_t = t
-		if not a[2] in t_y:
-			t_y[a[2]] = r
+		if not real_t in t_y:
+			t_y[real_t] = r
 		else:
-			t_y[a[2]] += r
+			t_y[real_t] += r
 	return x, y
 
 def get_id_from_pcap_name(f):
