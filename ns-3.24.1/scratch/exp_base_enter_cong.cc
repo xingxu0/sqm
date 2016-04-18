@@ -439,7 +439,7 @@ main (int argc, char *argv[])
 
 		} else {
 			UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
-			dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(5)));
+			dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(2)));
 			dlClient.SetAttribute ("MaxPackets", UintegerValue(4294967295));
 			Ptr<Node> remoteHost = remoteHostContainer.Get (u);
 			clientApps.Add(dlClient.Install(remoteHost));
@@ -478,12 +478,12 @@ main (int argc, char *argv[])
 	ApplicationContainer::Iterator i;
 	int n = 1;
 	for (i = clientApps.Begin ()+1; i != clientApps.End (); ++i) {
-		(*i)->SetStartTime(Seconds(n*3.0));
+		(*i)->SetStartTime(Seconds(n*5.0));
 		n += 1;
 	}
 	n = 1;
 	for (i = serverApps.Begin ()+1; i != serverApps.End (); ++i) {
-		(*i)->SetStartTime(Seconds(n*3.0));
+		(*i)->SetStartTime(Seconds(n*5.0));
 		n += 1;
 	}
 	lteHelper->EnableTraces ();

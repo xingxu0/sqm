@@ -126,6 +126,7 @@ ax2 = ax.twinx()
 leg = []
 t_y = {}
 max_x = -1
+max_y = -1
 for i in data:
 	#if i <=14:
 	#	continue
@@ -133,6 +134,7 @@ for i in data:
 	print data[i][:20]
 	x, y = convert_to_second_throughput(data[i])
 	max_x = max(max_x, max(x))
+	max_y = max(max_y, max(y))
 	print max_x
 	ax.plot(x, y)
 	leg.append(str(i))
@@ -160,6 +162,7 @@ for x in sorted_x:
 	y_t.append(x[1])		
 
 ax.set_xlim([0, max_x*1.3])
+ax.set_ylim([0, max_y*1.1])
 ax2.plot(x_t, y_t, ":k")
 ax.set_xlabel("Time (s)")
 ax.grid()
