@@ -1224,7 +1224,6 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
 
                 }   // end if cqi
             } // end for m_rlcBufferReq
-
           if (itMax == m_flowStatsDl.end ())
             {
               // no UE available for this RB
@@ -1247,6 +1246,11 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
                   (*itMap).second.push_back (i);
                 }
               NS_LOG_INFO (this << " UE assigned " << (*itMax).first);
+	      
+	      	// Xing
+		uint16_t my_rnti = cellid*1000+(*itMax).first;
+		(*rnti_prbs)[my_rnti] += 1;
+
             }
         } // end for RBG free
     } // end for RBGs

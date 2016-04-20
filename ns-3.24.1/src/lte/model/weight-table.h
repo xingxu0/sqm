@@ -7,3 +7,5 @@ std::map <uint16_t, float> * id_weight;
 std::map <uint16_t, uint8_t> * rnti_mcs;
 std::map <uint16_t, double> * rnti_rate;
 
+std::map <uint16_t, uint16_t> * rnti_prbs;
+
