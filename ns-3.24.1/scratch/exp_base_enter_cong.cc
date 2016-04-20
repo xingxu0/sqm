@@ -478,12 +478,18 @@ main (int argc, char *argv[])
 	ApplicationContainer::Iterator i;
 	int n = 1;
 	for (i = clientApps.Begin ()+1; i != clientApps.End (); ++i) {
-		(*i)->SetStartTime(Seconds(n*5.0));
+		if (n<n1)
+			(*i)->SetStartTime(Seconds(n*5.0));
+		else
+			(*i)->SetStartTime(Seconds(1));
 		n += 1;
 	}
 	n = 1;
 	for (i = serverApps.Begin ()+1; i != serverApps.End (); ++i) {
-		(*i)->SetStartTime(Seconds(n*5.0));
+		if (n<n1)
+			(*i)->SetStartTime(Seconds(n*5.0));
+		else
+			(*i)->SetStartTime(Seconds(1));
 		n += 1;
 	}
 	lteHelper->EnableTraces ();

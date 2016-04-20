@@ -30,9 +30,12 @@ def convert_to_second_throughput(i):
 		global_t = a[2]
 		real_t = int(round(global_t - 1))
 		x.append(real_t)
-		if t-last_t == 0:
+		if t-last_t == 0 and thr-last != 0:
 			print i, thr, last, t, last_t
-		r = (thr - last)*1.0/(t-last_t)
+		if t-last_t == 0:
+			r = 0
+		else:
+			r = (thr - last)*1.0/(t-last_t)
 		y.append(r)
 		last = thr
 		last_t = t
@@ -128,8 +131,8 @@ t_y = {}
 max_x = -1
 max_y = -1
 for i in data:
-	#if i <=14:
-	#	continue
+	if i >=30:
+		continue
 	print i
 	print data[i][:20]
 	x, y = convert_to_second_throughput(data[i])
@@ -169,4 +172,4 @@ ax.grid()
 ax.set_ylabel("Throughput (B/s)")
 ax2.set_ylabel("Total Throughput (B/s)")
 ax.legend(leg, 1, ncol=1)
-savefig("plot_flow_mon.png")
+savefig("plot_" + f + ".png")
