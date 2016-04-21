@@ -53,14 +53,6 @@ double get_w(int n, int r) {
 		return r;
 }
 
-void update_w(int t, int n1) {
-	int nn = ((int)t - 10)/10;
-	nn = n1 - nn;
-	double w = get_w(nn, 2);
-	(*id_weight)[0] = w;
-	Simulator::Schedule(Seconds(1), &update_w, t+1, n1);
-}
-
 void ThroughputMonitor (FlowMonitorHelper *fmhelper, Ptr<FlowMonitor> flowMon)
 {
 	std::map<FlowId, FlowMonitor::FlowStats> flowStats = flowMon->GetFlowStats();
@@ -109,6 +101,35 @@ KK get_key_from_value(VV v, std::map<KK,VV> *m){
 	return (KK)-1;
 }
 
+void update_w(int n, int maintain_prb) {
+	int total_prb = 0;
+	for (uint16_t i=0; i<n; ++i){
+		uint64_t imsi = get_key_from_value(i, imsi_id);
+		uint16_t rnti = get_key_from_value(imsi, rnti_imsi);
+		total_prb += (*rnti_prbs)[rnti];
+	}
+	
+	float fair_share = total_prb*1.0/n;
+	int light_user_prb = 0;
+	int light_user = 0;
+	for (uint16_t i=0; i<n; ++i){
+		uint64_t imsi = get_key_from_value(i, imsi_id);
+		uint16_t rnti = get_key_from_value(imsi, rnti_imsi);
+		if ((*rnti_prbs)[rnti] < fair_share)
+		{
+			light_user_prb += (*rnti_prbs)[rnti];
+			light_user += 1;
+		}
+	}
+	
+	int heavy_user_prb = total_prb - light_user_prb;
+	int heavy_user = n - light_user;
+	// total / (n + w - 1) = maintain_prb
+	float new_w = (maintain_prb - maintain_prb*heavy_user)*1.0/(maintain_prb - heavy_user_prb);
+	if (new_w > 1) (*id_weight)[0] = new_w;
+	std::cout<<"new weight"<<new_w<<std::endl;
+}
+
 void clear_prbs(int n) {
 	for (uint16_t i=0; i<n; ++i){
 		uint64_t imsi = get_key_from_value(i, imsi_id);
@@ -117,7 +138,7 @@ void clear_prbs(int n) {
 	}
 }
 
-void print_mcs(int n) {
+void dynamic_maintain(int n, int maintain_prb) {
 	for (std::map<uint64_t, uint16_t>::iterator it=imsi_id->begin(); it!=imsi_id->end(); it++) {
 		std::cout<<" "<<it->first<<":"<<it->second<<", ";
 	}
@@ -130,6 +151,7 @@ void print_mcs(int n) {
 		std::cout<<"imsi:"<<imsi<<" rnti:"<<rnti<<"  ";
 		std::cout<<(int)(*rnti_mcs)[rnti]<<" "<<(*rnti_rate)[rnti]<<" "<<(*rnti_prbs)[rnti]<<std::endl;
 	}
+	update_w(n, maintain_prb);
 	clear_prbs(n);
 }
 
@@ -227,6 +249,7 @@ main (int argc, char *argv[])
 	int ack = 1;
 	bool udp = false;
 	bool dynamic = false;
+	int maintain_prb = 1111;
 	
 	CommandLine cmd;
 	cmd.AddValue("nodes", "Number of eNodeBs + UE pairs", numberOfNodes);
@@ -249,6 +272,7 @@ main (int argc, char *argv[])
 	cmd.AddValue("ack", "ack", ack);
 	cmd.AddValue("udp", "udp", udp);
 	cmd.AddValue("dynamic", "dynamic", dynamic);
+	cmd.AddValue("maintain_prb", "maintain_prb", maintain_prb);
 
 	Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (15));
 
@@ -491,19 +515,34 @@ main (int argc, char *argv[])
 		clientApps.Add (client.Install (ueNodes.Get(0)));
 		}*/
 	}
-
-	serverApps.Start (Seconds (1.0));
-	clientApps.Start (Seconds (1.0));
+	//serverApps.Start (Seconds (1.0));
+	//clientApps.Start (Seconds (1.0));
+	clientApps.Get(0)->SetStartTime(Seconds(1));
+	serverApps.Get(0)->SetStartTime(Seconds(1));
+	ApplicationContainer::Iterator i;
+	int n = 1;
+	for (i = clientApps.Begin ()+1; i != clientApps.End (); ++i) {
+		if (n>10 && n<n1)
+			(*i)->SetStartTime(Seconds((n-10)*5.0));
+		else
+			(*i)->SetStartTime(Seconds(1));
+		n += 1;
+	}
+	n = 1;
+	for (i = serverApps.Begin ()+1; i != serverApps.End (); ++i) {
+		if (n>10 && n<n1)
+			(*i)->SetStartTime(Seconds((n-10)*5.0));
+		else
+			(*i)->SetStartTime(Seconds(1));
+		n += 1;
+	}
 	lteHelper->EnableTraces ();
 
 
+	if (dynamic)
 	for (uint8_t i=0; i<simTime; ++i)
-		Simulator::Schedule(Seconds(i), &print_mcs, numberOfNodes);
+		Simulator::Schedule(Seconds(i), &dynamic_maintain, numberOfNodes, maintain_prb);
 	
-	if (dynamic) {
-		Simulator::Schedule(Seconds(3), &update_w, 3, n1);
-	}
-
 	Ptr <FlowMonitor> flowmon;
 	FlowMonitorHelper fmHelper;
 	flowmon = fmHelper.Install (ueNodes);
