@@ -101,7 +101,7 @@ KK get_key_from_value(VV v, std::map<KK,VV> *m){
 	return (KK)-1;
 }
 
-void update_w(int total_n, int maintain_prb) {
+void update_w(int total_n, int maintain_prb, int premium_users) {
 	int total_prb = 0;
 	int total_prb_normal_users = 0;
 	int n = 0;
@@ -110,17 +110,19 @@ void update_w(int total_n, int maintain_prb) {
 		uint64_t imsi = get_key_from_value(i, imsi_id);
 		uint16_t rnti = get_key_from_value(imsi, rnti_imsi);
 		total_prb += (*rnti_prbs)[rnti];
-		if (i)
+		if (i >= premium_users)
 			total_prb_normal_users += (*rnti_prbs)[rnti];
 		if ((*rnti_prbs)[rnti] > 0) n += 1;
 		std::cout<<i<<":"<<(int)(*rnti_prbs)[rnti]<<",";
 	}
 	std::cout<<std::endl;
 	
-	float fair_share = total_prb_normal_users*1.0/(n-1);
+	float fair_share = total_prb_normal_users*1.0/(n-premium_users);
 	int light_user_prb = 0;
 	int light_user = 0;
 	for (uint16_t i=0; i<total_n; ++i){
+		if (i<premium_users) // we don't count premium users as light user
+			continue;
 		uint64_t imsi = get_key_from_value(i, imsi_id);
 		uint16_t rnti = get_key_from_value(imsi, rnti_imsi);
 		if ((*rnti_prbs)[rnti] < fair_share)
@@ -133,9 +135,19 @@ void update_w(int total_n, int maintain_prb) {
 	int heavy_user_prb = total_prb - light_user_prb;
 	int heavy_user = total_n - light_user;
 	// total / (n + w - 1) = maintain_prb
-	float new_w = (maintain_prb - maintain_prb*heavy_user)*1.0/(maintain_prb - heavy_user_prb);
-	if (new_w > 1) (*id_weight)[0] = new_w;
-	std::cout<<"new weight:"<<new_w<<" total_prb:"<<(int)total_prb<<" total_prb_normal_users:"<<(int)total_prb_normal_users<<" light_user:"<<(int)light_user<<" light_user_prb:"<<(int)light_user_prb<<" heavy_user:"<<(int)heavy_user<<" heavy user prb:"<<(int)heavy_user_prb<<" fair share:"<<fair_share<<std::endl;
+	
+	//float new_w = (maintain_prb - maintain_prb*heavy_user)*1.0/(maintain_prb - heavy_user_prb);
+	int new_maintain_prb = maintain_prb*premium_users;
+	int new_heavy_user = heavy_user - premium_users + 1;
+	float new_w = (new_maintain_prb - new_maintain_prb*new_heavy_user)*1.0/(new_maintain_prb - heavy_user_prb);
+	
+	//if (new_w > 1) (*id_weight)[0] = new_w;
+	float each_w = new_w/premium_users;
+	if (each_w > 1)
+		for (uint16_t i=0; i<premium_users; ++i) (*id_weight)[i] = each_w;
+	
+	//std::cout<<"new weight:"<<new_w<<" total_prb:"<<(int)total_prb<<" total_prb_normal_users:"<<(int)total_prb_normal_users<<" light_user:"<<(int)light_user<<" light_user_prb:"<<(int)light_user_prb<<" heavy_user:"<<(int)heavy_user<<" heavy user prb:"<<(int)heavy_user_prb<<" fair share:"<<fair_share<<std::endl;
+	std::cout<<"new weight:"<<new_w<<"("<<each_w<<") total_prb:"<<(int)total_prb<<" total_prb_normal_users:"<<(int)total_prb_normal_users<<" light_user:"<<(int)light_user<<" light_user_prb:"<<(int)light_user_prb<<" heavy_user:"<<(int)heavy_user<<"("<<(int)new_heavy_user<<") heavy user prb:"<<(int)heavy_user_prb<<" fair share:"<<fair_share<<std::endl;
 }
 
 void clear_prbs(int n) {
@@ -146,7 +158,7 @@ void clear_prbs(int n) {
 	}
 }
 
-void dynamic_maintain(int n, int maintain_prb) {
+void dynamic_maintain(int n, int maintain_prb, int rate_maintain_users) {
 	for (std::map<uint64_t, uint16_t>::iterator it=imsi_id->begin(); it!=imsi_id->end(); it++) {
 		std::cout<<" "<<it->first<<":"<<it->second<<", ";
 	}
@@ -159,7 +171,7 @@ void dynamic_maintain(int n, int maintain_prb) {
 		std::cout<<"imsi:"<<imsi<<" rnti:"<<rnti<<"  ";
 		std::cout<<(int)(*rnti_mcs)[rnti]<<" "<<(*rnti_rate)[rnti]<<" "<<(*rnti_prbs)[rnti]<<std::endl;
 	}
-	update_w(n, maintain_prb);
+	update_w(n, maintain_prb, rate_maintain_users);
 	clear_prbs(n);
 }
 
@@ -257,6 +269,7 @@ main (int argc, char *argv[])
 	bool udp = false;
 	bool dynamic = false;
 	int maintain_prb = 1111;
+	int rate_maintain_users = 0;
 	
 	CommandLine cmd;
 	cmd.AddValue("nodes", "Number of eNodeBs + UE pairs", numberOfNodes);
@@ -280,7 +293,8 @@ main (int argc, char *argv[])
 	cmd.AddValue("udp", "udp", udp);
 	cmd.AddValue("dynamic", "dynamic", dynamic);
 	cmd.AddValue("maintain_prb", "maintain_prb", maintain_prb);
-
+	cmd.AddValue("rate_maintain_users", "rate_maintain_users", rate_maintain_users);
+	
 	Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (15));
 
 
@@ -289,6 +303,8 @@ main (int argc, char *argv[])
 	config.ConfigureDefaults ();
 	numberOfNodes = n1 + n2 + n3;
 	Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue (TcpNewReno::GetTypeId ()));
+	
+	if (rate_maintain_users) dynamic = true;
 
 	Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
 	lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisPropagationLossModel"));
@@ -331,7 +347,7 @@ main (int argc, char *argv[])
 	for (uint16_t i = 0; i < numberOfNodes; i++) {
 		PointToPointHelper* p2ph = new PointToPointHelper();
 		//if (i<numberOfNodes / 2)
-		if (i % 2 == 0)//(i<8)
+		if (i % 2 == 0 || i < rate_maintain_users)//(i<8)
 			p2ph->SetDeviceAttribute ("DataRate", DataRateValue (DataRate (dataRate + "Mb/s")));
 		else
 			p2ph->SetDeviceAttribute ("DataRate", DataRateValue (DataRate (slow_dataRate + "Mb/s")));
@@ -555,7 +571,7 @@ main (int argc, char *argv[])
 
 	if (dynamic)
 	for (uint8_t i=0; i<simTime; ++i)
-		Simulator::Schedule(Seconds(i), &dynamic_maintain, numberOfNodes, maintain_prb);
+		Simulator::Schedule(Seconds(i), &dynamic_maintain, numberOfNodes, maintain_prb, rate_maintain_users);
 	
 	Ptr <FlowMonitor> flowmon;
 	FlowMonitorHelper fmHelper;
