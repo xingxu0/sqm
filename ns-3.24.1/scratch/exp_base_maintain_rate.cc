@@ -37,15 +37,6 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("LTEExample");
 
-void init() {
-	imsi_id = new std::map <uint64_t, uint16_t>();
-	rnti_imsi = new std::map <uint16_t, uint64_t>();
-	id_weight = new std::map<uint16_t, float>();
-	rnti_mcs = new std::map <uint16_t, uint8_t>();
-	rnti_rate = new std::map<uint16_t, double>();
-	rnti_prbs = new std::map<uint16_t, uint16_t>();
-}
-
 double get_w(int n, int r) {
 	if (n>r)
 		return r*1.0*(n-1)/(n-r);

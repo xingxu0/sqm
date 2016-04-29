@@ -1182,7 +1182,8 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
                           achievableRate += ((m_amc->GetTbSizeFromMcs (mcs, rbgSize) / 8) / 0.001);   // = TB size / TTI
                         }
 		      uint16_t my_rnti = cellid*1000+(*it).first;
-		      (*rnti_mcs)[my_rnti] = mcs;
+		      (*rnti_mcs)[my_rnti] += mcs;
+		      (*rnti_mcs_count)[my_rnti] += 1;
 		      (*rnti_rate)[my_rnti] = achievableRate;
 		      //std::cout<<achievableRate<<std::endl;
 			//Xing

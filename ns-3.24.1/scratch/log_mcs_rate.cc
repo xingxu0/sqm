@@ -77,14 +77,6 @@ void print_mcs() {
 	}
 }
 
-void init() {
-imsi_id = new std::map <uint64_t, uint16_t>();
-  rnti_imsi = new std::map <uint16_t, uint64_t>();
-  id_weight = new std::map<uint16_t, float>();
-  rnti_mcs = new std::map <uint16_t, uint8_t>();
-  rnti_rate = new std::map<uint16_t, double>();
-}
-
 int
 main (int argc, char *argv[])
 {

@@ -37,15 +37,6 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("LTEExample");
 
-void init() {
-	imsi_id = new std::map <uint64_t, uint16_t>();
-	rnti_imsi = new std::map <uint16_t, uint64_t>();
-	id_weight = new std::map<uint16_t, float>();
-	rnti_mcs = new std::map <uint16_t, uint8_t>();
-	rnti_rate = new std::map<uint16_t, double>();
-	rnti_prbs = new std::map<uint16_t, uint16_t>();
-}
-
 double get_w(int n, int r) {
 	if (n>r)
 		return r*1.0*(n-1)/(n-r);
@@ -87,6 +78,7 @@ void NotifyConnectionEstablishedEnb (std::string context,
   (*rnti_imsi)[my_rnti] = imsi;
   (*rnti_rate)[my_rnti] = 0;
   (*rnti_mcs)[my_rnti] = 0;
+  (*rnti_mcs_count)[my_rnti] = 0;
   (*rnti_prbs)[my_rnti] = 0;
   std::cout << " weight " << (*id_weight)[(*imsi_id)[(*rnti_imsi)[my_rnti]]]<<std::endl;
 }
@@ -155,6 +147,8 @@ void clear_prbs(int n) {
 		uint64_t imsi = get_key_from_value(i, imsi_id);
 		uint16_t rnti = get_key_from_value(imsi, rnti_imsi);
 		(*rnti_prbs)[rnti] = 0;
+		(*rnti_mcs)[rnti] = 0;
+		(*rnti_mcs_count)[rnti] = 0;
 	}
 }
 

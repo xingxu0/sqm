@@ -37,15 +37,6 @@ int rate_maintain_users = 0;
 
 NS_LOG_COMPONENT_DEFINE ("LTEExample");
 
-void init() {
-	imsi_id = new std::map <uint64_t, uint16_t>();
-	rnti_imsi = new std::map <uint16_t, uint64_t>();
-	id_weight = new std::map<uint16_t, float>();
-	rnti_mcs = new std::map <uint16_t, uint8_t>();
-	rnti_rate = new std::map<uint16_t, double>();
-	rnti_prbs = new std::map<uint16_t, uint16_t>();
-}
-
 void ThroughputMonitor (FlowMonitorHelper *fmhelper, Ptr<FlowMonitor> flowMon)
 {
 	std::map<FlowId, FlowMonitor::FlowStats> flowStats = flowMon->GetFlowStats();
@@ -135,8 +126,13 @@ void update_w() {
 	for (uint16_t i=0; i<rate_maintain_users; ++i){
 		uint64_t imsi = get_key_from_value(i, imsi_id);
 		uint16_t rnti = get_key_from_value(imsi, rnti_imsi);
-		int prb =  2*maintain_thr / amc->GetTbSizeFromMcs(rnti_mcs[rnti], 1); // 2 is an arbitrary number
-		prb.push_back(prb);
+		int mcs_value = (*rnti_mcs_count)[rnti] == 0 ? 28 : (*rnti_mcs)[rnti]/(*rnti_mcs_count)[rnti];
+		if (mcs_value >= 28 || mcs_value < 0) {
+			std::cout<<"mcs value issue"<<mcs_value<<" "<<(int) (*rnti_mcs)[rnti]<<":"<<(*rnti_mcs_count)[rnti]<<std::endl;
+			mcs_value = 28;
+		}
+		int prb =  4*maintain_thr / amc->GetTbSizeFromMcs(mcs_value, 1); // 2 is an arbitrary number
+		prbs.push_back(prb);
 		new_maintain_thr += prb;
 	}
 	int new_heavy_user = heavy_user - rate_maintain_users + 1;
@@ -145,13 +141,18 @@ void update_w() {
 	//if (new_w > 1) (*id_weight)[0] = new_w;
 	//if (each_w > 1)
 	//	for (uint16_t i=0; i<rate_maintain_users; ++i) (*id_weight)[i] = each_w;
-	for (uint16_t i=0; i<rate_maintain_users; ++i) {		
-		float w = new_w*prb[i]/new_maintain_thr;
+	std::cout<<"new rate maintain user's w"<<std::endl;
+	for (uint16_t i=0; i<rate_maintain_users; ++i) {
+		uint64_t imsi = get_key_from_value(i, imsi_id);
+		uint16_t rnti = get_key_from_value(imsi, rnti_imsi);
+		float w = new_w*prbs[i]/new_maintain_thr;
 		if (w > 1) (*id_weight)[i] = w;
+		std::cout<<i<<", mcs:"<<(int)(*rnti_mcs)[rnti]<<", prb:"<<prbs[i]<<", w:"<<w<<std::endl;
 	}
 	
 	//std::cout<<"new weight:"<<new_w<<" total_prb:"<<(int)total_prb<<" total_prb_normal_users:"<<(int)total_prb_normal_users<<" light_user:"<<(int)light_user<<" light_user_prb:"<<(int)light_user_prb<<" heavy_user:"<<(int)heavy_user<<" heavy user prb:"<<(int)heavy_user_prb<<" fair share:"<<fair_share<<std::endl;
-	std::cout<<"new weight:"<<new_w<<"("<<each_w<<") total_prb:"<<(int)total_prb<<" total_prb_normal_users:"<<(int)total_prb_normal_users<<" light_user:"<<(int)light_user<<" light_user_prb:"<<(int)light_user_prb<<" heavy_user:"<<(int)heavy_user<<"("<<(int)new_heavy_user<<") heavy user prb:"<<(int)heavy_user_prb<<" fair share:"<<fair_share<<std::endl;
+	std::cout<<"new weight:"<<new_w<<"total_prb:"<<(int)total_prb<<" total_prb_normal_users:"<<(int)total_prb_normal_users<<" light_user:"<<(int)light_user<<" light_user_prb:"<<(int)light_user_prb<<" heavy_user:"<<(int)heavy_user<<"("<<(int)new_heavy_user<<") heavy user prb:"<<(int)heavy_user_prb<<" fair share:"<<fair_share<<std::endl;
+	
 }
 
 void clear_prbs() {
@@ -320,6 +321,7 @@ main (int argc, char *argv[])
 		rrc->SetAttribute ("EpsBearerToRlcMapping", EnumValue (LteEnbRrc::RLC_AM_ALWAYS));
 		Config::SetDefault ("ns3::LteEnbRrc::EpsBearerToRlcMapping",EnumValue(LteEnbRrc::RLC_AM_ALWAYS));
  	}
+ 	// below fading model
  	
 	lteHelper->SetAttribute ("FadingModel", StringValue ("ns3::TraceFadingLossModel"));
 
@@ -334,7 +336,8 @@ main (int argc, char *argv[])
 	{
 		// script launched as an example
 		lteHelper->SetFadingModelAttribute ("TraceFilename", StringValue ("src/lte/model/fading-traces/fading_trace_EPA_3kmph.fad"));
-	}	
+	}
+	
 	// below two lines disable errors on CTRL and DATA:
 	//Config::SetDefault ("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue (false));
 	//Config::SetDefault ("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue (false));
