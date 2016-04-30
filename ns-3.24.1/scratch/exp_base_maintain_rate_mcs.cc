@@ -146,7 +146,7 @@ void update_w() {
 		uint64_t imsi = get_key_from_value(i, imsi_id);
 		uint16_t rnti = get_key_from_value(imsi, rnti_imsi);
 		float w = new_w*prbs[i]/new_maintain_thr;
-		if (w > 1) (*id_weight)[i] = w;
+		(*id_weight)[i] = w > 1 ? w : 1;
 		std::cout<<i<<", mcs:"<<(int)(*rnti_mcs)[rnti]<<", prb:"<<prbs[i]<<", w:"<<w<<std::endl;
 	}
 	
