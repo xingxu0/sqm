@@ -160,6 +160,8 @@ void clear_prbs() {
 		uint64_t imsi = get_key_from_value(i, imsi_id);
 		uint16_t rnti = get_key_from_value(imsi, rnti_imsi);
 		(*rnti_prbs)[rnti] = 0;
+		(*rnti_mcs)[rnti] = 0;
+		(*rnti_mcs_count)[rnti] = 0;
 	}
 }
 
@@ -276,6 +278,7 @@ main (int argc, char *argv[])
 	bool udp = false;
 	bool dynamic = false;
 	bool random_location = false;
+	bool fading = false;
 	
 	CommandLine cmd;
 	cmd.AddValue("nodes", "Number of eNodeBs + UE pairs", numberOfNodes);
@@ -301,6 +304,7 @@ main (int argc, char *argv[])
 	cmd.AddValue("maintain_thr", "maintain_thr", maintain_thr);
 	cmd.AddValue("rate_maintain_users", "rate_maintain_users", rate_maintain_users);
 	cmd.AddValue("random_location", "random_location", random_location);
+	cmd.AddValue("fading", "fading", fading);
 	
 	Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (15));
 	
@@ -322,6 +326,8 @@ main (int argc, char *argv[])
 		Config::SetDefault ("ns3::LteEnbRrc::EpsBearerToRlcMapping",EnumValue(LteEnbRrc::RLC_AM_ALWAYS));
  	}
  	// below fading model
+
+	if (fading) {
  	
 	lteHelper->SetAttribute ("FadingModel", StringValue ("ns3::TraceFadingLossModel"));
 
@@ -337,7 +343,8 @@ main (int argc, char *argv[])
 		// script launched as an example
 		lteHelper->SetFadingModelAttribute ("TraceFilename", StringValue ("src/lte/model/fading-traces/fading_trace_EPA_3kmph.fad"));
 	}
-	
+	}
+
 	// below two lines disable errors on CTRL and DATA:
 	//Config::SetDefault ("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue (false));
 	//Config::SetDefault ("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue (false));
