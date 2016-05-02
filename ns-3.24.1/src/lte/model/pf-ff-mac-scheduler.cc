@@ -1110,6 +1110,7 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
           std::map <uint16_t, pfsFlowPerf_t>::iterator it;
           std::map <uint16_t, pfsFlowPerf_t>::iterator itMax = m_flowStatsDl.end ();
           double rcqiMax = 0.0;
+	  std::map <uint16_t, uint16_t> rnti_latest_mcs;
           for (it = m_flowStatsDl.begin (); it != m_flowStatsDl.end (); it++)
             {
               if ((m_ffrSapProvider->IsDlRbgAvailableForUe (i, (*it).first)) == false)
@@ -1183,6 +1184,7 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
                         }
 		      uint16_t my_rnti = cellid*1000+(*it).first;
 		      (*rnti_mcs)[my_rnti] += mcs;
+		      rnti_latest_mcs[my_rnti] = mcs;
 		      (*rnti_mcs_count)[my_rnti] += 1;
 		      (*rnti_rate)[my_rnti] = achievableRate;
 		      //std::cout<<achievableRate<<std::endl;
@@ -1252,6 +1254,8 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
 		uint16_t my_rnti = cellid*1000+(*itMax).first;
 		(*rnti_prbs)[my_rnti] += 1;
 
+		(*rnti_mcs_selected)[my_rnti] += rnti_latest_mcs[my_rnti];
+		(*rnti_mcs_count_selected)[my_rnti] += 1;
             }
         } // end for RBG free
     } // end for RBGs
