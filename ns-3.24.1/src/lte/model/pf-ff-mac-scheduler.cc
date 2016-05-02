@@ -1188,7 +1188,7 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
 		      (*rnti_mcs_count)[my_rnti] += 1;
 		      (*rnti_rate)[my_rnti] = achievableRate;
 		      if (mcs > (*rnti_mcs_max)[my_rnti]) (*rnti_mcs_max)[my_rnti] = mcs;
-		      (*rnti_mcs_log)[my_rnti][mcs] += 1;
+		      (*rnti_mcs_log)[my_rnti].mcs[mcs] += 1;
 		      //std::cout<<achievableRate<<std::endl;
 			//Xing
                       //double rcqi = achievableRate / (*it).second.lastAveragedThroughput;

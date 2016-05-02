@@ -1,5 +1,5 @@
 #include <map>
-typedef uint8_t mcs_log[29];
+struct mcs_log { uint16_t mcs[29]; };
 
 std::map <uint64_t, uint16_t> * imsi_id;
 std::map <uint16_t, uint64_t> * rnti_imsi;
