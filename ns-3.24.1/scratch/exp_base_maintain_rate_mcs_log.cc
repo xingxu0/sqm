@@ -135,11 +135,12 @@ void update_w() {
 		int t_count = 0;
 		int t_value = 0;
 		
-		while (k >= 0 || t_count < pre_prbs) {
+		while (k >= 0 && t_count < pre_prbs) {
 			t_count += (*rnti_mcs_log)[rnti].mcs[k];
 			t_value += k*(*rnti_mcs_log)[rnti].mcs[k];
 			k -= 1;
 		}
+		std::cout<<t_count<<":"<<t_value<<":"<<k<<" ";
 		int mcs_value = int(round(t_value*1.0/t_count));
 		if (mcs_value > 28 || mcs_value < 0) {
 			std::cout<<i<<" s mcs value issue"<<mcs_value<<" "<<(int) (*rnti_mcs)[rnti]<<":"<<(*rnti_mcs_count)[rnti]<<"   ";
@@ -163,7 +164,7 @@ void update_w() {
 		uint16_t rnti = get_key_from_value(imsi, rnti_imsi);
 		float w = new_w*prbs[i]/new_maintain_thr;
 		(*id_weight)[i] = w > 1 ? w : 1;
-		std::cout<<i<<", mcs:"<<(int)(*rnti_mcs)[rnti]<<", count:"<<(int)(*rnti_mcs_count)[rnti]<<"("<< ((*rnti_mcs_count)[rnti] == 0 ? -1 : (*rnti_mcs)[rnti]*1.0/(*rnti_mcs_count)[rnti])<<") selected mcs:"<<(int)(*rnti_mcs_selected)[rnti]<<", selected count:"<<(int)(*rnti_mcs_count_selected)[rnti]<<"("<< ((int)(*rnti_mcs_count_selected)[rnti] == 0 ? -1 : (*rnti_mcs_selected)[rnti]*1.0/(*rnti_mcs_count_selected)[rnti])<<"), prb:"<<prbs[i]<<", w:"<<w<<" ,estimated:"<<(int)estimated[i]<<std::endl;
+		std::cout<<i<<", mcs:"<<(int)(*rnti_mcs)[rnti]<<", count:"<<(int)(*rnti_mcs_count)[rnti]<<"("<< ((*rnti_mcs_count)[rnti] == 0 ? -1 : (*rnti_mcs)[rnti]*1.0/(*rnti_mcs_count)[rnti])<<") selected mcs:"<<(int)(*rnti_mcs_selected)[rnti]<<", selected count:"<<(int)(*rnti_mcs_count_selected)[rnti]<<"("<< ((int)(*rnti_mcs_count_selected)[rnti] == 0 ? -1 : (*rnti_mcs_selected)[rnti]*1.0/(*rnti_mcs_count_selected)[rnti])<<"), prb:"<<prbs[i]<<", w:"<<w<<", estimated:"<<(int)estimated[i]<<std::endl;
 	}
 	
 	//std::cout<<"new weight:"<<new_w<<" total_prb:"<<(int)total_prb<<" total_prb_normal_users:"<<(int)total_prb_normal_users<<" light_user:"<<(int)light_user<<" light_user_prb:"<<(int)light_user_prb<<" heavy_user:"<<(int)heavy_user<<" heavy user prb:"<<(int)heavy_user_prb<<" fair share:"<<fair_share<<std::endl;
