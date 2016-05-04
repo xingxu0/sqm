@@ -34,6 +34,7 @@ uint16_t n3 = 4;
 uint16_t numberOfNodes = 18;
 int maintain_thr = 200000; // in terms of B/s
 int rate_maintain_users = 0;
+float interval = 1;
 
 NS_LOG_COMPONENT_DEFINE ("LTEExample");
 
@@ -135,7 +136,7 @@ void update_w() {
 			std::cout<<i<<" s mcs value issue"<<mcs_value<<" "<<(int) (*rnti_mcs)[rnti]<<":"<<(*rnti_mcs_count)[rnti]<<"   ";
 			mcs_value = 28;
 		}
-		int prb =  4*maintain_thr / amc->GetTbSizeFromMcs(mcs_value, 1); // 2 is an arbitrary number
+		int prb =  4*interval*maintain_thr / amc->GetTbSizeFromMcs(mcs_value, 1); // 2 is an arbitrary number
 		prbs.push_back(prb);
 		estimated.push_back(mcs_value);
 		new_maintain_thr += prb;
@@ -324,6 +325,7 @@ main (int argc, char *argv[])
 	cmd.AddValue("rate_maintain_users", "rate_maintain_users", rate_maintain_users);
 	cmd.AddValue("random_location", "random_location", random_location);
 	cmd.AddValue("fading", "fading", fading);
+	cmd.AddValue("interval", "interval", interval);
 	
 	Config::SetDefault ("ns3::LteUePhy::TxPower", DoubleValue (15));
 	
@@ -630,7 +632,9 @@ main (int argc, char *argv[])
 
 
 	if (dynamic)
-	for (uint8_t i=0; i<simTime; ++i)
+	//for (uint16_t i=0; i<simTime*1000; i+=interval)
+		//Simulator::Schedule(MilliSeconds(i), &dynamic_maintain);
+	for (float i=0; i<simTime; i+=interval)
 		Simulator::Schedule(Seconds(i), &dynamic_maintain);
 	
 	Ptr <FlowMonitor> flowmon;
