@@ -1165,6 +1165,7 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
                       // this UE has data to transmit
                       double achievableRate = 0.0;
                       uint8_t mcs = 0;
+		      int rate = 0;
 
 		      //std::cout<<(int)(*it).first<<" "<<nLayer<<" "<<(int)rbgSize<<"     ";
                       for (uint8_t k = 0; k < nLayer; k++)
@@ -1180,15 +1181,16 @@ PfFfMacScheduler::DoSchedDlTriggerReq (const struct FfMacSchedSapProvider::Sched
                             }
 			  // achievableRate is Tmax in Magus slides
 			  //std::cout<<(int)mcs<<" ";
+			  rate = m_amc->GetTbSizeFromMcs (mcs, 1);
                           achievableRate += ((m_amc->GetTbSizeFromMcs (mcs, rbgSize) / 8) / 0.001);   // = TB size / TTI
                         }
 		      uint16_t my_rnti = cellid*1000+(*it).first;
-		      (*rnti_mcs)[my_rnti] += mcs;
-		      rnti_latest_mcs[my_rnti] = mcs;
+		      (*rnti_mcs)[my_rnti] +=  rate; //mcs;
+		      rnti_latest_mcs[my_rnti] = rate; //mcs;
 		      (*rnti_mcs_count)[my_rnti] += 1;
 		      (*rnti_rate)[my_rnti] = achievableRate;
-		      if (mcs > (*rnti_mcs_max)[my_rnti]) (*rnti_mcs_max)[my_rnti] = mcs;
-		      (*rnti_mcs_log)[my_rnti].mcs[mcs] += 1;
+		      //if (mcs > (*rnti_mcs_max)[my_rnti]) (*rnti_mcs_max)[my_rnti] = mcs;
+		      //(*rnti_mcs_log)[my_rnti].mcs[mcs] += 1;
 		      //std::cout<<achievableRate<<std::endl;
 			//Xing
                       //double rcqi = achievableRate / (*it).second.lastAveragedThroughput;
