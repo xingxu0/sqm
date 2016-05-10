@@ -618,7 +618,7 @@ main (int argc, char *argv[])
 	serverApps.Get(0)->SetStartTime(Seconds(1));
 	ApplicationContainer::Iterator i;
 	int n = 1;
-	int first_started = 1000;
+	int first_started = 10;
 	for (i = clientApps.Begin ()+1; i != clientApps.End (); ++i) {
 		if (n>first_started && n<n1)
 		{
