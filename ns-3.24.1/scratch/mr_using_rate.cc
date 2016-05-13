@@ -380,8 +380,8 @@ main (int argc, char *argv[])
 	}
 
 	// below two lines disable errors on CTRL and DATA:
-	//Config::SetDefault ("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue (false));
-	//Config::SetDefault ("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue (false));
+	Config::SetDefault ("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue (false));
+	Config::SetDefault ("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue (false));
 
 //lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
 //lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (100));

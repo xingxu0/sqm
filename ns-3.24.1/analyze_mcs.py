@@ -85,6 +85,8 @@ prbs = []
 selected_prbs = []
 weight = []
 mcs = []
+temp_mcs = []
+temp_weight = []
 for i in range(len(ls)):
 	l = ls[i]
 	if l.find("Flow ID") != -1:
@@ -104,6 +106,15 @@ for i in range(len(ls)):
 	if m != None:
 		time = float(m.group(2))
 		continue
+	
+	result = re.match("0, mcs:(.*), count:(.*)\((.*)\) selected mcs:(.*), selected count:(.*)\((.*)\), prb:(.*), w:(.*), estimated:(.*)", l)
+	if result != None:
+		temp_mcs.append(float(result.group(9)))
+		continue
+	
+	w_result = re.match("new weight:(.*)total_prb:(.*)", l)
+	if w_result != None:
+		temp_weight.append(max(float(w_result.group(1)), 1))
 	
 	m = re.match("Last Received Packet([ \t]*): (.*) Seconds", l)
 	if m != None:
@@ -212,12 +223,17 @@ for x in weight:
 	x_t.append(x[0])
 	y_t.append(x[1])
 w_mean = np.mean(y_t)
+
+w_mean = np.mean(temp_weight)
+
 x_t = []
 y_t = []
 for x in prbs:
 	x_t.append(x[0])
 	y_t.append(x[1])
 mcs_mean = np.mean(y_t)
+
+mcs_mean = np.mean(temp_mcs)
 
 	
 ax.set_xlim([0, max_x*1.3])
