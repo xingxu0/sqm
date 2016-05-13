@@ -54,7 +54,7 @@ void ThroughputMonitor (FlowMonitorHelper *fmhelper, Ptr<FlowMonitor> flowMon)
 
 int main (int argc, char *argv[])
 {
-	double simTime = 20;
+	double simTime = 10;
 	double distance = 1000.0;
 	double interPacketInterval = 0.01;
 	double interSiteDistance = 2000;
