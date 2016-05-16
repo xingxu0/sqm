@@ -289,6 +289,9 @@ void generate_x_y(int d, int &x, int &y) {
 int
 main (int argc, char *argv[])
 {
+	LogLevel logLevel = (LogLevel)(LOG_LEVEL_INFO|LOG_PREFIX_TIME);
+	LogComponentEnable ("PfFfMacScheduler", logLevel);
+	
 	init();
 	amc = CreateObject <LteAmc> ();
 	srand (0);
@@ -434,16 +437,6 @@ main (int argc, char *argv[])
 		ndc.push_back(internetDevices);
 	}
 
-	LogLevel logLevel = (LogLevel)(LOG_PREFIX_FUNC | LOG_PREFIX_TIME | LOG_LEVEL_ALL);
-
-	LogComponentEnable ("LteHelper", logLevel);
-	LogComponentEnable ("EpcHelper", logLevel);
-	LogComponentEnable ("EpcEnbApplication", logLevel);
-	LogComponentEnable ("EpcSgwPgwApplication", logLevel);
-	LogComponentEnable ("EpcMme", logLevel);
-	LogComponentEnable ("LteEnbRrc", logLevel);
-	LogComponentEnable ("EpcUeNas", logLevel);
-
 	NodeContainer ueNodes;
 	NodeContainer enbNodes;
 	enbNodes.Create(bs);
@@ -531,6 +524,7 @@ main (int argc, char *argv[])
 	}
 
 	// bearer      
+	/*
 	for (uint16_t u = 0; u < ueNodes.GetN (); u++)
 	{
 		Ptr<NetDevice> ueDevice = ueLteDevs.Get (u);
@@ -551,7 +545,7 @@ main (int argc, char *argv[])
 		EpsBearer bearer (q);
 		uint8_t bid = lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
 		std::cout<<u<<"'s bearer id: "<<(int)bid<<std::endl;
-	}
+	}*/
 
 	// Install and start applications on UEs and remote host
 	uint16_t dlPort = 33333;
@@ -618,7 +612,7 @@ main (int argc, char *argv[])
 	serverApps.Get(0)->SetStartTime(Seconds(1));
 	ApplicationContainer::Iterator i;
 	int n = 1;
-	int first_started = 10;
+	int first_started = 100;
 	for (i = clientApps.Begin ()+1; i != clientApps.End (); ++i) {
 		if (n>first_started && n<n1)
 		{

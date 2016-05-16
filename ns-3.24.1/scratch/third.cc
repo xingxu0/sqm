@@ -67,11 +67,8 @@ main (int argc, char *argv[])
       return 1;
     }
 
-  if (verbose)
-    {
       LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
       LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
-    }
 
   NodeContainer p2pNodes;
   p2pNodes.Create (2);
