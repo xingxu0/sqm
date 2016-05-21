@@ -149,7 +149,7 @@ for i in data:
 	print data[i][:20]
 	x, y = convert_to_second_throughput(data[i])
 	for j in x:
-		f_o.write(str(int((j - x[0])*1000)) + " " + str(y[x.index(j)]) + "\n")
+		f_o.write(str(int((j - x[0])*1000)) + " " + str(y[x.index(j)]*8/1000) + "\n")
 	print x
 	print y
 	if i == 0:

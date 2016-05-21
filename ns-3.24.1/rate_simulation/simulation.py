@@ -1,5 +1,5 @@
 # SIMULATION 1.0
-import math
+import math, sys
 from config import *
 from helpers import *
 # def simulate(init, mid, singleSession): # input the pandas dataframe
@@ -32,9 +32,9 @@ for gggg in range(0,1):
   bwArray = []
   usedBWArray = []
   bitratesPlayed = dict()
-  BLEN, CHUNKS_DOWNLOADED, BUFFTIME, PLAYTIME, CANONICAL_TIME, INIT_HB, MID_HB, BR, BW, AVG_SESSION_BITRATE,SWITCH_LOCK,MAX_BUFFLEN, LOCK = 0, 0, 0, 0, 0, 200, 500, 0, 0,0,0,120,15
+  BLEN, CHUNKS_DOWNLOADED, BUFFTIME, PLAYTIME, CANONICAL_TIME, INIT_HB, MID_HB, BR, BW, AVG_SESSION_BITRATE,SWITCH_LOCK,MAX_BUFFLEN, LOCK = 0, 0, 0, 0, 0, 2000, 5000, 0, 0,0,0,120,15
   # group2 = group1.sort("timestampms")
-  candidateBR, jointime, playtimems, sessiontimems, bitrate_groundtruth, bufftimems, BR, bwArray, CHUNKSIZE, TOTAL_CHUNKS = parseSessionStateFromTrace('filename')    
+  candidateBR, jointime, playtimems, sessiontimems, bitrate_groundtruth, bufftimems, BR, bwArray, CHUNKSIZE, TOTAL_CHUNKS = parseSessionStateFromTrace(sys.argv[1])    
   if VALIDATION_MODE:
     bwArray = bwArray[0::2]
 #   print playtimems, bufftimems, bwArray[len(bwArray) - 1][0], TOTAL_CHUNKS, sessiontimems

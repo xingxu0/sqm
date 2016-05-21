@@ -153,10 +153,14 @@ def parseSessionStateFromTrace(filename):
   #   ts.append(group.irow(j)["timestampms"])
   #   bw.append(group.irow(j)["bandwidth"])
 
-  ts = [0, 1000, 2000, 3000, 4000, 5000, 6000]
-  bw = [179981.99099548874, 203036.0, 209348.0, 198828.0000000001, 209348.0, 203036.0, 209348.0]    
+  ls = open(filename).readlines()
+  for l in ls:
+	  s = l.split(" ")
+	  ts.append(int(s[0]))
+	  bw.append(float(s[1]))
+  #ts = [0, 1000, 2000, 3000, 4000, 5000, 6000]
+  #bw = [179981.99099548874, 203036.0, 209348.0, 198828.0000000001, 209348.0, 203036.0, 209348.0]    
   totalTraceTime = ts[-1] # read this value as the last time stamp in the file
-
   return bitrates, 10, totalTraceTime, totalTraceTime, 1, 1, bitrates[0], zip(ts,bw), 5, 1 #10 , 75 # 
 
 
