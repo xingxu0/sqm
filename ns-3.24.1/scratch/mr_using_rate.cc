@@ -383,8 +383,8 @@ main (int argc, char *argv[])
 	}
 
 	// below two lines disable errors on CTRL and DATA:
-	Config::SetDefault ("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue (false));
-	Config::SetDefault ("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue (false));
+	//Config::SetDefault ("ns3::LteSpectrumPhy::CtrlErrorModelEnabled", BooleanValue (false));
+	//Config::SetDefault ("ns3::LteSpectrumPhy::DataErrorModelEnabled", BooleanValue (false));
 
 //lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
 //lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (100));
@@ -578,7 +578,7 @@ main (int argc, char *argv[])
 
 		} else {
 			UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
-			dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds(1)));
+			dlClient.SetAttribute ("Interval", TimeValue (MicroSeconds(1000)));
 			dlClient.SetAttribute ("MaxPackets", UintegerValue(10000000));
 			Ptr<Node> remoteHost = remoteHostContainer.Get (u);
 			clientApps.Add(dlClient.Install(remoteHost));

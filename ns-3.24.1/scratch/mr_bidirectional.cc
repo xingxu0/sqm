@@ -215,7 +215,8 @@ int main (int argc, char *argv[])
 	clientApps.Start (Seconds (1.0));
 	if (interval_ul)
 		ulclientApps.Start( Seconds (1.0));
-	lteHelper->EnableTraces ();
+	//lteHelper->EnableTraces ();
+	lteHelper->EnableRlcTraces ();
 	
 	Ptr <FlowMonitor> flowmon;
 	FlowMonitorHelper fmHelper;
