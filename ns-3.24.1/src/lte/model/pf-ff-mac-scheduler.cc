@@ -226,6 +226,8 @@ PfFfMacScheduler::PfFfMacScheduler ()
   m_schedSapProvider = new PfSchedulerMemberSchedSapProvider (this);
   m_ffrSapProvider = 0;
   m_ffrSapUser = new MemberLteFfrSapUser<PfFfMacScheduler> (this);
+  
+  init();
 }
 
 PfFfMacScheduler::~PfFfMacScheduler ()

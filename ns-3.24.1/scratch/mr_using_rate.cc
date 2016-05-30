@@ -58,6 +58,11 @@ void ThroughputMonitor (FlowMonitorHelper *fmhelper, Ptr<FlowMonitor> flowMon)
 		std::cout<<"Throughput: " << stats->second.rxBytes*1.0/(stats->second.timeLastRxPacket.GetSeconds()-stats->second.timeFirstRxPacket.GetSeconds()) << " B/s"<<std::endl;
 		std::cout<<"---------------------------------------------------------------------------"<<std::endl;
 	}
+	
+	for (std::map<uint16_t, uint64_t>::iterator it=rnti_am_mode_bytes_adjustment->begin(); it!=rnti_am_mode_bytes_adjustment->end(); it++) {
+		std::cout<<it->first<<" can send more bytes: "<<it->second<<std::endl;
+		it->second = 0;
+	}
 	Simulator::Schedule(Seconds(1),&ThroughputMonitor, fmhelper, flowMon);
 }
 

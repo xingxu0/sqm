@@ -28,6 +28,8 @@
 #include <vector>
 #include <map>
 
+//#include "../src/lte/model/weight-table.h"
+
 namespace ns3 {
 
 /**

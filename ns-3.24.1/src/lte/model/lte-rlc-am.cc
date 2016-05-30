@@ -26,7 +26,9 @@
 #include "ns3/lte-rlc-am.h"
 #include "ns3/lte-rlc-sdu-status-tag.h"
 #include "ns3/lte-rlc-tag.h"
+#include <iostream>
 
+#include "ns3/weight-table.h"
 
 namespace ns3 {
 
@@ -190,6 +192,7 @@ LteRlcAm::DoNotifyTxOpportunity (uint32_t bytes, uint8_t layer, uint8_t harqId)
 {
   NS_LOG_FUNCTION (this << m_rnti << (uint32_t) m_lcid << bytes);
 
+
   if (bytes < 4)
     {
       // Stingy MAC: In general, we need more bytes.
@@ -200,6 +203,7 @@ LteRlcAm::DoNotifyTxOpportunity (uint32_t bytes, uint8_t layer, uint8_t harqId)
       return;
     }
 
+  //std::cout<<(int)m_rnti<<" : "<<(int)bytes<<std::endl;
   if ( m_statusPduRequested && ! m_statusProhibitTimer.IsRunning () )
     {
       if (bytes < m_statusPduBufferSize)
@@ -270,6 +274,8 @@ LteRlcAm::DoNotifyTxOpportunity (uint32_t bytes, uint8_t layer, uint8_t harqId)
       m_statusPduBufferSize = 0;
       m_statusProhibitTimer = Simulator::Schedule (m_statusProhibitTimerValue,
                                                    &LteRlcAm::ExpireStatusProhibitTimer, this);
+      //std::cout<<"\tused for STATUS"<<std::endl;
+      (*rnti_am_mode_bytes_adjustment)[m_rnti] += bytes - 4;
       return;
     }
   else if ( m_retxBufferSize > 0 )

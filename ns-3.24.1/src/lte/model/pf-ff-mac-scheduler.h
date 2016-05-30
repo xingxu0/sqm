@@ -30,6 +30,7 @@
 #include <ns3/nstime.h>
 #include <ns3/lte-amc.h>
 #include <ns3/lte-ffr-sap.h>
+//#include "../src/lte/model/weight-table.h"
 
 // value for SINR outside the range defined by FF-API, used to indicate that there
 // is no CQI for this element
