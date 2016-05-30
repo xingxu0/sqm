@@ -28,6 +28,8 @@
 #include "ns3/lte-rlc-sap.h"
 // #include "ff-mac-sched-sap.h"
 
+#include <iostream>
+
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("LteRlc");
@@ -86,7 +88,8 @@ LteRlc::LteRlc ()
   : m_rlcSapUser (0),
     m_macSapProvider (0),
     m_rnti (0),
-    m_lcid (0)
+    m_lcid (0),
+    m_cellid (0)
 {
   NS_LOG_FUNCTION (this);
   m_rlcSapProvider = new LteRlcSpecificLteRlcSapProvider<LteRlc> (this);
@@ -121,6 +124,15 @@ LteRlc::DoDispose ()
   NS_LOG_FUNCTION (this);
   delete (m_rlcSapProvider);
   delete (m_macSapUser);
+}
+
+// Xing
+void
+LteRlc::SetCellID (uint16_t cellid)
+{
+  NS_LOG_FUNCTION (this << (uint32_t) cellid);
+  m_cellid = cellid;
+  std::cout<<"print cell id"<<(int)m_cellid<<" ("<<&m_cellid<<")"<<std::endl;
 }
 
 void

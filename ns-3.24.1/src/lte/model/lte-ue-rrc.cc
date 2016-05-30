@@ -36,6 +36,8 @@
 
 #include <cmath>
 
+#include <iostream>
+
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("LteUeRrc");
@@ -1154,10 +1156,12 @@ LteUeRrc::ApplyRadioResourceConfigDedicated (LteRrcSap::RadioResourceConfigDedic
 
           const uint8_t lcid = 1; // fixed LCID for SRB1
 
+          //std::cout<<"create in lte-ue-rrc"<<std::endl;
           Ptr<LteRlc> rlc = CreateObject<LteRlcAm> ();
+	  //std::cout<<"create in lte-ue-rrc done"<<std::endl;
           rlc->SetLteMacSapProvider (m_macSapProvider);
           rlc->SetRnti (m_rnti);
-          rlc->SetLcId (lcid);      
+          rlc->SetLcId (lcid);
 
           Ptr<LtePdcp> pdcp = CreateObject<LtePdcp> ();
           pdcp->SetRnti (m_rnti);
@@ -1191,6 +1195,11 @@ LteUeRrc::ApplyRadioResourceConfigDedicated (LteRrcSap::RadioResourceConfigDedic
           ueParams.srb0SapProvider = m_srb0->m_rlc->GetLteRlcSapProvider ();
           ueParams.srb1SapProvider = m_srb1->m_pdcp->GetLtePdcpSapProvider ();
           m_rrcSapUser->Setup (ueParams);
+	  
+	  //std::cout<<"create AM rlc for "<<m_rnti<< " of cell id "<<m_cellId<<std::endl;
+	  //std::cout<<rlc->m_cellid<<std::endl;
+	  //rlc->SetCellID(m_cellId);
+	  //std::cout<<rlc->m_cellid<<std::endl;
         }
       else
         {

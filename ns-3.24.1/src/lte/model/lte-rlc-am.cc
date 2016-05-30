@@ -79,6 +79,8 @@ LteRlcAm::LteRlcAm ()
   m_expectedSeqNumber = 0;
 
   m_pollRetransmitTimerJustExpired = false;
+  
+  std::cout<<"create AM now"<<(int)m_cellid<<" , "<<(int)m_rnti<<std::endl;
 }
 
 LteRlcAm::~LteRlcAm ()
@@ -203,7 +205,7 @@ LteRlcAm::DoNotifyTxOpportunity (uint32_t bytes, uint8_t layer, uint8_t harqId)
       return;
     }
 
-  //std::cout<<(int)m_rnti<<" : "<<(int)bytes<<std::endl;
+  std::cout<<(int)m_cellid<<"("<<&m_cellid<<")"<<" , "<<(int)m_rnti<<" : "<<(int)bytes<<std::endl;
   if ( m_statusPduRequested && ! m_statusProhibitTimer.IsRunning () )
     {
       if (bytes < m_statusPduBufferSize)
