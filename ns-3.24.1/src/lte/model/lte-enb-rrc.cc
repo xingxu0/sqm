@@ -362,12 +362,14 @@ UeManager::SetupDataRadioBearer (EpsBearer bearer, uint8_t bearerId, uint32_t gt
 
   TypeId rlcTypeId = m_rrc->GetRlcType (bearer);
 
+  //std::cout<<"create in lte-enb-rrc xxx"<<std::endl;
   ObjectFactory rlcObjectFactory;
   rlcObjectFactory.SetTypeId (rlcTypeId);
   Ptr<LteRlc> rlc = rlcObjectFactory.Create ()->GetObject<LteRlc> ();
   rlc->SetLteMacSapProvider (m_rrc->m_macSapProvider);
   rlc->SetRnti (m_rnti);
   rlc->SetCellID (m_rrc->m_cellId);
+  //std::cout<<"create in lte-enb-rrc done xxx"<<std::endl;
 
   drbInfo->m_rlc = rlc;
 

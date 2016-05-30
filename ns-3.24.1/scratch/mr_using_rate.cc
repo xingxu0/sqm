@@ -60,7 +60,8 @@ void ThroughputMonitor (FlowMonitorHelper *fmhelper, Ptr<FlowMonitor> flowMon)
 	}
 	
 	for (std::map<uint16_t, uint64_t>::iterator it=rnti_am_mode_bytes_adjustment->begin(); it!=rnti_am_mode_bytes_adjustment->end(); it++) {
-		std::cout<<it->first<<" can send more bytes: "<<it->second<<std::endl;
+		if (rnti_imsi->find(it->first) != rnti_imsi->end())
+			std::cout<<(*rnti_imsi)[it->first]<<" can send more bytes: "<<it->second<<std::endl;
 		it->second = 0;
 	}
 	Simulator::Schedule(Seconds(1),&ThroughputMonitor, fmhelper, flowMon);
@@ -617,7 +618,7 @@ main (int argc, char *argv[])
 	serverApps.Get(0)->SetStartTime(Seconds(1));
 	ApplicationContainer::Iterator i;
 	int n = 1;
-	int first_started = 100;
+	int first_started = 20;
 	for (i = clientApps.Begin ()+1; i != clientApps.End (); ++i) {
 		if (n>first_started && n<n1)
 		{

@@ -132,7 +132,7 @@ LteRlc::SetCellID (uint16_t cellid)
 {
   NS_LOG_FUNCTION (this << (uint32_t) cellid);
   m_cellid = cellid;
-  std::cout<<"print cell id"<<(int)m_cellid<<" ("<<&m_cellid<<")"<<std::endl;
+  //std::cout<<"print cell id"<<(int)m_cellid<<" ("<<&m_cellid<<")"<<std::endl;
 }
 
 void

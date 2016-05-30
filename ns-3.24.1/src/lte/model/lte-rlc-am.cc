@@ -80,7 +80,7 @@ LteRlcAm::LteRlcAm ()
 
   m_pollRetransmitTimerJustExpired = false;
   
-  std::cout<<"create AM now"<<(int)m_cellid<<" , "<<(int)m_rnti<<std::endl;
+  //std::cout<<"create AM now"<<(int)m_cellid<<" , "<<(int)m_rnti<<std::endl;
 }
 
 LteRlcAm::~LteRlcAm ()
@@ -205,7 +205,7 @@ LteRlcAm::DoNotifyTxOpportunity (uint32_t bytes, uint8_t layer, uint8_t harqId)
       return;
     }
 
-  std::cout<<(int)m_cellid<<"("<<&m_cellid<<")"<<" , "<<(int)m_rnti<<" : "<<(int)bytes<<std::endl;
+  //std::cout<<(int)m_cellid<<"("<<&m_cellid<<")"<<" , "<<(int)m_rnti<<" : "<<(int)bytes<<std::endl;
   if ( m_statusPduRequested && ! m_statusProhibitTimer.IsRunning () )
     {
       if (bytes < m_statusPduBufferSize)
@@ -277,7 +277,7 @@ LteRlcAm::DoNotifyTxOpportunity (uint32_t bytes, uint8_t layer, uint8_t harqId)
       m_statusProhibitTimer = Simulator::Schedule (m_statusProhibitTimerValue,
                                                    &LteRlcAm::ExpireStatusProhibitTimer, this);
       //std::cout<<"\tused for STATUS"<<std::endl;
-      (*rnti_am_mode_bytes_adjustment)[m_rnti] += bytes - 4;
+      (*rnti_am_mode_bytes_adjustment)[m_cellid*1000 + m_rnti] += bytes - 4;
       return;
     }
   else if ( m_retxBufferSize > 0 )
