@@ -277,11 +277,12 @@ LteRlcAm::DoNotifyTxOpportunity (uint32_t bytes, uint8_t layer, uint8_t harqId)
       m_statusProhibitTimer = Simulator::Schedule (m_statusProhibitTimerValue,
                                                    &LteRlcAm::ExpireStatusProhibitTimer, this);
       //std::cout<<"\tused for STATUS"<<std::endl;
-      (*rnti_am_mode_bytes_adjustment)[m_cellid*1000 + m_rnti] += bytes - 4;
+      (*rnti_am_mode_bytes_adjustment)[m_cellid*1000 + m_rnti] += bytes; // - 4;
       return;
     }
   else if ( m_retxBufferSize > 0 )
     {
+      //(*rnti_am_mode_bytes_adjustment)[m_cellid*1000 + m_rnti] += bytes; 	    
       NS_LOG_LOGIC ("retxBufferSize = " << m_retxBufferSize);      
       NS_LOG_LOGIC ("Sending data from Retransmission Buffer");
       NS_ASSERT (m_vtA < m_vtS);
