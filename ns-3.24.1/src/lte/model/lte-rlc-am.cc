@@ -183,7 +183,7 @@ LteRlcAm::DoTransmitPdcpPdu (Ptr<Packet> p)
   m_rbsTimer.Cancel ();
   m_rbsTimer = Simulator::Schedule (m_rbsTimerValue, &LteRlcAm::ExpireRbsTimer, this);
   
-  std::cout<<(int)m_cellid<<" "<<(int)m_rnti<<" " <<m_txonBuffer.size()<<" "<<m_txonBufferSize<<std::endl;
+  //std::cout<<(int)m_cellid<<" "<<(int)m_rnti<<" " <<m_txonBuffer.size()<<" "<<m_txonBufferSize<<std::endl;
 }
 
 
@@ -278,7 +278,7 @@ LteRlcAm::DoNotifyTxOpportunity (uint32_t bytes, uint8_t layer, uint8_t harqId)
       m_statusPduBufferSize = 0;
       m_statusProhibitTimer = Simulator::Schedule (m_statusProhibitTimerValue,
                                                    &LteRlcAm::ExpireStatusProhibitTimer, this);
-      std::cout<<(int)m_cellid<<" "<<(int)m_rnti<<" : "<<(int)bytes<<"\tused for STATUS"<<std::endl;
+      //std::cout<<(int)m_cellid<<" "<<(int)m_rnti<<" : "<<(int)bytes<<"\tused for STATUS"<<std::endl;
       (*rnti_am_mode_bytes_adjustment)[m_cellid*1000 + m_rnti] += bytes; // - 4;
       return;
     }
@@ -376,7 +376,7 @@ LteRlcAm::DoNotifyTxOpportunity (uint32_t bytes, uint8_t layer, uint8_t harqId)
                   
                   NS_LOG_LOGIC ("retxBufferSize = " << m_retxBufferSize);
 		
-		  std::cout<<(int)m_cellid<<" "<<(int)m_rnti<<" : "<<(int)bytes<<"\tused for ReTx of "<<packet->GetSize ()<<std::endl;
+		  //std::cout<<(int)m_cellid<<" "<<(int)m_rnti<<" : "<<(int)bytes<<"\tused for ReTx of "<<packet->GetSize ()<<std::endl;
 
                   return;
                 }
@@ -1044,7 +1044,7 @@ LteRlcAm::DoReceivePdu (Ptr<Packet> p)
                   NS_LOG_INFO ("Move SN = " << seqNumberValue << " to retxBuffer");
                   m_retxBuffer.at (seqNumberValue).m_pdu = m_txedBuffer.at (seqNumberValue).m_pdu->Copy ();
                   m_retxBuffer.at (seqNumberValue).m_retxCount = m_txedBuffer.at (seqNumberValue).m_retxCount;
-		  std::cout<<(int)m_cellid<<" "<<(int)m_rnti<<" "<<"NACKED1 "<<m_retxBufferSize<<" + " <<m_retxBuffer.at (seqNumberValue).m_pdu->GetSize ()<<std::endl;
+		  //std::cout<<(int)m_cellid<<" "<<(int)m_rnti<<" "<<"NACKED1 "<<m_retxBufferSize<<" + " <<m_retxBuffer.at (seqNumberValue).m_pdu->GetSize ()<<std::endl;
                   m_retxBufferSize += m_retxBuffer.at (seqNumberValue).m_pdu->GetSize ();
 		  
 
@@ -1677,13 +1677,11 @@ LteRlcAm::ExpirePollRetransmitTimer (void)
   NS_LOG_LOGIC ("statusPduRequested = " << m_statusPduRequested);
 
   m_pollRetransmitTimerJustExpired = true;
-  //xing commented out for testing  
-  /*
 
   // see section 5.2.2.3
   // note the difference between Rel 8 and Rel 11 specs; we follow Rel 11 here
   NS_ASSERT (m_vtS <= m_vtMs);
-  if ((m_txonBufferSize == 0 && m_retxBufferSize == 0)
+  if ((m_txonBufferSize == 0 && m_retxBufferSize == 0) // Xing: don't do this for DL, only for UL 
       || (m_vtS == m_vtMs))
     {
       NS_LOG_INFO ("txonBuffer and retxBuffer empty. Move PDUs up to = " << m_vtS.GetValue () - 1 << " to retxBuffer");
@@ -1697,7 +1695,7 @@ LteRlcAm::ExpirePollRetransmitTimer (void)
                NS_LOG_INFO ("Move PDU " << sn << " from txedBuffer to retxBuffer");
                m_retxBuffer.at (sn).m_pdu = m_txedBuffer.at (sn).m_pdu->Copy ();
                m_retxBuffer.at (sn).m_retxCount = m_txedBuffer.at (sn).m_retxCount;
-	       std::cout<<(int)m_cellid<<" "<<(int)m_rnti<<" "<<"NACKED2 "<<m_retxBufferSize<<" + " <<m_retxBuffer.at (sn).m_pdu->GetSize ()<<std::endl;
+	       //std::cout<<(int)m_cellid<<" "<<(int)m_rnti<<" "<<"NACKED2 "<<m_retxBufferSize<<" + " <<m_retxBuffer.at (sn).m_pdu->GetSize ()<<std::endl;
                m_retxBufferSize += m_retxBuffer.at (sn).m_pdu->GetSize ();
 	       
                m_txedBufferSize -= m_txedBuffer.at (sn).m_pdu->GetSize ();
@@ -1706,8 +1704,6 @@ LteRlcAm::ExpirePollRetransmitTimer (void)
              }
         }
     }
-    
-    */
 
   DoReportBufferStatus ();  
 }
