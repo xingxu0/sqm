@@ -184,7 +184,7 @@ def now(bpp, admitted, new_user, current_premium_user):
 		if admitted[i] != 1:
 			continue
 		ret_prb[i] = total_prb/(normal_n + current_premium_user)
-		print total_prb, normal_n, current_premium_user, total_prb/(normal_n + current_premium_user)
+		#print total_prb, normal_n, current_premium_user, total_prb/(normal_n + current_premium_user)
 		temp_rate = ret_prb[i]*bpp[i]*8/1000
 		j = 0
 		while br[j] <= temp_rate and j < len(br):
