@@ -8,11 +8,13 @@ import numpy as np
 # print "python policy.py [scheme] [# premium users] [\% of premium resources] [# normal users] [silent]"
 # print "\t schemes. 1: random location; 2: same location; 3: good and bad"
 
+stair = int(sys.agrv[1])
+
 pid = os.getpid()
 x = []
 y_total = [[], [], [], [], []]
 y_avg = [[], [], [], [], []]
-times = 1
+times = 10
 for i in range(40, 140, 20):
 	tt = 0
 	t_total = [0] * len(y_total)
@@ -21,7 +23,10 @@ for i in range(40, 140, 20):
 	x.append(i)
 	for j in range(times):	
 		#os.system("python policy_dynamic.py 1 10 0.10 %d 1"%(i))
-		os.system("python policy_dynamic_qoe.py 1 10 0.10 %d 0 %d.trace"%(i, pid))
+		if stair:
+			os.system("python policy_dynamic_qoe.py 1 10 0.10 %d 0 %d.trace"%(i, pid))
+		else:
+			os.system("python policy_dynamic_qoe_real_no_stair.py 1 10 0.10 %d 0 %d.trace"%(i, pid))
 		ls = open("%d.trace"%(pid)).readlines()
 		os.system("rm %d.trace"%(pid))
 
@@ -57,4 +62,4 @@ ax2.set_ylabel("Average Objective Function")
 ax.set_xlabel("Number of Non-Premium Users")
 ax2.set_xlabel("Number of Non-Premium Users")
 plt.tight_layout()
-plt.savefig("vary_non_premium_user.png")
+plt.savefig("vary_non_premium_user_%d.png"%(stair))

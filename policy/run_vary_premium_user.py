@@ -5,8 +5,11 @@ import os, sys, glob, re, math, operator, random, commands, copy
 import numpy as np
 #import statistics
 
+stair = int(sys.agrv[1])
+
 # print "python policy.py [scheme] [# premium users] [\% of premium resources] [# normal users] [silent]"
 # print "\t schemes. 1: random location; 2: same location; 3: good and bad"
+pid = os.getpid()
 x = []
 y_total = [[], [], [], [], []]
 y_avg = [[], [], [], [], []]
@@ -17,8 +20,12 @@ for i in range(5, 21, 3):
 	t_total = [0] * len(y_total)
 	t_avg = [0] * len(y_total)
 	for j in range(times):
-		os.system("python policy_dynamic.py 1 %d 0.10 90 %d"%(i, 1 if j>0 else 0))
-		ls = open("temp").readlines()
+		if stair:
+			os.system("python policy_dynamic_qoe.py 1 %d 0.10 90 1 %d.trace"%(i, pid))
+		else:
+			os.system("python policy_dynamic_qoe_real_no_stair.py 1 %d 0.10 90 1 %d.trace"%(i, pid))
+		ls = open("%d.trace"%(pid)).readlines()
+		os.system("rm %d.trace"%(pid))
 		
 		t = ls[0].split(" ")
 		for ii in range(len(t)):
@@ -51,4 +58,4 @@ ax2.set_ylabel("Average Objective Function")
 ax2.set_xlabel("Number of Premium Users")
 ax.set_xlabel("Number of Premium Users")
 plt.tight_layout()
-plt.savefig("vary_premium_user.png")
+plt.savefig("vary_premium_user.png_%d.png"%(stair))

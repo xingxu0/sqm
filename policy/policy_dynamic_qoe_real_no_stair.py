@@ -218,10 +218,12 @@ def paris(bpp, admitted, new_user, current_premium_user):
 			continue
 		ret_prb[i] = available/admitted_
 		temp_rate = ret_prb[i]*bpp[i]*8/1000
-		j = 0
-		while j < len(br) and br[j] <= temp_rate:
-			j += 1
-		ret_rate[i] = br[j - 1] if j - 1 >= 0 else 0
+		# stair
+		#j = 0
+		#while j < len(br) and br[j] <= temp_rate:
+		#	j += 1
+		#ret_rate[i] = br[j - 1] if j - 1 >= 0 else 0
+		ret_rate[i] = temp_rate
 	ret_prb_ = []
 	ret_rate_ = []
 	for i in range(len(bpp)):
@@ -246,10 +248,11 @@ def now(bpp, admitted, new_user, current_premium_user):
 		#print total_prb, normal_n, current_premium_user, total_prb/(normal_n + current_premium_user)
 		temp_rate = ret_prb[i]*bpp[i]*8/1000
 		# stair
-		j = 0
-		while j < len(br) and br[j] <= temp_rate:
-			j += 1
-		ret_rate[i] = br[j - 1] if j - 1 >= 0 else 0
+		#j = 0
+		#while j < len(br) and br[j] <= temp_rate:
+		#	j += 1
+		#ret_rate[i] = br[j - 1] if j - 1 >= 0 else 0
+		ret_rate[i] = temp_rate
 	ret_prb_ = []
 	ret_rate_ = []
 	for i in range(len(bpp)):
