@@ -8,7 +8,7 @@ import numpy as np
 # print "python policy.py [scheme] [# premium users] [\% of premium resources] [# normal users] [silent]"
 # print "\t schemes. 1: random location; 2: same location; 3: good and bad"
 
-stair = int(sys.agrv[1])
+stair = int(sys.argv[1])
 
 pid = os.getpid()
 x = []

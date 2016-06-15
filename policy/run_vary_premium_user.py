@@ -5,7 +5,7 @@ import os, sys, glob, re, math, operator, random, commands, copy
 import numpy as np
 #import statistics
 
-stair = int(sys.agrv[1])
+stair = int(sys.argv[1])
 
 # print "python policy.py [scheme] [# premium users] [\% of premium resources] [# normal users] [silent]"
 # print "\t schemes. 1: random location; 2: same location; 3: good and bad"
