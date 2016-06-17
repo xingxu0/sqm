@@ -60,3 +60,8 @@ ax2.set_xlabel("Premium Resources (1)")
 ax.set_xlabel("Premium Resources (1)")
 plt.tight_layout()
 plt.savefig("vary_premium_resource_%d.png"%(stair))
+
+fout = open("vary_premium_resource_%d.txt"%(stair), "w")
+fout.write(str(y_total) + "\n")
+fout.write(str(y_avg) + "\n")
+fout.close()

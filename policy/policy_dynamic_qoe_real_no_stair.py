@@ -15,6 +15,7 @@ bpp_max = int(292*0.8)  # this value maps to 712bits/s as TBS
 total_prb = 12000*4
 percentage = .3
 lock_parameter = 0.3
+time = 600
 
 br = [350, 700, 1200, 2400, 4800]
 #br = [350, 700, 1200, 2400]
@@ -23,7 +24,7 @@ label = ["N","R1", "R2", "R3", "R4", "R5"]
 
 #signal range's default is 37%
 #print "python policy.py [scheme] [# premium users] [\% of premium resources] [# normal users] [silent] [signal range]"
-print "python policy.py [scheme] [# premium users] [\% of premium resources] [# normal users] [silent] [trace name]"
+print "python policy.py [scheme] [# premium users] [\% of premium resources] [# normal users] [silent] [trace name] [duration]"
 print "\t schemes. 1: random location; 2: same location; 3: good and bad"
 
 scheme = int(sys.argv[1])
@@ -32,13 +33,14 @@ percentage = float(sys.argv[3])
 normal_n = int(sys.argv[4])
 silent = int(sys.argv[5])
 tracename  = sys.argv[6]
+if len(sys.argv) > 7:
+	time = int(sys.argv[7])
 #if len(sys.argv) > 6:
 #	r = float(sys.argv[6])
 #	bpp_min = int(bpp_mid*(1-r))
 #	bpp_max = int(bpp_mid*(1+r))
 
 random.seed()
-time = 600
 result_sqm = []
 result_sqm2 = []
 result_sqm3 = []
@@ -103,7 +105,7 @@ def sqm_admission2(admitted, x, bpp):
 	admitted[x] = 1
 	for i in range(x + 1):
 		if admitted[i] == 1:
-			t_prb += br_with_zero[-1]*1000.0/(bpp[i]*8)
+			t_prb += 2000*1000.0/(bpp[i]*8)#br_with_zero[-2]*1000.0/(bpp[i]*8)
 	if t_prb <= total_prb*percentage:
 		admitted[x] = 1
 	else:
@@ -115,7 +117,7 @@ def sqm_admission3(admitted, x, bpp):
 	admitted[x] = 1
 	for i in range(x + 1):
 		if admitted[i] == 1:
-			t_prb += br_with_zero[len(br_with_zero)/2]*1000.0/(bpp[i]*8)
+			t_prb +=1000*1000.0/(bpp[i]*8) # br_with_zero[len(br_with_zero)/2-1]*1000.0/(bpp[i]*8)
 	if t_prb <= total_prb*percentage:
 		admitted[x] = 1
 	else:

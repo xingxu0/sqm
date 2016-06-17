@@ -63,3 +63,8 @@ ax.set_xlabel("Number of Non-Premium Users")
 ax2.set_xlabel("Number of Non-Premium Users")
 plt.tight_layout()
 plt.savefig("vary_non_premium_user_%d.png"%(stair))
+
+fout = open("vary_non_premium_user_%d.txt"%(stair), "w")
+fout.write(str(y_total) + "\n")
+fout.write(str(y_avg) + "\n")
+fout.close()
