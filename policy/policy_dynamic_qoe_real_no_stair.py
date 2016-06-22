@@ -133,135 +133,6 @@ def paris_admission(admitted, x, bpp):
 	else:
 		admitted[x] = -1
 		print "paris rejected user ", x, total_prb*1.0*percentage/admitted_, total_prb*(1.0-percentage)/normal_n
-
-def sqm(bpp, admitted, new_user, current_premium_user, last, admssion_scheme):
-	if new_user:
-		for i in range(len(admitted)):
-			if admitted[i] == 0 and new_user:
-				if admssion_scheme == 1:
-					sqm_admission(admitted, i, bpp)
-				elif admssion_scheme == 2:
-					sqm_admission2(admitted, i, bpp)
-				else:
-					sqm_admission3(admitted, i, bpp)
-				new_user -= 1
-	available = total_prb*percentage
-	used = 0
-	ret_prb = {}
-	ret_rate = {}
-	sorted_bpp = sorted(bpp.items(), key=operator.itemgetter(1), reverse=True)
-	for i in range(len(sorted_bpp)):
-		ret_prb[sorted_bpp[i][0]] = 0
-		ret_rate[sorted_bpp[i][0]] = 0
-		if admitted[sorted_bpp[i][0]] != 1:
-			continue
-		for j in range(len(br) - 1, -1, -1):
-			need = br[j]*1000.0/(sorted_bpp[i][1]*8)
-			if used + need < available:
-				ret_prb[sorted_bpp[i][0]] = need
-				ret_rate[sorted_bpp[i][0]] = br[j]
-				used += need
-				break
-	
-	ret_prb_ = []
-	ret_rate_ = []
-	for i in range(len(bpp)):
-		ret_prb_.append(ret_prb[i])
-		ret_rate_.append(ret_rate[i])
-	# to lock it a bit to avoid fluctruation
-	if last != []:
-		if last[1] != ret_rate_:
-			diff = 0
-			for i in range(len(last[1])):
-				diff += abs(br_with_zero.index(int(last[1][i])) - br_with_zero.index(ret_rate_[i]))
-				if abs(br_with_zero.index(last[1][i]) - br_with_zero.index(ret_rate_[i])) >= len(br_with_zero)/2:
-					diff += n
-			if diff >= n - 1:
-				# check last solution is still feasible or not
-				t_prb = 0
-				for i in range(len(last[1])):
-					t_prb += last[1][i]*1.0/(bpp[i]*8)
-				if t_prb <= available and abs((np.mean(ret_rate_) - np.mean(last[1]))/np.mean(ret_rate_)) <lock_parameter:
-					#print "\tusing last",diff, last[1], ret_rate_, abs((np.mean(ret_rate_) - np.mean(last[1]))/np.mean(ret_rate_))
-					ret_prb_ = copy.deepcopy(last[0])
-					ret_rate_ = copy.deepcopy(last[1])
-	premium_allocation = [copy.deepcopy(ret_prb_), copy.deepcopy(ret_rate_)]
-	#return ret_prb_, ret_rate_, premium_allocation
-	non_premium = 0
-	for i in range(len(admitted)):
-		if admitted[i] == 1:
-			if ret_prb_[i] == 0:
-				non_premium += 1
-	for i in range(len(admitted)):
-		if admitted[i] == 1:
-			if ret_prb_[i] == 0:
-				ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
-				ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000
-	return ret_prb_, ret_rate_, premium_allocation
-
-
-def paris(bpp, admitted, new_user, current_premium_user):
-	if new_user:
-		for i in range(len(admitted)):
-			if admitted[i] == 0 and new_user:
-				paris_admission(admitted, i, bpp)
-				new_user -= 1
-	available = total_prb*percentage
-	ret_prb = {}
-	ret_rate = {}
-	admitted_ = 0
-	for i in range(len(admitted)):
-		if admitted[i] == 1:
-			admitted_ += 1
-	for i in range(len(bpp)):
-		ret_prb[i] = 0
-		ret_rate[i] = 0
-		if admitted[i] != 1:
-			continue
-		ret_prb[i] = available/admitted_
-		temp_rate = ret_prb[i]*bpp[i]*8/1000
-		# stair
-		#j = 0
-		#while j < len(br) and br[j] <= temp_rate:
-		#	j += 1
-		#ret_rate[i] = br[j - 1] if j - 1 >= 0 else 0
-		ret_rate[i] = temp_rate
-	ret_prb_ = []
-	ret_rate_ = []
-	for i in range(len(bpp)):
-		ret_prb_.append(ret_prb[i])
-		ret_rate_.append(ret_rate[i])
-	return ret_prb_, ret_rate_
-
-def now(bpp, admitted, new_user, current_premium_user):
-	if new_user:
-		for i in range(len(admitted)):
-			if admitted[i] == 0 and new_user:
-				admitted[i] = 1
-				new_user -= 1
-	ret_prb = {}
-	ret_rate = {}
-	for i in range(len(bpp)):
-		ret_prb[i] = 0
-		ret_rate[i] = 0
-		if admitted[i] != 1:
-			continue
-		ret_prb[i] = total_prb/(normal_n + current_premium_user)
-		#print total_prb, normal_n, current_premium_user, total_prb/(normal_n + current_premium_user)
-		temp_rate = ret_prb[i]*bpp[i]*8/1000
-		# stair
-		#j = 0
-		#while j < len(br) and br[j] <= temp_rate:
-		#	j += 1
-		#ret_rate[i] = br[j - 1] if j - 1 >= 0 else 0
-		ret_rate[i] = temp_rate
-	ret_prb_ = []
-	ret_rate_ = []
-	for i in range(len(bpp)):
-		ret_prb_.append(ret_prb[i])
-		ret_rate_.append(ret_rate[i])
-	return ret_prb_, ret_rate_
-
 #generate join time
 
 last = 0
@@ -292,7 +163,7 @@ last_r2 = []
 last_r3 = []
 admitted_sqm = [0] * n
 admitted_sqm2 = [0] * n
-admitted_sqm3 = [0] * n
+admitted_sqm3 = [0] * n   # with minimum support
 admitted_paris = [0] * n
 admitted_now = [0] * n
 current_user = 0
@@ -315,7 +186,7 @@ for i in range(time):
 	result_sqm2.append([r1, r2])
 	last_r2 = copy.deepcopy(r3)
 	
-	r1, r2, r3 = sqm(bpp, admitted_sqm3, new_user, current_user, last_r2, 3)
+	r1, r2, r3 = sqm_minimum_support(bpp, admitted_sqm3, new_user, current_user, last_r2, 1)
 	u_sqm3.append(sum(r2)*1.0)#/count_admitted_user(admitted_sqm))
 	u_a_sqm3.append(sum(r2)*1.0/count_admitted_user(admitted_sqm3) if count_admitted_user(admitted_sqm3) else 0 )
 	result_sqm3.append([r1, r2])
