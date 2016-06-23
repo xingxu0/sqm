@@ -10,14 +10,22 @@ pid = os.getpid()
 
 #signal range's default is 37%
 #print "python policy.py [scheme] [# premium users] [\% of premium resources] [# normal users] [silent] [signal range]"
-print "python policy.py [scheme] [# premium users] [\% of premium resources] [# normal users] [duration]"
+print "python policy.py [scheme] [# premium users] [\% of premium resources] [# normal users] [silent] [trace name] [duration]"
 print "\t schemes. 1: random location; 2: same location; 3: good and bad"
 
 scheme = int(sys.argv[1])
 common.n = int(sys.argv[2])
 common.percentage = float(sys.argv[3])
 common.normal_n = int(sys.argv[4])
-common.time = int(sys.argv[5])
+# common.time = 
+silent = int(sys.argv[5])
+tracename  = sys.argv[6]
+if len(sys.argv) > 7:
+	time = int(sys.argv[7])
+#if len(sys.argv) > 6:
+#	r = float(sys.argv[6])
+#	bpp_min = int(bpp_mid*(1-r))
+#	bpp_max = int(bpp_mid*(1+r))
 
 random.seed(0)
 result_sqm = []
@@ -27,7 +35,7 @@ result_paris = []
 result_now = []
 bpp = {}
 bpp_legend = []
-randomness = 0.05
+randomness = 0.02
 filename = ""
 
 join_time = []
@@ -59,7 +67,7 @@ def get_two_types_users():
 		else:
 			bpp[i] = random.randint(common.bpp_min, int(common.bpp_min*1.1))
 		bpp_legend.append(str(bpp[i]))
-		
+
 #generate join time
 
 last = 0
@@ -90,21 +98,17 @@ last_r2 = []
 last_r3 = []
 admitted_sqm = [0] * common.n
 admitted_sqm2 = [0] * common.n
-admitted_sqm3 = [0] * common.n
+admitted_sqm3 = [0] * common.n   # with minimum support
 admitted_paris = [0] * common.n
 admitted_now = [0] * common.n
 current_user = 0
 new_user = 0
-signal = [[] for i in range(common.n)]
-
-scheme_label = ["sqm1", "sqm_minimum_support", "sqm_fairness", "paris", "now"]
 for i in range(common.time):
 	for j in range(common.n):
 		if join_time[j] == i:
 			new_user += 1
 	for j in range(common.n):
 		bpp[j] = bpp[j]*(1 + 2*(random.random() - 0.5)*randomness)
-		signal[j].append(bpp[j])
 	r1, r2, r3 = common.sqm(bpp, admitted_sqm, new_user, current_user, last_r, 1)
 	u_sqm.append(sum(r2)*1.0)#/count_admitted_user(admitted_sqm))
 	u_a_sqm.append(sum(r2)*1.0/common.count_admitted_user(admitted_sqm) if common.count_admitted_user(admitted_sqm) else 0 )
@@ -134,8 +138,14 @@ for i in range(common.time):
 	result_now.append(r)
 	current_user += new_user
 	new_user = 0
-	
-	
+		
+#f = open("temp", "w")
+#f.write(str(np.mean(u_sqm)) +" " + str(np.mean(u_sqm2)) +" " + str(np.mean(u_sqm3)) +" " + str(np.mean(u_paris)) + " " + str( np.mean(u_now)) + "\n")
+#f.write(str(np.mean(u_a_sqm)) +" "+ str(np.mean(u_a_sqm2)) +" " + str(np.mean(u_a_sqm3)) +" " +str(np.mean(u_a_paris)) + " " + str( np.mean(u_a_now)) + "\n")
+#f.close()
+
+results = [result_sqm, result_sqm2, result_sqm3, result_paris, result_now]
+
 def generate_file(f, r, j):
 	randomness = 0 #.05
 	fo = open(f, "w")
@@ -143,60 +153,109 @@ def generate_file(f, r, j):
 		random_ = 2*(random.random() - 0.5)*randomness
 		fo.write(str(i*1000) + " " + str(max(1, r[i][1][j]*(1+random_))) + "\n")
 
-results = [result_sqm, result_sqm2, result_sqm3, result_paris, result_now]
-#axes = [(ax, ax2), (bx, bx2), (cx, cx2), (dx, dx2), (ex, ex2)]
-#axesu = [axu, bxu, cxu, dxu, exu]
-#results_u = [u_sqm, u_sqm2, u_sqm3, u_paris, u_now]
-#max_u = max(max(u_sqm), max(u_paris), max(u_now), max(u_sqm2), max(u_sqm3))
-
-#qoe_total = [0] * len(results)
-#qoe_avg = [0] * len(results)
+qoe_total = [0] * len(results)
+qoe_avg = [0] * len(results)
+qoe = [[[0,0,0] for y in range(common.n)] for x in range(len(results))]
 ad = [admitted_sqm, admitted_sqm2, admitted_sqm3, admitted_paris, admitted_now]
-
-
 for i in range(len(results)):
-	fig, axes = plt.subplots(nrows=common.n, ncols=1, figsize=(8,6*common.n))
 	r = results[i]
-	wrong_users = 0
 	for j in range(common.n):
-		ax = axes[j]
-		ax2 = ax.twinx()
 		generate_file("temp_trace_%d"%(pid), r, j)
 		o = commands.getstatusoutput("python ABRSim/simulation.py temp_trace_%d"%(pid))
 		#print o
-		
-		
-		props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-
 		g = re.match("QoE: (.*) avg. bitrate: (.*) buf. ratio: (.*) numSwtiches: (.*) dominant BR: (.*) played (.*) out of (.*)", o[1])
-		if g != None:
-			ab = float(g.group(2))
-			bu = float(g.group(3))
-			sw = float(g.group(4))
+		metric = 2
+		if g != None and float(g.group(metric)) > 0:
+			qoe_total[i] += float(g.group(metric))
+			qoe[i][j][0] = float(g.group(2))
+			qoe[i][j][1] = float(g.group(3))
+			qoe[i][j][2] = float(g.group(4))
 		else:
-			ab, bu, sw = 0, 0, 0
-			wrong_users += 1
-			print o[1]
-		text = "admitted: " + ("Yes" if ad[i][j] == 1 else "No") + "\navg bitrate: " + str(ab) + "\nrebuffer: " + str(bu) + "\nswitches: " + str(sw)
-		ax.text(0.01, 1.03, text, transform=ax.transAxes, verticalalignment='top', fontsize=14, bbox=props)
-	#qoe_avg[i] = qoe_total[i]*1.0/count_admitted_user(ad[i]) if count_admitted_user(ad[i]) else 0
-	#os.system("rm temp_trace_%d"%(pid))
+			qoe_total[i] += 0
+	qoe_avg[i] = qoe_total[i]*1.0/common.count_admitted_user(ad[i]) if common.count_admitted_user(ad[i]) else 0
+	os.system("rm temp_trace_%d"%(pid))
+
+f = open(tracename, "w")
+t_total = ""
+t_avg = ""
+for i in range(len(qoe_total)):
+	t_total += str(qoe_total[i]) + " "
+	t_avg += str(qoe_avg[i]) + " "
+f.write(t_total[:-1] + "\n" + t_avg[:-1] + "\n")
+f.close()
+
+# plotting
+fig = plt.figure(figsize=(25,10))
+ax = fig.add_subplot(251)
+bx = fig.add_subplot(252)
+cx = fig.add_subplot(253)
+dx = fig.add_subplot(254)
+ex = fig.add_subplot(255)
+axu = fig.add_subplot(256)
+bxu = fig.add_subplot(257)
+cxu = fig.add_subplot(258)
+dxu = fig.add_subplot(259)
+exu = fig.add_subplot(2,5,10)
+ax2 = ax.twinx()
+bx2 = bx.twinx()
+cx2 = cx.twinx()
+dx2 = dx.twinx()
+ex2 = ex.twinx()
+
+axes = [(ax, ax2), (bx, bx2), (cx, cx2), (dx, dx2), (ex, ex2)]
+axesu = [axu, bxu, cxu, dxu, exu]
+results_u = [u_sqm, u_sqm2, u_sqm3, u_paris, u_now]
+max_u = max(max(u_sqm), max(u_paris), max(u_now), max(u_sqm2), max(u_sqm3))
+for ii in range(len(results)): # for each scheme
 	
+	rate_count = [0] * (len(common.br_with_zero) + 1)
+	x = []
+	for i in range(common.n): # for each premium user
 		x = []
 		y1 = []
 		y2 = []
-		for k in range(len(results[i])):
-			x.append(k)
-			y1.append(results[i][k][0][j]) # prb
-			#y1.append(results[i][k][1][j]) # rate
-			y2.append(common.br_with_zero.index(results[i][k][1][j]) if results[i][k][1][j] in common.br_with_zero else 0) # quality level
-		#print bpp[j], len(bpp[j])
-		ax.plot(x, y2)
-		ax2.plot(x, y1, ":k")
-		ax.set_ylim([-1, len(common.br_with_zero)*1.3])
-		ax2.set_ylabel("Rate (Kbits/s)")
-		ax.set_ylabel("Rate (Quality level)")
-		ax.set_xlabel("Time (s)")
-	plt.savefig("policy_%s_%s_np%d_nt%d_p%.2f_lock%.2f.png"%(scheme_label[i], filename, common.n, common.normal_n, common.percentage, common.lock_parameter))
-	plt.tight_layout()
-	plt.close()
+		for j in range(len(results[ii])): # for each second
+			x.append(j)
+			y1.append(results[ii][j][0][i])
+			# plot rate between rate level
+			value = 0
+			if results[ii][j][1][i] in common.br_with_zero:
+				value = common.br_with_zero.index(results[ii][j][1][i])
+			else:
+				for k in range(len(common.br_with_zero)):
+					if common.br_with_zero[k] > results[ii][j][1][i]:
+						break
+				value = k - 1 + (results[ii][j][1][i] - common.br_with_zero[k - 1])/(common.br_with_zero[k] - common.br_with_zero[k - 1])
+			y2.append(value)
+			#y2.append(common.br_with_zero.index(results[ii][j][1][i]) if results[ii][j][1][i] in common.br_with_zero else 0)
+			rate_count[common.br_with_zero.index(results[ii][j][1][i]) if results[ii][j][1][i] in common.br_with_zero else 0] += 1
+		axes[ii][1].plot(x, y1, ":", linewidth=2)
+		axes[ii][0].plot(x, y2, "-", linewidth=2)
+	#axes[ii][1].legend(["PRB"], 1, ncol=6)
+	axes[ii][0].legend(bpp_legend, 1, ncol=3)
+	axes[ii][0].grid()
+	#ax.set_xlim([r_s, r_e])
+	#ax.set_ylim([0, 4800])
+	#ax[i].legend(le[i],fontsize=legend_font_size)
+	#ax[i].set_ylabel("++", fontsize=label_font_size)
+	axes[ii][1].set_ylabel("PRB")
+	axes[ii][0].set_ylabel("Rate (Quality level)")
+	axes[ii][0].set_xlabel("Time (s)")
+	text = ""
+	for i in range(len(common.br_with_zero)):
+		text = str(common.label[i]) + ":" + str("%.2f"%(rate_count[i]*1.0/len(results[ii]))) + ", " + text
+	props = dict(boxstyle='round', facecolor='wheat', alpha=0.9)
+	axes[ii][0].text(0.01, 1.03, text, transform=axes[ii][0].transAxes, verticalalignment='top', fontsize=14, bbox=props)
+	axes[ii][0].set_ylim([-1, len(common.br_with_zero)*1.3])
+	
+	for i in range(common.n):
+		text = "A: %.0f R: %.4f S: %d"%(qoe[ii][i][0], qoe[ii][i][1], qoe[ii][i][2])
+		axesu[ii].text(0.01, 0.9 - i*(1.0/common.n), text, transform=axesu[ii].transAxes, verticalalignment='top', fontsize=14, bbox=props)
+	
+	axesu[ii].plot(x, results_u[ii])
+	axesu[ii].set_ylim([0, max_u*1.1])
+	axesu[ii].set_ylabel("objective function")
+	axesu[ii].set_xlabel("time")
+plt.tight_layout()
+if not silent:
+	plt.savefig("policy_dynamic_%s_np%d_nt%d_p%.2f.png"%(filename, common.n, common.normal_n, common.percentage))

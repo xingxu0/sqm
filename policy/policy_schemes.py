@@ -7,13 +7,12 @@ bpp_min = int(135*0.8) # bpp is bytes per prb
 bpp_max = int(292*0.8)  # this value maps to 712bits/s as TBS
 total_prb = 12000*4
 percentage = .3
-lock_parameter = 0 #0.3
+lock_parameter = 0 #0.1 #0.3
 time = 600
 
 label = ["N","R1", "R2", "R3", "R4", "R5"]
 
 br = [350, 700, 1200, 2400, 4800]
-#br = [350, 700, 1200, 2400]
 br_with_zero = [0] + br
 
 def count_admitted_user(a): # user with 1 is admitted, -1 is rejected, 0 is not seen
@@ -166,7 +165,6 @@ def sqm_minimum_support(bpp, admitted, new_user, current_premium_user, last, adm
 		if doable == True:
 			fairness_rate = j
 			break
-	print fairness_rate, available, used
 	# assign fairness_rate to everyone
 	used = 0
 	for i in range(len(sorted_bpp)):
@@ -177,16 +175,18 @@ def sqm_minimum_support(bpp, admitted, new_user, current_premium_user, last, adm
 			used += need
 			ret_prb[sorted_bpp[i][0]] = need
 			ret_rate[sorted_bpp[i][0]] = br[fairness_rate]
+		else:
+			ret_prb[sorted_bpp[i][0]] = 0
+			ret_rate[sorted_bpp[i][0]] = 0
 	# assign the rest of PRBs according to previous method
-	available -= used
-	print available
+	new_available = available - used
 	used = 0
 	for i in range(len(sorted_bpp)):
 		if admitted[sorted_bpp[i][0]] != 1:
 			continue
 		for j in range(len(br) - 1, -1, -1):
 			need = br[j]*1000.0/(sorted_bpp[i][1]*8)
-			if used + need - ret_prb[sorted_bpp[i][0]] < available:
+			if used + need - ret_prb[sorted_bpp[i][0]] < new_available:
 				used += need - ret_prb[sorted_bpp[i][0]]
 				ret_prb[sorted_bpp[i][0]] = need
 				ret_rate[sorted_bpp[i][0]] = br[j]
@@ -217,10 +217,22 @@ def sqm_minimum_support(bpp, admitted, new_user, current_premium_user, last, adm
 	premium_allocation = [copy.deepcopy(ret_prb_), copy.deepcopy(ret_rate_)]
 	#return ret_prb_, ret_rate_, premium_allocation
 	non_premium = 0
+	allocated_prb = 0
 	for i in range(len(admitted)):
 		if admitted[i] == 1:
+			allocated_prb += ret_prb_[i]
 			if ret_prb_[i] == 0:
 				non_premium += 1
+	# give extra to any premium user
+	extra = available - allocated_prb
+	for i in range(len(admitted)):
+		if admitted[i] == 1:
+			if ret_prb_[i] != 0:
+				ret_prb_[i] += extra
+				ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000
+				break
+				
+	#print extra, available, non_premium
 	for i in range(len(admitted)):
 		if admitted[i] == 1:
 			if ret_prb_[i] == 0:
