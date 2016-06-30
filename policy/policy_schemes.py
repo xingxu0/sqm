@@ -23,6 +23,7 @@ def count_admitted_user(a): # user with 1 is admitted, -1 is rejected, 0 is not 
 	return c
 
 def sqm_admission(admitted, x, bpp):
+	#print "sqm admission", 
 	t_prb = 0
 	admitted[x] = 1
 	for i in range(x + 1):
@@ -30,9 +31,10 @@ def sqm_admission(admitted, x, bpp):
 			t_prb += br_with_zero[1]*1000.0/(bpp[i]*8)
 	if t_prb <= total_prb*percentage:
 		admitted[x] = 1
+		#print "accept", x
 	else:
 		admitted[x] = -1
-		print "sqm rejected user ", x
+		print "sqm REJECT", x
 		
 def sqm_admission2(admitted, x, bpp):
 	t_prb = 0
@@ -76,8 +78,10 @@ def sqm(bpp, admitted, new_user, current_premium_user, last, admssion_scheme):
 					sqm_admission(admitted, i, bpp)
 				elif admssion_scheme == 2:
 					sqm_admission2(admitted, i, bpp)
-				else:
+				elif admssion_scheme == 3:
 					sqm_admission3(admitted, i, bpp)
+				else:
+					paris_admission(admitted, i, bpp)
 				new_user -= 1
 	available = total_prb*percentage
 	used = 0
@@ -126,11 +130,12 @@ def sqm(bpp, admitted, new_user, current_premium_user, last, admssion_scheme):
 		if admitted[i] == 1:
 			if ret_prb_[i] == 0:
 				non_premium += 1
+		elif admitted[i] == -1:
+			non_premium += 1
 	for i in range(len(admitted)):
-		if admitted[i] == 1:
-			if ret_prb_[i] == 0:
-				ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
-				ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000
+		if (admitted[i] == 1 and ret_prb_[i] == 0) or admitted[i] == -1:
+			ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
+			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000
 	return ret_prb_, ret_rate_, premium_allocation
 
 def sqm_minimum_support(bpp, admitted, new_user, current_premium_user, last, admssion_scheme, maximum_fair):
@@ -141,8 +146,10 @@ def sqm_minimum_support(bpp, admitted, new_user, current_premium_user, last, adm
 					sqm_admission(admitted, i, bpp)
 				elif admssion_scheme == 2:
 					sqm_admission2(admitted, i, bpp)
-				else:
+				elif admssion_scheme == 3:
 					sqm_admission3(admitted, i, bpp)
+				else:
+					paris_admission(admitted, i, bpp)
 				new_user -= 1
 	available = total_prb*percentage
 	used = 0
@@ -168,6 +175,8 @@ def sqm_minimum_support(bpp, admitted, new_user, current_premium_user, last, adm
 	# assign fairness_rate to everyone
 	used = 0
 	for i in range(len(sorted_bpp)):
+		ret_prb[sorted_bpp[i][0]] = 0
+		ret_rate[sorted_bpp[i][0]] = 0
 		if admitted[sorted_bpp[i][0]] != 1:
 			continue
 		need = br[fairness_rate]*1000.0/(sorted_bpp[i][1]*8)
@@ -223,6 +232,8 @@ def sqm_minimum_support(bpp, admitted, new_user, current_premium_user, last, adm
 			allocated_prb += ret_prb_[i]
 			if ret_prb_[i] == 0:
 				non_premium += 1
+		elif admitted[i] == -1:
+			non_premium += 1
 	# give extra to any premium user
 	extra = available - allocated_prb
 	for i in range(len(admitted)):
@@ -234,19 +245,25 @@ def sqm_minimum_support(bpp, admitted, new_user, current_premium_user, last, adm
 				
 	#print extra, available, non_premium
 	for i in range(len(admitted)):
-		if admitted[i] == 1:
-			if ret_prb_[i] == 0:
-				ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
-				ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000
+		if (admitted[i] == 1 and ret_prb_[i] == 0) or admitted[i] == -1:
+			ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
+			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000
 	return ret_prb_, ret_rate_, premium_allocation
 
 
 
-def paris(bpp, admitted, new_user, current_premium_user):
+def paris(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 	if new_user:
 		for i in range(len(admitted)):
 			if admitted[i] == 0 and new_user:
-				paris_admission(admitted, i, bpp)
+				if admssion_scheme == 1:
+					sqm_admission(admitted, i, bpp)
+				elif admssion_scheme == 2:
+					sqm_admission2(admitted, i, bpp)
+				elif admssion_scheme == 3:
+					sqm_admission3(admitted, i, bpp)
+				else:
+					paris_admission(admitted, i, bpp)
 				new_user -= 1
 	available = total_prb*percentage
 	ret_prb = {}
@@ -268,14 +285,26 @@ def paris(bpp, admitted, new_user, current_premium_user):
 		#	j += 1
 		#ret_rate[i] = br[j - 1] if j - 1 >= 0 else 0
 		ret_rate[i] = temp_rate
+	
 	ret_prb_ = []
 	ret_rate_ = []
 	for i in range(len(bpp)):
 		ret_prb_.append(ret_prb[i])
 		ret_rate_.append(ret_rate[i])
+	non_premium = 0
+	for i in range(len(admitted)):
+		if admitted[i] == 1:
+			if ret_prb_[i] == 0:
+				non_premium += 1
+		elif admitted[i] == -1:
+			non_premium += 1
+	for i in range(len(admitted)):
+		if (admitted[i] == 1 and ret_prb_[i] == 0) or admitted[i] == -1:
+			ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
+			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000		
 	return ret_prb_, ret_rate_
 
-def now(bpp, admitted, new_user, current_premium_user):
+def now(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 	if new_user:
 		for i in range(len(admitted)):
 			if admitted[i] == 0 and new_user:

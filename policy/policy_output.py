@@ -37,6 +37,7 @@ bpp = {}
 bpp_legend = []
 randomness = 0.02
 filename = ""
+issue = 0
 
 join_time = []
 
@@ -103,36 +104,37 @@ admitted_paris = [0] * common.n
 admitted_now = [0] * common.n
 current_user = 0
 new_user = 0
+admission_control_scheme = 1
 for i in range(common.time):
 	for j in range(common.n):
 		if join_time[j] == i:
 			new_user += 1
 	for j in range(common.n):
 		bpp[j] = bpp[j]*(1 + 2*(random.random() - 0.5)*randomness)
-	r1, r2, r3 = common.sqm(bpp, admitted_sqm, new_user, current_user, last_r, 1)
+	r1, r2, r3 = common.sqm(bpp, admitted_sqm, new_user, current_user, last_r, admission_control_scheme)
 	u_sqm.append(sum(r2)*1.0)#/count_admitted_user(admitted_sqm))
 	u_a_sqm.append(sum(r2)*1.0/common.count_admitted_user(admitted_sqm) if common.count_admitted_user(admitted_sqm) else 0 )
 	result_sqm.append([r1, r2])
 	last_r = copy.deepcopy(r3)
 	
-	r1, r2, r3 = common.sqm_minimum_support(bpp, admitted_sqm2, new_user, current_user, last_r2, 1, 0)
+	r1, r2, r3 = common.sqm_minimum_support(bpp, admitted_sqm2, new_user, current_user, last_r2, admission_control_scheme, 0)
 	u_sqm2.append(sum(r2)*1.0)#/count_admitted_user(admitted_sqm))
 	u_a_sqm2.append(sum(r2)*1.0/common.count_admitted_user(admitted_sqm2) if common.count_admitted_user(admitted_sqm2) else 0 )
 	result_sqm2.append([r1, r2])
 	last_r2 = copy.deepcopy(r3)
 	
-	r1, r2, r3 = common.sqm_minimum_support(bpp, admitted_sqm3, new_user, current_user, last_r2, 1, 1)
+	r1, r2, r3 = common.sqm_minimum_support(bpp, admitted_sqm3, new_user, current_user, last_r2, admission_control_scheme, 1)
 	u_sqm3.append(sum(r2)*1.0)#/count_admitted_user(admitted_sqm))
 	u_a_sqm3.append(sum(r2)*1.0/common.count_admitted_user(admitted_sqm3) if common.count_admitted_user(admitted_sqm3) else 0 )
 	result_sqm3.append([r1, r2])
 	last_r3 = copy.deepcopy(r3)
 	
-	r = common.paris(bpp, admitted_paris, new_user, current_user)
+	r = common.paris(bpp, admitted_paris, new_user, current_user, admission_control_scheme)
 	u_paris.append(sum(r[1])*1.0)#/count_admitted_user(admitted_paris))
 	u_a_paris.append(sum(r[1])*1.0/common.count_admitted_user(admitted_paris) if common.count_admitted_user(admitted_paris) else 0)
 	result_paris.append(r)
 	
-	r = common.now(bpp, admitted_now, new_user, current_user)
+	r = common.now(bpp, admitted_now, new_user, current_user, admission_control_scheme)
 	u_now.append(sum(r[1])*1.0)#/count_admitted_user(admitted_now))
 	u_a_now.append(sum(r[1])*1.0/common.count_admitted_user(admitted_now) if common.count_admitted_user(admitted_now) else 0)
 	result_now.append(r)
@@ -155,7 +157,7 @@ def generate_file(f, r, j):
 
 qoe_total = [0] * len(results)
 qoe_avg = [0] * len(results)
-qoe = [[[0,0,0] for y in range(common.n)] for x in range(len(results))]
+qoe = [[[0,0,0,0] for y in range(common.n)] for x in range(len(results))] # average bitrate, rebuffer, switches, admitted
 ad = [admitted_sqm, admitted_sqm2, admitted_sqm3, admitted_paris, admitted_now]
 for i in range(len(results)):
 	r = results[i]
@@ -170,18 +172,25 @@ for i in range(len(results)):
 			qoe[i][j][0] = float(g.group(2))
 			qoe[i][j][1] = float(g.group(3))
 			qoe[i][j][2] = float(g.group(4))
+			qoe[i][j][3] = ad[i][j]
 		else:
 			qoe_total[i] += 0
+			print "***", i, j
+			os.system("cp temp_trace_%d issue_%d_%d_%d_%d"%(pid, pid, i,j,issue))
+			issue += 1
 	qoe_avg[i] = qoe_total[i]*1.0/common.count_admitted_user(ad[i]) if common.count_admitted_user(ad[i]) else 0
 	os.system("rm temp_trace_%d"%(pid))
 
 f = open(tracename, "w")
-t_total = ""
-t_avg = ""
-for i in range(len(qoe_total)):
-	t_total += str(qoe_total[i]) + " "
-	t_avg += str(qoe_avg[i]) + " "
-f.write(t_total[:-1] + "\n" + t_avg[:-1] + "\n")
+for i in range(len(results)):
+	r = results[i]
+	ind = [3, 0, 1, 2]
+	for kk in range(4):
+		k = ind[kk]
+		text = ""
+		for j in range(common.n):
+			text += str(qoe[i][j][k]) + " "
+		f.write(text[:-1] + "\n")
 f.close()
 
 # plotting
@@ -248,9 +257,18 @@ for ii in range(len(results)): # for each scheme
 	axes[ii][0].text(0.01, 1.03, text, transform=axes[ii][0].transAxes, verticalalignment='top', fontsize=14, bbox=props)
 	axes[ii][0].set_ylim([-1, len(common.br_with_zero)*1.3])
 	
+	total = [0,0,0,0]
 	for i in range(common.n):
-		text = "A: %.0f R: %.4f S: %d"%(qoe[ii][i][0], qoe[ii][i][1], qoe[ii][i][2])
-		axesu[ii].text(0.01, 0.9 - i*(1.0/common.n), text, transform=axesu[ii].transAxes, verticalalignment='top', fontsize=14, bbox=props)
+		text = "AD: %s A: %.0f R: %.4f S: %d"%("Y" if qoe[ii][i][3] == 1 else "N", qoe[ii][i][0], qoe[ii][i][1], qoe[ii][i][2])
+		axesu[ii].text(0.01, 0.9 - i*(1.0/(common.n+1)), text, transform=axesu[ii].transAxes, verticalalignment='top', fontsize=14, bbox=props)
+		total[0] += qoe[ii][i][0]
+		total[1] += qoe[ii][i][1]
+		total[2] += qoe[ii][i][2]
+		if qoe[ii][i][3] == 1:
+			total[3] += 1
+	
+	text = "Total:\nAD: %d A: %.0f R: %.4f S: %d"%(total[3], total[0], total[1], total[2])
+	axesu[ii].text(0.01, 0.9 - common.n*(1.0/(common.n+1)), text, transform=axesu[ii].transAxes, verticalalignment='top', fontsize=15, bbox=props)
 	
 	axesu[ii].plot(x, results_u[ii])
 	axesu[ii].set_ylim([0, max_u*1.1])
