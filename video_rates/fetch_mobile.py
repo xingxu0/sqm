@@ -23,12 +23,12 @@ def request_mobile(ip="", hostname="", fileobject="", saveto="temp", extra_heade
 	headers = extra_headers
 	if len(hostname) > 0:
 		headers["Host"] = hostname
-	#headers["User-Agent"] = "Mozilla/5.0 (Linux; Android 4.4.2; Nexus 4 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.114 Mobile Safari/537.36"
-	#headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-	#headers["accept-language"] = "en-US,en;q=0.8,zh-CN;q=0.6,zh-TW;q=0.4"
-	#headers["cookie"] = "GPS=1; YSC=QRncVfQ7VII; VISITOR_INFO1_LIVE=U5gxjnY8XzI; PREF=f5=30"
+	headers["User-Agent"] = "Mozilla/5.0 (Linux; Android 4.4.2; Nexus 4 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.114 Mobile Safari/537.36"
+	headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+	headers["accept-language"] = "en-US,en;q=0.8,zh-CN;q=0.6,zh-TW;q=0.4"
+	headers["cookie"] = "GPS=1; YSC=QRncVfQ7VII; VISITOR_INFO1_LIVE=U5gxjnY8XzI; PREF=f5=30"
 	#headers["accept-encoding"] = "gzip, deflate, sdch"
-	#headers["upgrade-insecure-requests"] = "1"
+	headers["upgrade-insecure-requests"] = "1"
 	web.request("GET", "/" + fileobject, headers=headers)
 	response = web.getresponse()
   # save to file |saveto|
@@ -39,10 +39,10 @@ def request_mobile(ip="", hostname="", fileobject="", saveto="temp", extra_heade
 
 def get_field(l, f):
 	f += "="
-	s = l.find("\u0026" + f) + len("\u0026" + f)
-	if s == -1 + len("\u0026" + f):
+	s = l.find(r"\\u0026" + f) + len(r"\\u0026" + f)
+	if s == -1 + len(r"\\u0026" + f):
 		s = l.find(f) + len(f)
-	e = l.find("\u0026", s)
+	e = l.find(r"\\u0026", s)
 	return l[s:e if e != -1 else None]
 
 def get_bitrate(f):
@@ -76,11 +76,10 @@ def test():
 	r = []
 	for url in urls:
 		print url,
-		request_mobile(ip="www.youtube.com", fileobject=url)
+		request_mobile(ip="m.youtube.com", fileobject=url)
 		r_ = get_bitrate("temp")
 		print r_
 		r += r_
-	print len(urls)
 	return r
 
 if __name__ == "__main__":
@@ -107,4 +106,4 @@ if __name__ == "__main__":
 	ax_.set_ylabel("CDF (1)")
 	ax.set_xscale("log")
 	plt.tight_layout()
-	plt.savefig("bitrates_desktop.png")
+	plt.savefig("bitrates_mobile.png")
