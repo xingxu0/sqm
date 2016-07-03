@@ -27,7 +27,8 @@ if len(sys.argv) > 7:
 #	bpp_min = int(bpp_mid*(1-r))
 #	bpp_max = int(bpp_mid*(1+r))
 
-random.seed(0)
+#random.seed(0)
+random.seed()
 result_sqm = []
 result_sqm2 = []
 result_sqm3 = []
@@ -149,7 +150,7 @@ for i in range(common.time):
 results = [result_sqm, result_sqm2, result_sqm3, result_paris, result_now]
 
 def generate_file(f, r, j):
-	randomness = 0 #.05
+	randomness = 0.05
 	fo = open(f, "w")
 	for i in range(len(r)):
 		random_ = 2*(random.random() - 0.5)*randomness

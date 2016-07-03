@@ -15,6 +15,8 @@ x = []
 times = 1
 qoe_overall = []
 n_scheme = 5
+
+times = int(sys.argv[1])
 for i in range(5, 21, 3):
 	x.append(i)
 	tt = 0
@@ -22,7 +24,7 @@ for i in range(5, 21, 3):
 	n_user = i
 	qoe = [[0 for z in range(4)] for x_ in range(n_scheme)]
 	for j in range(times):
-		os.system("python policy_output.py 1 %d 0.10 90 0 %d.trace"%(i, pid))
+		os.system("python policy_output.py 1 %d 0.10 90 1 %d.trace"%(i, pid))
 		ls = open("%d.trace"%(pid)).readlines()
 		os.system("rm %d.trace"%(pid))
 		
