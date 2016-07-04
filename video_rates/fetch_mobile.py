@@ -1,5 +1,5 @@
 # PEP
-import httplib, os, string, random, time, socket, subprocess, itertools, numpy as np
+import httplib, os, string, random, time, socket, subprocess, itertools, numpy as np, operator
 from multiprocessing import Process
 import matplotlib.pyplot as plt
 
@@ -90,11 +90,17 @@ if __name__ == "__main__":
 	ax = fig.add_subplot(121)
 	ax_ = fig.add_subplot(122)
 	data = r
-	num_bins = 1000
+	num_bins = 100
 	counts, bin_edges = np.histogram(data, bins=num_bins)
 	x = []
+	xx = []
+	yy = []
+	data = {}
 	for i in range(len(counts)):
 		x.append(counts[i]*1.0/len(r))
+		xx.append(bin_edges[i + 1])
+		yy.append(x[i])
+		data[bin_edges[i + 1]] = x[i]
 	cdf = np.cumsum(x)
 	ax.plot(bin_edges[1:], cdf)
 	ax.set_xlabel("Bitrate (Kbps)")
@@ -107,3 +113,5 @@ if __name__ == "__main__":
 	ax.set_xscale("log")
 	plt.tight_layout()
 	plt.savefig("bitrates_mobile.png")
+	sorted_data = sorted(data.items(), key=operator.itemgetter(1), reverse=True)
+	print sorted_data
