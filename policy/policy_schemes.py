@@ -41,7 +41,8 @@ def sqm_admission2(admitted, x, bpp):
 	admitted[x] = 1
 	for i in range(x + 1):
 		if admitted[i] == 1:
-			t_prb += 2000*1000.0/(bpp[i]*8)#br_with_zero[-2]*1000.0/(bpp[i]*8)
+			#t_prb += 2000*1000.0/(bpp[i]*8)#br_with_zero[-2]*1000.0/(bpp[i]*8)
+			t_prb += br_with_zero[2]*1000.0/(bpp[i]*8)
 	if t_prb <= total_prb*percentage:
 		admitted[x] = 1
 	else:

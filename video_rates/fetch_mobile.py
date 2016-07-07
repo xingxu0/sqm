@@ -90,7 +90,7 @@ if __name__ == "__main__":
 	ax = fig.add_subplot(121)
 	ax_ = fig.add_subplot(122)
 	data = r
-	num_bins = 100
+	num_bins = 1000
 	counts, bin_edges = np.histogram(data, bins=num_bins)
 	x = []
 	xx = []

@@ -105,7 +105,7 @@ admitted_paris = [0] * common.n
 admitted_now = [0] * common.n
 current_user = 0
 new_user = 0
-admission_control_scheme = 1
+admission_control_scheme = 2
 for i in range(common.time):
 	for j in range(common.n):
 		if join_time[j] == i:
