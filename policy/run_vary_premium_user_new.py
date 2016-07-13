@@ -20,13 +20,15 @@ times = int(sys.argv[1])
 for i in range(5, 21, 3):
 	x.append(i)
 	tt = 0
+	print "!!!", i
 	
 	n_user = i
 	qoe = [[0 for z in range(4)] for x_ in range(n_scheme)]
 	for j in range(times):
-		os.system("python policy_output.py 1 %d 0.10 90 1 %d.trace"%(i, pid))
+		#os.system("python policy_output.py 1 %d 0.10 90 1 %d.trace"%(i, pid))
+		os.system("python policy_different_join_time.py 1 %d 0.10 90 0 %d.trace"%(i, pid))
 		ls = open("%d.trace"%(pid)).readlines()
-		os.system("rm %d.trace"%(pid))
+		#os.system("rm %d.trace"%(pid))
 		
 		xx = -1
 		for ii in range(n_scheme):
@@ -39,11 +41,13 @@ for i in range(5, 21, 3):
 				for kk in range(n_user):
 					#print ii, jj, kk, t_
 					#qoe[ii][jj][kk] += float(t_[kk])
-					if admission == 0 or int(admission[kk]) == 1:
+					if admission == 0 or int(admission[kk]) >= 1:
 						qoe[ii][jj] += float(t_[kk])
 	for ii in range(n_scheme):
 		for jj in range(1, 4):
-			qoe[ii][jj] = qoe[ii][jj]*1.0/qoe[ii][0]
+			qoe[ii][jj] = (qoe[ii][jj]*1.0/qoe[ii][0] if qoe[ii][0] else 0)
+			if not qoe[ii][0]:
+				print pid
 	qoe_overall.append(qoe)
 		
 fig = plt.figure(figsize=(24,6))
