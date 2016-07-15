@@ -12,9 +12,9 @@ import policy_schemes as common
 # print "\t schemes. 1: random location; 2: same location; 3: good and bad"
 pid = os.getpid()
 x = []
-times = 1
+times = 10
 qoe_overall = []
-n_scheme = 5
+n_scheme = 6
 
 times = int(sys.argv[1])
 for i in range(5, 21, 3):
@@ -26,9 +26,9 @@ for i in range(5, 21, 3):
 	qoe = [[0 for z in range(4)] for x_ in range(n_scheme)]
 	for j in range(times):
 		#os.system("python policy_output.py 1 %d 0.10 90 1 %d.trace"%(i, pid))
-		os.system("python policy_different_join_time.py 1 %d 0.10 90 0 %d.trace"%(i, pid))
+		os.system("python policy_different_join_time.py 1 %d 0.10 90 1 %d.trace"%(i, pid))
 		ls = open("%d.trace"%(pid)).readlines()
-		#os.system("rm %d.trace"%(pid))
+		os.system("rm %d.trace"%(pid))
 		
 		xx = -1
 		for ii in range(n_scheme):
@@ -47,7 +47,7 @@ for i in range(5, 21, 3):
 		for jj in range(1, 4):
 			qoe[ii][jj] = (qoe[ii][jj]*1.0/qoe[ii][0] if qoe[ii][0] else 0)
 			if not qoe[ii][0]:
-				print pid
+				print "0 user issue", pid
 	qoe_overall.append(qoe)
 		
 fig = plt.figure(figsize=(24,6))
@@ -72,7 +72,7 @@ for i in range(3):
 	ax[i].set_xlabel("Number of Premium Users")
 	ax[i].set_ylabel(ylabel[i])
 	if i == 0:
-		ax[i].legend(["sqm", "sqm2", "sqm3", "paris", "now"], 1, ncol=3)
+		ax[i].legend(["sqm", "sqm2", "sqm3", "paris", "paris2", "now"], 1, ncol=3)
 	ax[i].grid()
 plt.tight_layout()
 plt.savefig("vary_premium_user.png")

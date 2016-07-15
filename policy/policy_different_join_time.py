@@ -1,4 +1,4 @@
-import matplotlib, re
+import matplotlib, re, sys
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os, sys, glob, re, math, operator, random, commands, copy
@@ -28,11 +28,12 @@ if len(sys.argv) > 7:
 #	bpp_max = int(bpp_mid*(1+r))
 
 #random.seed(0)
-random.seed(0)
+random.seed()
 result_sqm = []
 result_sqm2 = []
 result_sqm3 = []
 result_paris = []
+result_paris2 = []
 result_now = []
 bpp = {}
 bpp_legend = []
@@ -76,8 +77,9 @@ def get_two_types_users():
 last = 0
 for i in range(common.n):
 	#join_time.append(last + random.randint(0, 10))
-	join_time.append(last + 60)
-	leave_time.append(last + 60 + common.time)
+	#join_time.append(last + 60)
+	join_time.append(last)
+	leave_time.append(last + common.time)
 	#join_time.append(0)
 	last = join_time[-1]
 
@@ -92,11 +94,13 @@ u_sqm = [] # this is total utility
 u_sqm2 = []
 u_sqm3 = []
 u_paris = []
+u_paris2 = []
 u_now = []
 u_a_sqm = [] # this is average utility
 u_a_sqm2 = []
 u_a_sqm3 = []
 u_a_paris = []
+u_a_paris2 = []
 u_a_now = []
 last_r = []
 last_r2 = []
@@ -105,12 +109,13 @@ admitted_sqm = [0] * common.n
 admitted_sqm2 = [0] * common.n
 admitted_sqm3 = [0] * common.n   # with minimum support
 admitted_paris = [0] * common.n
+admitted_paris2 = [0] * common.n
 admitted_now = [0] * common.n
-admitted = [admitted_sqm, admitted_sqm2, admitted_sqm3, admitted_paris, admitted_now]
+admitted = [admitted_sqm, admitted_sqm2, admitted_sqm3, admitted_paris, admitted_paris2, admitted_now]
 current_user = 0
 new_user = 0
 leave_user = 0
-admission_control_scheme = 2
+admission_control_scheme = 1
 for i in range(max(leave_time)): #common.time):
 	for j in range(common.n):
 		if join_time[j] == i:
@@ -145,6 +150,11 @@ for i in range(max(leave_time)): #common.time):
 	u_a_paris.append(sum(r[1])*1.0/common.count_admitted_user(admitted_paris) if common.count_admitted_user(admitted_paris) else 0)
 	result_paris.append(r)
 	
+	r = common.paris2(bpp, admitted_paris2, new_user, current_user, admission_control_scheme)
+	u_paris2.append(sum(r[1])*1.0)#/count_admitted_user(admitted_paris))
+	u_a_paris2.append(sum(r[1])*1.0/common.count_admitted_user(admitted_paris2) if common.count_admitted_user(admitted_paris2) else 0)
+	result_paris2.append(r)
+	
 	r = common.now(bpp, admitted_now, new_user, current_user, admission_control_scheme)
 	u_now.append(sum(r[1])*1.0)#/count_admitted_user(admitted_now))
 	u_a_now.append(sum(r[1])*1.0/common.count_admitted_user(admitted_now) if common.count_admitted_user(admitted_now) else 0)
@@ -158,7 +168,7 @@ for i in range(max(leave_time)): #common.time):
 #f.write(str(np.mean(u_a_sqm)) +" "+ str(np.mean(u_a_sqm2)) +" " + str(np.mean(u_a_sqm3)) +" " +str(np.mean(u_a_paris)) + " " + str( np.mean(u_a_now)) + "\n")
 #f.close()
 
-results = [result_sqm, result_sqm2, result_sqm3, result_paris, result_now]
+results = [result_sqm, result_sqm2, result_sqm3, result_paris, result_paris2, result_now]
 
 def generate_file(f, r, j, s, e):
 	randomness = 0.05
@@ -170,7 +180,7 @@ def generate_file(f, r, j, s, e):
 qoe_total = [0] * len(results)
 qoe_avg = [0] * len(results)
 qoe = [[[0,0,0,0] for y in range(common.n)] for x in range(len(results))] # average bitrate, rebuffer, switches, admitted
-ad = [admitted_sqm, admitted_sqm2, admitted_sqm3, admitted_paris, admitted_now]
+ad = [admitted_sqm, admitted_sqm2, admitted_sqm3, admitted_paris, admitted_paris2, admitted_now]
 for i in range(len(results)):
 	r = results[i]
 	for j in range(common.n):
@@ -184,7 +194,7 @@ for i in range(len(results)):
 			qoe[i][j][0] = float(g.group(2))
 			qoe[i][j][1] = float(g.group(3))
 			qoe[i][j][2] = float(g.group(4))
-			qoe[i][j][3] = ad[i][j]
+			qoe[i][j][3] = min(1, ad[i][j]) # 2 for admitted but ended, so need to upper bound by 1
 		else:
 			qoe_total[i] += 0
 			print "***", i, j
@@ -206,27 +216,30 @@ for i in range(len(results)):
 f.close()
 
 # plotting
-fig = plt.figure(figsize=(25,10))
-ax = fig.add_subplot(251)
-bx = fig.add_subplot(252)
-cx = fig.add_subplot(253)
-dx = fig.add_subplot(254)
-ex = fig.add_subplot(255)
-axu = fig.add_subplot(256)
-bxu = fig.add_subplot(257)
-cxu = fig.add_subplot(258)
-dxu = fig.add_subplot(259)
-exu = fig.add_subplot(2,5,10)
+fig = plt.figure(figsize=(30,10))
+ax = fig.add_subplot(261)
+bx = fig.add_subplot(262)
+cx = fig.add_subplot(263)
+dx = fig.add_subplot(264)
+ex = fig.add_subplot(265)
+fx = fig.add_subplot(266)
+axu = fig.add_subplot(267)
+bxu = fig.add_subplot(268)
+cxu = fig.add_subplot(269)
+dxu = fig.add_subplot(2, 6, 10)
+exu = fig.add_subplot(2, 6, 11)
+fxu = fig.add_subplot(2, 6, 12)
 ax2 = ax.twinx()
 bx2 = bx.twinx()
 cx2 = cx.twinx()
 dx2 = dx.twinx()
 ex2 = ex.twinx()
+fx2 = fx.twinx()
 
-axes = [(ax, ax2), (bx, bx2), (cx, cx2), (dx, dx2), (ex, ex2)]
-axesu = [axu, bxu, cxu, dxu, exu]
-results_u = [u_sqm, u_sqm2, u_sqm3, u_paris, u_now]
-max_u = max(max(u_sqm), max(u_paris), max(u_now), max(u_sqm2), max(u_sqm3))
+axes = [(ax, ax2), (bx, bx2), (cx, cx2), (dx, dx2), (ex, ex2), (fx, fx2)]
+axesu = [axu, bxu, cxu, dxu, exu, fxu]
+results_u = [u_sqm, u_sqm2, u_sqm3, u_paris, u_paris2, u_now]
+max_u = max(max(u_sqm), max(u_paris), max(u_paris2), max(u_now), max(u_sqm2), max(u_sqm3))
 for ii in range(len(results)): # for each scheme
 	
 	rate_count = [0] * (len(common.br_with_zero) + 1)
@@ -271,7 +284,7 @@ for ii in range(len(results)): # for each scheme
 	
 	total = [0,0,0,0]
 	for i in range(common.n):
-		text = "AD: %s A: %.0f R: %.4f S: %d"%("Y" if qoe[ii][i][3] == 1 else "N", qoe[ii][i][0], qoe[ii][i][1], qoe[ii][i][2])
+		text = "AD: %s A: %.0f R: %.4f S: %d"%("Y" if qoe[ii][i][3] >= 1 else "N", qoe[ii][i][0], qoe[ii][i][1], qoe[ii][i][2])
 		axesu[ii].text(0.01, 0.9 - i*(1.0/(common.n+1)), text, transform=axesu[ii].transAxes, verticalalignment='top', fontsize=14, bbox=props)
 		total[0] += qoe[ii][i][0]
 		total[1] += qoe[ii][i][1]

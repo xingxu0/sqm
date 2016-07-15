@@ -13,7 +13,7 @@ pid = os.getpid()
 x = []
 times = 1
 qoe_overall = []
-n_scheme = 5
+n_scheme = 6
 n_user = 10
 
 times = int(sys.argv[1])
@@ -23,7 +23,7 @@ for i in range(40, 140, 20):
 
 	qoe = [[0 for z in range(4)] for x_ in range(n_scheme)]
 	for j in range(times):	
-		os.system("python policy_output.py 1 10 0.10 %d 1 %d.trace"%(i, pid))
+		os.system("python policy_different_join_time.py 1 10 0.10 %d 1 %d.trace"%(i, pid))
 		ls = open("%d.trace"%(pid)).readlines()
 		#os.system("rm %d.trace"%(pid))
 		
@@ -38,7 +38,7 @@ for i in range(40, 140, 20):
 				for kk in range(n_user):
 					#print ii, jj, kk, t_
 					#qoe[ii][jj][kk] += float(t_[kk])
-					if admission == 0 or int(admission[kk]) == 1:
+					if admission == 0 or int(admission[kk]) >= 1:
 						qoe[ii][jj] += float(t_[kk])
 	for ii in range(n_scheme):
 		for jj in range(1, 4):
@@ -67,7 +67,7 @@ for i in range(3):
 	ax[i].set_xlabel("Number of Non-Premium Users")
 	ax[i].set_ylabel(ylabel[i])
 	if i == 0:
-		ax[i].legend(["sqm", "sqm2", "sqm3", "paris", "now"], 1, ncol=3)
+		ax[i].legend(["sqm", "sqm2", "sqm3", "paris", "paris2", "now"], 1, ncol=3)
 	ax[i].grid()
 plt.tight_layout()
 plt.savefig("vary_non_premium_user.png")

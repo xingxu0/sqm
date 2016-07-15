@@ -1,4 +1,4 @@
-import operator, copy, numpy as np
+import operator, copy, numpy as np, sys
 
 n = 6
 normal_n = 30 #number of normal user
@@ -287,6 +287,68 @@ def paris(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 		#ret_rate[i] = br[j - 1] if j - 1 >= 0 else 0
 		ret_rate[i] = temp_rate
 	
+	ret_prb_ = []
+	ret_rate_ = []
+	for i in range(len(bpp)):
+		ret_prb_.append(ret_prb[i])
+		ret_rate_.append(ret_rate[i])
+	non_premium = 0
+	for i in range(len(admitted)):
+		if admitted[i] == 1:
+			if ret_prb_[i] == 0:
+				non_premium += 1
+		elif admitted[i] == -1:
+			non_premium += 1
+	for i in range(len(admitted)):
+		if (admitted[i] == 1 and ret_prb_[i] == 0) or admitted[i] == -1:
+			ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
+			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000		
+	return ret_prb_, ret_rate_
+
+def paris2(bpp, admitted, new_user, current_premium_user, admssion_scheme):
+	if new_user:
+		for i in range(len(admitted)):
+			if admitted[i] == 0 and new_user:
+				if admssion_scheme == 1:
+					sqm_admission(admitted, i, bpp)
+				elif admssion_scheme == 2:
+					sqm_admission2(admitted, i, bpp)
+				elif admssion_scheme == 3:
+					sqm_admission3(admitted, i, bpp)
+				else:
+					paris_admission(admitted, i, bpp)
+				new_user -= 1
+	available = total_prb*percentage
+	ret_prb = {}
+	ret_rate = {}
+	admitted_ = 0
+	for i in range(len(admitted)):
+		if admitted[i] == 1:
+			admitted_ += 1
+	diff = 0 # extra PRBs used
+	for i in range(len(bpp)):
+		ret_prb[i] = 0
+		ret_rate[i] = 0
+		if admitted[i] != 1:
+			continue
+		ret_prb[i] = available/admitted_
+		#need = br[j]*1000.0/(sorted_bpp[i][1]*8)
+		close_j, close_v = 0, sys.maxint
+		for j in range(len(br)):
+			t_prb = br[j]*1000.0/(bpp[i]*8)
+			if abs(t_prb - ret_prb[i]) < close_v:
+				close_v = abs(t_prb - ret_prb[i])
+				close_j = j
+		diff += br[close_j]*1000.0/(bpp[i]*8) - ret_prb[i]
+		ret_prb[i] = br[close_j]*1000.0/(bpp[i]*8)
+		temp_rate = ret_prb[i]*bpp[i]*8/1000
+		# stair
+		#j = 0
+		#while j < len(br) and br[j] <= temp_rate:
+		#	j += 1
+		#ret_rate[i] = br[j - 1] if j - 1 >= 0 else 0
+		ret_rate[i] = temp_rate
+	print "paris2 diff %d out of %d"%(diff, available)
 	ret_prb_ = []
 	ret_rate_ = []
 	for i in range(len(bpp)):
