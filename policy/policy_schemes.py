@@ -237,6 +237,7 @@ def sqm_minimum_support(bpp, admitted, new_user, current_premium_user, last, adm
 			non_premium += 1
 	# give extra to any premium user
 	extra = available - allocated_prb
+	extra = 0 # don't use extra
 	for i in range(len(admitted)):
 		if admitted[i] == 1:
 			if ret_prb_[i] != 0:
@@ -348,7 +349,7 @@ def paris2(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 		#	j += 1
 		#ret_rate[i] = br[j - 1] if j - 1 >= 0 else 0
 		ret_rate[i] = temp_rate
-	print "paris2 diff %d out of %d"%(diff, available)
+	#print "paris2 diff %d out of %d"%(diff, available)
 	ret_prb_ = []
 	ret_rate_ = []
 	for i in range(len(bpp)):

@@ -23,7 +23,7 @@ for i in range(5, 21, 3):
 	print "!!!", i
 	
 	n_user = i
-	qoe = [[0 for z in range(4)] for x_ in range(n_scheme)]
+	qoe = [[0 for z in range(5)] for x_ in range(n_scheme)]
 	for j in range(times):
 		#os.system("python policy_output.py 1 %d 0.10 90 1 %d.trace"%(i, pid))
 		os.system("python policy_different_join_time.py 1 %d 0.10 90 1 %d.trace"%(i, pid))
@@ -33,7 +33,7 @@ for i in range(5, 21, 3):
 		xx = -1
 		for ii in range(n_scheme):
 			admission = 0
-			for jj in range(4):
+			for jj in range(5):
 				xx += 1
 				t_ = ls[xx].split(" ")
 				if jj == 0:
@@ -44,19 +44,20 @@ for i in range(5, 21, 3):
 					if admission == 0 or int(admission[kk]) >= 1:
 						qoe[ii][jj] += float(t_[kk])
 	for ii in range(n_scheme):
-		for jj in range(1, 4):
+		for jj in range(1, 5):
 			qoe[ii][jj] = (qoe[ii][jj]*1.0/qoe[ii][0] if qoe[ii][0] else 0)
 			if not qoe[ii][0]:
 				print "0 user issue", pid
 	qoe_overall.append(qoe)
 		
-fig = plt.figure(figsize=(24,6))
-ax1 = fig.add_subplot(131)
-ax2 = fig.add_subplot(132)
-ax3 = fig.add_subplot(133)
-ax = [ax1, ax2, ax3]
-ylabel = ["Average Bitrate", "Rebuffer", "# of Switches"]
-for i in range(3):
+fig = plt.figure(figsize=(16,12))
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
+ax = [ax1, ax2, ax3, ax4]
+ylabel = ["Average Bitrate", "Rebuffer", "Qoe: # of Switches", "Rate selection: # of switches"]
+for i in range(4):
 	for s in range(n_scheme):
 		y = []
 		y_min = []

@@ -96,6 +96,7 @@ u_sqm3 = []
 u_paris = []
 u_paris2 = []
 u_now = []
+pre_sqm, pre_sqm2, pre_sqm3, pre_paris, pre_paris2, pre_now = -1, -1, -1, -1, -1, -1
 u_a_sqm = [] # this is average utility
 u_a_sqm2 = []
 u_a_sqm3 = []
@@ -112,6 +113,7 @@ admitted_paris = [0] * common.n
 admitted_paris2 = [0] * common.n
 admitted_now = [0] * common.n
 admitted = [admitted_sqm, admitted_sqm2, admitted_sqm3, admitted_paris, admitted_paris2, admitted_now]
+
 current_user = 0
 new_user = 0
 leave_user = 0
@@ -172,19 +174,23 @@ results = [result_sqm, result_sqm2, result_sqm3, result_paris, result_paris2, re
 
 def generate_file(f, r, j, s, e):
 	randomness = 0.05
+	switches = 0
 	fo = open(f, "w")
 	for i in range(s, e):
 		random_ = 2*(random.random() - 0.5)*randomness
 		fo.write(str(i*1000) + " " + str(max(1, r[i][1][j]*(1+random_))) + "\n")
+		if i and r[i][1][j] in common.br and r[i - 1][1][j] in common.br and r[i][1][j] != r[i - 1][1][j]:
+			switches += 1
+	return switches
 
 qoe_total = [0] * len(results)
 qoe_avg = [0] * len(results)
-qoe = [[[0,0,0,0] for y in range(common.n)] for x in range(len(results))] # average bitrate, rebuffer, switches, admitted
+qoe = [[[0,0,0,0,0] for y in range(common.n)] for x in range(len(results))] # average bitrate, rebuffer, switches, admitted
 ad = [admitted_sqm, admitted_sqm2, admitted_sqm3, admitted_paris, admitted_paris2, admitted_now]
 for i in range(len(results)):
 	r = results[i]
 	for j in range(common.n):
-		generate_file("temp_trace_%d"%(pid), r, j, join_time[j], leave_time[j])
+		switches = generate_file("temp_trace_%d"%(pid), r, j, join_time[j], leave_time[j])
 		o = commands.getstatusoutput("python ABRSim/simulation.py temp_trace_%d"%(pid))
 		#print o
 		g = re.match("QoE: (.*) avg. bitrate: (.*) buf. ratio: (.*) numSwtiches: (.*) dominant BR: (.*) played (.*) out of (.*)", o[1])
@@ -195,6 +201,7 @@ for i in range(len(results)):
 			qoe[i][j][1] = float(g.group(3))
 			qoe[i][j][2] = float(g.group(4))
 			qoe[i][j][3] = min(1, ad[i][j]) # 2 for admitted but ended, so need to upper bound by 1
+			qoe[i][j][4] = switches
 		else:
 			qoe_total[i] += 0
 			print "***", i, j
@@ -206,8 +213,8 @@ for i in range(len(results)):
 f = open(tracename, "w")
 for i in range(len(results)):
 	r = results[i]
-	ind = [3, 0, 1, 2]
-	for kk in range(4):
+	ind = [3, 0, 1, 2, 4]
+	for kk in range(5):
 		k = ind[kk]
 		text = ""
 		for j in range(common.n):
@@ -282,17 +289,18 @@ for ii in range(len(results)): # for each scheme
 	axes[ii][0].text(0.01, 1.03, text, transform=axes[ii][0].transAxes, verticalalignment='top', fontsize=14, bbox=props)
 	axes[ii][0].set_ylim([-1, len(common.br_with_zero)*1.3])
 	
-	total = [0,0,0,0]
+	total = [0,0,0,0,0]
 	for i in range(common.n):
-		text = "AD: %s A: %.0f R: %.4f S: %d"%("Y" if qoe[ii][i][3] >= 1 else "N", qoe[ii][i][0], qoe[ii][i][1], qoe[ii][i][2])
+		text = "AD: %s A: %.0f R: %.4f S: %d BRS: %d"%("Y" if qoe[ii][i][3] >= 1 else "N", qoe[ii][i][0], qoe[ii][i][1], qoe[ii][i][2], qoe[ii][i][4])
 		axesu[ii].text(0.01, 0.9 - i*(1.0/(common.n+1)), text, transform=axesu[ii].transAxes, verticalalignment='top', fontsize=14, bbox=props)
 		total[0] += qoe[ii][i][0]
 		total[1] += qoe[ii][i][1]
 		total[2] += qoe[ii][i][2]
+		total[4] += qoe[ii][i][4]
 		if qoe[ii][i][3] != -1:
 			total[3] += 1
 	
-	text = "Total:\nAD: %d A: %.0f R: %.4f S: %d"%(total[3], total[0], total[1], total[2])
+	text = "Total:\nAD: %d A: %.0f R: %.4f S: %d BRS: %d"%(total[3], total[0], total[1], total[2], total[4])
 	axesu[ii].text(0.01, 0.9 - common.n*(1.0/(common.n+1)), text, transform=axesu[ii].transAxes, verticalalignment='top', fontsize=15, bbox=props)
 	
 	axesu[ii].plot(x, results_u[ii])
