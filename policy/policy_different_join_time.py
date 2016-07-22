@@ -34,6 +34,7 @@ result_sqm2 = []
 result_sqm3 = []
 result_paris = []
 result_paris2 = []
+result_paris3 = []
 result_now = []
 bpp = {}
 bpp_legend = []
@@ -95,13 +96,22 @@ u_sqm2 = []
 u_sqm3 = []
 u_paris = []
 u_paris2 = []
+u_paris3 = []
 u_now = []
-pre_sqm, pre_sqm2, pre_sqm3, pre_paris, pre_paris2, pre_now = -1, -1, -1, -1, -1, -1
+df_sqm = [0] # this is downgrade fraction
+df_sqm2 = [0]
+df_sqm3 = [0]
+df_paris = [0]
+df_paris2 = [0]
+df_paris3 = [0]
+df_now = [0]
+pre_sqm, pre_sqm2, pre_sqm3, pre_paris, pre_paris2, pre_paris3, pre_now = -1, -1, -1, -1, -1, -1, -1
 u_a_sqm = [] # this is average utility
 u_a_sqm2 = []
 u_a_sqm3 = []
 u_a_paris = []
 u_a_paris2 = []
+u_a_paris3 = []
 u_a_now = []
 last_r = []
 last_r2 = []
@@ -111,8 +121,9 @@ admitted_sqm2 = [0] * common.n
 admitted_sqm3 = [0] * common.n   # with minimum support
 admitted_paris = [0] * common.n
 admitted_paris2 = [0] * common.n
+admitted_paris3 = [0] * common.n
 admitted_now = [0] * common.n
-admitted = [admitted_sqm, admitted_sqm2, admitted_sqm3, admitted_paris, admitted_paris2, admitted_now]
+admitted = [admitted_sqm, admitted_sqm2, admitted_sqm3, admitted_paris, admitted_paris2, admitted_paris3, admitted_now]
 
 current_user = 0
 new_user = 0
@@ -134,33 +145,46 @@ for i in range(max(leave_time)): #common.time):
 	u_a_sqm.append(sum(r2)*1.0/common.count_admitted_user(admitted_sqm) if common.count_admitted_user(admitted_sqm) else 0 )
 	result_sqm.append([r1, r2])
 	last_r = copy.deepcopy(r3)
+	common.get_downgrade_fraction([r1, r2], admitted_sqm, df_sqm)
 	
 	r1, r2, r3 = common.sqm_minimum_support(bpp, admitted_sqm2, new_user, current_user, last_r2, admission_control_scheme, 0)
 	u_sqm2.append(sum(r2)*1.0)#/count_admitted_user(admitted_sqm))
 	u_a_sqm2.append(sum(r2)*1.0/common.count_admitted_user(admitted_sqm2) if common.count_admitted_user(admitted_sqm2) else 0 )
 	result_sqm2.append([r1, r2])
 	last_r2 = copy.deepcopy(r3)
+	common.get_downgrade_fraction([r1, r2], admitted_sqm2, df_sqm2)
 	
 	r1, r2, r3 = common.sqm_minimum_support(bpp, admitted_sqm3, new_user, current_user, last_r2, admission_control_scheme, 1)
 	u_sqm3.append(sum(r2)*1.0)#/count_admitted_user(admitted_sqm))
 	u_a_sqm3.append(sum(r2)*1.0/common.count_admitted_user(admitted_sqm3) if common.count_admitted_user(admitted_sqm3) else 0 )
 	result_sqm3.append([r1, r2])
 	last_r3 = copy.deepcopy(r3)
+	common.get_downgrade_fraction([r1, r2], admitted_sqm3, df_sqm3)
 	
 	r = common.paris(bpp, admitted_paris, new_user, current_user, admission_control_scheme)
 	u_paris.append(sum(r[1])*1.0)#/count_admitted_user(admitted_paris))
 	u_a_paris.append(sum(r[1])*1.0/common.count_admitted_user(admitted_paris) if common.count_admitted_user(admitted_paris) else 0)
 	result_paris.append(r)
+	common.get_downgrade_fraction(r, admitted_paris, df_paris)
 	
 	r = common.paris2(bpp, admitted_paris2, new_user, current_user, admission_control_scheme)
 	u_paris2.append(sum(r[1])*1.0)#/count_admitted_user(admitted_paris))
 	u_a_paris2.append(sum(r[1])*1.0/common.count_admitted_user(admitted_paris2) if common.count_admitted_user(admitted_paris2) else 0)
 	result_paris2.append(r)
+	common.get_downgrade_fraction(r, admitted_paris2, df_paris2)
+	
+	r = common.paris3(bpp, admitted_paris3, new_user, current_user, admission_control_scheme)
+	u_paris3.append(sum(r[1])*1.0)#/count_admitted_user(admitted_paris))
+	u_a_paris3.append(sum(r[1])*1.0/common.count_admitted_user(admitted_paris3) if common.count_admitted_user(admitted_paris3) else 0)
+	result_paris3.append(r)
+	common.get_downgrade_fraction(r, admitted_paris3, df_paris3)
 	
 	r = common.now(bpp, admitted_now, new_user, current_user, admission_control_scheme)
 	u_now.append(sum(r[1])*1.0)#/count_admitted_user(admitted_now))
 	u_a_now.append(sum(r[1])*1.0/common.count_admitted_user(admitted_now) if common.count_admitted_user(admitted_now) else 0)
 	result_now.append(r)
+	common.get_downgrade_fraction(r, admitted_now, df_now)
+	
 	current_user = current_user + new_user - leave_user
 	new_user = 0
 	leave_user = 0
@@ -170,7 +194,7 @@ for i in range(max(leave_time)): #common.time):
 #f.write(str(np.mean(u_a_sqm)) +" "+ str(np.mean(u_a_sqm2)) +" " + str(np.mean(u_a_sqm3)) +" " +str(np.mean(u_a_paris)) + " " + str( np.mean(u_a_now)) + "\n")
 #f.close()
 
-results = [result_sqm, result_sqm2, result_sqm3, result_paris, result_paris2, result_now]
+results = [result_sqm, result_sqm2, result_sqm3, result_paris, result_paris2, result_paris3, result_now]
 
 def generate_file(f, r, j, s, e):
 	randomness = 0.05
@@ -186,12 +210,12 @@ def generate_file(f, r, j, s, e):
 qoe_total = [0] * len(results)
 qoe_avg = [0] * len(results)
 qoe = [[[0,0,0,0,0] for y in range(common.n)] for x in range(len(results))] # average bitrate, rebuffer, switches, admitted
-ad = [admitted_sqm, admitted_sqm2, admitted_sqm3, admitted_paris, admitted_paris2, admitted_now]
+ad = [admitted_sqm, admitted_sqm2, admitted_sqm3, admitted_paris, admitted_paris2, admitted_paris3, admitted_now]
 for i in range(len(results)):
 	r = results[i]
 	for j in range(common.n):
 		switches = generate_file("temp_trace_%d"%(pid), r, j, join_time[j], leave_time[j])
-		o = commands.getstatusoutput("python ABRSim/simulation.py temp_trace_%d"%(pid))
+		o = commands.getstatusoutput("python ABRSim/ABRSimNew/simulation.py temp_trace_%d"%(pid))
 		#print o
 		g = re.match("QoE: (.*) avg. bitrate: (.*) buf. ratio: (.*) numSwtiches: (.*) dominant BR: (.*) played (.*) out of (.*)", o[1])
 		metric = 2
@@ -210,6 +234,7 @@ for i in range(len(results)):
 	qoe_avg[i] = qoe_total[i]*1.0/common.count_admitted_user(ad[i]) if common.count_admitted_user(ad[i]) else 0
 	os.system("rm temp_trace_%d"%(pid))
 
+df = [df_sqm,df_sqm2,df_sqm3,df_paris,df_paris2,df_paris3,df_now]
 f = open(tracename, "w")
 for i in range(len(results)):
 	r = results[i]
@@ -220,33 +245,37 @@ for i in range(len(results)):
 		for j in range(common.n):
 			text += str(qoe[i][j][k]) + " "
 		f.write(text[:-1] + "\n")
+	f.write(str(df[i][0]) + "\n")
 f.close()
 
 # plotting
-fig = plt.figure(figsize=(30,10))
-ax = fig.add_subplot(261)
-bx = fig.add_subplot(262)
-cx = fig.add_subplot(263)
-dx = fig.add_subplot(264)
-ex = fig.add_subplot(265)
-fx = fig.add_subplot(266)
-axu = fig.add_subplot(267)
-bxu = fig.add_subplot(268)
-cxu = fig.add_subplot(269)
-dxu = fig.add_subplot(2, 6, 10)
-exu = fig.add_subplot(2, 6, 11)
-fxu = fig.add_subplot(2, 6, 12)
+fig = plt.figure(figsize=(35,10))
+ax = fig.add_subplot(271)
+bx = fig.add_subplot(272)
+cx = fig.add_subplot(273)
+dx = fig.add_subplot(274)
+ex = fig.add_subplot(275)
+fx = fig.add_subplot(276)
+gx = fig.add_subplot(277)
+axu = fig.add_subplot(278)
+bxu = fig.add_subplot(279)
+cxu = fig.add_subplot(2,7,10)
+dxu = fig.add_subplot(2, 7, 11)
+exu = fig.add_subplot(2, 7, 12)
+fxu = fig.add_subplot(2, 7, 13)
+gxu = fig.add_subplot(2, 7, 14)
 ax2 = ax.twinx()
 bx2 = bx.twinx()
 cx2 = cx.twinx()
 dx2 = dx.twinx()
 ex2 = ex.twinx()
 fx2 = fx.twinx()
+gx2 = gx.twinx()
 
-axes = [(ax, ax2), (bx, bx2), (cx, cx2), (dx, dx2), (ex, ex2), (fx, fx2)]
-axesu = [axu, bxu, cxu, dxu, exu, fxu]
-results_u = [u_sqm, u_sqm2, u_sqm3, u_paris, u_paris2, u_now]
-max_u = max(max(u_sqm), max(u_paris), max(u_paris2), max(u_now), max(u_sqm2), max(u_sqm3))
+axes = [(ax, ax2), (bx, bx2), (cx, cx2), (dx, dx2), (ex, ex2), (fx, fx2), (gx, gx2)]
+axesu = [axu, bxu, cxu, dxu, exu, fxu, gxu]
+results_u = [u_sqm, u_sqm2, u_sqm3, u_paris, u_paris2, u_paris3, u_now]
+max_u = max(max(u_sqm), max(u_paris), max(u_paris2), max(u_now), max(u_sqm2), max(u_sqm3), max(u_paris3))
 for ii in range(len(results)): # for each scheme
 	
 	rate_count = [0] * (len(common.br_with_zero) + 1)
@@ -300,7 +329,7 @@ for ii in range(len(results)): # for each scheme
 		if qoe[ii][i][3] != -1:
 			total[3] += 1
 	
-	text = "Total:\nAD: %d A: %.0f R: %.4f S: %d BRS: %d"%(total[3], total[0], total[1], total[2], total[4])
+	text = "Total: DF: %d\nAD: %d A: %.0f R: %.4f S: %d BRS: %d"%(df[ii][0], total[3], total[0], total[1], total[2], total[4])
 	axesu[ii].text(0.01, 0.9 - common.n*(1.0/(common.n+1)), text, transform=axesu[ii].transAxes, verticalalignment='top', fontsize=15, bbox=props)
 	
 	axesu[ii].plot(x, results_u[ii])

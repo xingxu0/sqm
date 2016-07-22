@@ -12,7 +12,7 @@ pid = os.getpid()
 x = []
 times = 1
 qoe_overall = []
-n_scheme = 6
+n_scheme = 7
 n_user = 10
 
 times = int(sys.argv[1])
@@ -20,16 +20,16 @@ for i in [0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16]:
 	x.append(i)
 	tt = 0
 
-	qoe = [[0 for z in range(5)] for x_ in range(n_scheme)]
+	qoe = [[0 for z in range(6)] for x_ in range(n_scheme)]
 	for j in range(times):
-		os.system("python policy_different_join_time.py 1 10 %f 90 0 %d.trace"%(i, pid))
+		os.system("python policy_different_join_time.py 1 10 %f 180 0 %d.trace"%(i, pid))
 		ls = open("%d.trace"%(pid)).readlines()
 		#os.system("rm %d.trace"%(pid))
 		
 		xx = -1
 		for ii in range(n_scheme):
 			admission = 0
-			for jj in range(5):
+			for jj in range(6):
 				xx += 1
 				t_ = ls[xx].split(" ")
 				if jj == 0:
@@ -39,19 +39,22 @@ for i in [0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16]:
 					#qoe[ii][jj][kk] += float(t_[kk])
 					if admission == 0 or int(admission[kk]) >= 1:
 						qoe[ii][jj] += float(t_[kk])
+				if jj == 5:
+					qoe[ii][jj] = int(ls[xx])
 	for ii in range(n_scheme):
-		for jj in range(1, 5):
+		for jj in range(1, 6):
 			qoe[ii][jj] = qoe[ii][jj]*1.0/qoe[ii][0]
 	qoe_overall.append(qoe)
 
-fig = plt.figure(figsize=(16,12))
-ax1 = fig.add_subplot(221)
-ax2 = fig.add_subplot(222)
-ax3 = fig.add_subplot(223)
-ax4 = fig.add_subplot(224)
-ax = [ax1, ax2, ax3, ax4]
-ylabel = ["Average Bitrate", "Rebuffer", "Qoe: # of Switches", "Rate selection: # of switches"]
-for i in range(4):
+fig = plt.figure(figsize=(40,6))
+ax1 = fig.add_subplot(151)
+ax2 = fig.add_subplot(152)
+ax3 = fig.add_subplot(153)
+ax4 = fig.add_subplot(154)
+ax5 = fig.add_subplot(155)
+ax = [ax1, ax2, ax3, ax4, ax5]
+ylabel = ["Average Bitrate", "Rebuffer", "Qoe: # of Switches", "Rate selection: # of switches", "Downgrade Fraction"]
+for i in range(5):
 	for s in range(n_scheme):
 		y = []
 		y_min = []
@@ -67,7 +70,7 @@ for i in range(4):
 	ax[i].set_xlabel("Premium Resources (1)")
 	ax[i].set_ylabel(ylabel[i])
 	if i == 0:
-		ax[i].legend(["sqm", "sqm2", "sqm3", "paris", "paris2", "now"], 1, ncol=3)
+		ax[i].legend(["sqm", "sqm2", "sqm3", "paris", "paris2", "paris3", "now"], 1, ncol=3)
 	ax[i].grid()
 plt.tight_layout()
 plt.savefig("vary_premium_resource.png")
