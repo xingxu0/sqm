@@ -308,7 +308,7 @@ def paris(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 			ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
 			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000		
 	return ret_prb_, ret_rate_
-
+""" original paris2, where I allocate resources, but when I don't have enough (diff is positive), I don't do anything.
 def paris2(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 	if new_user:
 		for i in range(len(admitted)):
@@ -338,19 +338,21 @@ def paris2(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 		ret_prb[i] = available/admitted_
 		#need = br[j]*1000.0/(sorted_bpp[i][1]*8)
 		close_j, close_v = 0, sys.maxint
-		for j in range(len(br)):
-			t_prb = br[j]*1000.0/(bpp[i]*8)
+		for j in range(len(br_with_zero)):
+			t_prb = br_with_zero[j]*1000.0/(bpp[i]*8)
 			if abs(t_prb - ret_prb[i]) < close_v:
 				close_v = abs(t_prb - ret_prb[i])
 				close_j = j
-		diff += br[close_j]*1000.0/(bpp[i]*8) - ret_prb[i]
-		ret_prb[i] = br[close_j]*1000.0/(bpp[i]*8)
-		ret_rate[i] = br[close_j]
+		diff += br_with_zero[close_j]*1000.0/(bpp[i]*8) - ret_prb[i]
+		ret_prb[i] = br_with_zero[close_j]*1000.0/(bpp[i]*8)
+		ret_rate[i] = br_with_zero[close_j]
 		# stair
 		#j = 0
 		#while j < len(br) and br[j] <= temp_rate:
 		#	j += 1
 		#ret_rate[i] = br[j - 1] if j - 1 >= 0 else 0
+	if int(diff) > 0:
+		print "paris2 diff %d out of %d"%(diff, available)
 	ret_prb_ = []
 	ret_rate_ = []
 	for i in range(len(bpp)):
@@ -368,6 +370,7 @@ def paris2(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 			ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
 			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000		
 	return ret_prb_, ret_rate_
+"""
 
 def paris3(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 	if new_user:
@@ -411,28 +414,52 @@ def paris3(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 		#while j < len(br) and br[j] <= temp_rate:
 		#	j += 1
 		#ret_rate[i] = br[j - 1] if j - 1 >= 0 else 0
-	if int(diff) > 0:
-		print "paris3 diff %d out of %d"%(diff, available)
+	#if int(diff) > 0:
+		#print "paris3 diff %d out of %d"%(diff, available)
+		
+	# first downgrade users who use more resources than their fair share to R1 (won't downgrade to R0)
 	while int(diff) > 0:
-		min_degrade, min_user = sys.maxint, 0
+		print "paris3 downgrade level1"
+		min_degrade, min_user = sys.maxint, -1
 		for i in range(len(bpp)):
-			degrade_one_level = ret_prb[i] - br_with_zero[br_with_zero.index(ret_rate[i]) - 1]*1000.0/(bpp[i]*8)
-			if degrade_one_level > diff:
-				if degrade_one_level < min_degrade:
-					min_degrade = degrade_one_level
-					min_user = i
-		if min_degrade == sys.maxint:
-			min_degrade = -sys.maxint
-			for i in range(len(bpp)):
-				degrade_one_level = ret_prb[i] - br_with_zero[br_with_zero.index(ret_rate[i]) - 1]*1000.0/(bpp[i]*8)
-				if degrade_one_level > min_degrade:
-					min_degrade = degrade_one_level
-					min_user = i
-		new_rate = br_with_zero[br_with_zero.index(ret_rate[min_user]) - 1]
-		print "\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
-		ret_rate[min_user] = new_rate
-		diff = diff - (ret_prb[min_user] - ret_rate[min_user]*1000.0/(bpp[min_user]*8))
-		ret_prb[min_user] = ret_rate[min_user]*1000.0/(bpp[min_user]*8)
+			if ret_prb[i] > available/admitted_:
+				min_user = i
+				new_rate = br_with_zero[br_with_zero.index(ret_rate[min_user]) - 1]
+				if new_rate == 0: continue
+				#print "\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
+				ret_rate[min_user] = new_rate
+				diff = diff - (ret_prb[min_user] - ret_rate[min_user]*1000.0/(bpp[min_user]*8))
+				ret_prb[min_user] = ret_rate[min_user]*1000.0/(bpp[min_user]*8)
+				break
+		if min_user == -1: break
+	# then downgrade user whose rate is better than R1
+	while int(diff) > 0:
+		print "paris3 downgrade level2"
+		min_degrade, min_user = sys.maxint, -1
+		for i in range(len(bpp)):
+			if ret_rate[i] > br[0]:
+				min_user = i
+				new_rate = br_with_zero[br_with_zero.index(ret_rate[min_user]) - 1]
+				if new_rate == 0: continue
+				#print "\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
+				ret_rate[min_user] = new_rate
+				diff = diff - (ret_prb[min_user] - ret_rate[min_user]*1000.0/(bpp[min_user]*8))
+				ret_prb[min_user] = ret_rate[min_user]*1000.0/(bpp[min_user]*8)
+				break
+		if min_user == -1: break
+	# then downgrade user to R0, if we really need to do
+	while int(diff) > 0:
+		print "paris3 downgrade level3"
+		min_degrade, min_user = sys.maxint, -1
+		for i in range(len(bpp)):
+			if True:
+				min_user = i
+				new_rate = br_with_zero[br_with_zero.index(ret_rate[min_user]) - 1]
+				#print "\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
+				ret_rate[min_user] = new_rate
+				diff = diff - (ret_prb[min_user] - ret_rate[min_user]*1000.0/(bpp[min_user]*8))
+				ret_prb[min_user] = ret_rate[min_user]*1000.0/(bpp[min_user]*8)
+				break
 	ret_prb_ = []
 	ret_rate_ = []
 	for i in range(len(bpp)):
@@ -450,6 +477,81 @@ def paris3(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 			ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
 			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000		
 	return ret_prb_, ret_rate_
+
+def paris2(bpp, admitted, new_user, current_premium_user, admssion_scheme):
+	if new_user:
+		for i in range(len(admitted)):
+			if admitted[i] == 0 and new_user:
+				if admssion_scheme == 1:
+					sqm_admission(admitted, i, bpp)
+				elif admssion_scheme == 2:
+					sqm_admission2(admitted, i, bpp)
+				elif admssion_scheme == 3:
+					sqm_admission3(admitted, i, bpp)
+				else:
+					paris_admission(admitted, i, bpp)
+				new_user -= 1
+	available = total_prb*percentage
+	ret_prb = {}
+	ret_rate = {}
+	admitted_ = 0
+	for i in range(len(admitted)):
+		if admitted[i] == 1:
+			admitted_ += 1
+	diff = 0 # extra PRBs used
+	for i in range(len(bpp)):
+		ret_prb[i] = 0
+		ret_rate[i] = 0
+		if admitted[i] != 1:
+			continue
+		ret_prb[i] = available/admitted_
+		#need = br[j]*1000.0/(sorted_bpp[i][1]*8)
+		close_j, close_v = 0, sys.maxint
+		for j in range(len(br_with_zero)):
+			t_prb = br_with_zero[j]*1000.0/(bpp[i]*8)
+			if abs(t_prb - ret_prb[i]) < close_v:
+				close_v = abs(t_prb - ret_prb[i])
+				close_j = j
+		diff += br_with_zero[close_j]*1000.0/(bpp[i]*8) - ret_prb[i]
+		ret_prb[i] = br_with_zero[close_j]*1000.0/(bpp[i]*8)
+		ret_rate[i] = br_with_zero[close_j]
+		# stair
+		#j = 0
+		#while j < len(br) and br[j] <= temp_rate:
+		#	j += 1
+		#ret_rate[i] = br[j - 1] if j - 1 >= 0 else 0
+	#if int(diff) > 0:
+		#print "paris3 diff %d out of %d"%(diff, available)
+	while int(diff) > 0:
+		min_degrade, min_user = sys.maxint, 0
+		for i in range(len(bpp)):
+			if ret_prb[i] > available/admitted_:
+				min_user = i
+				new_rate = br_with_zero[br_with_zero.index(ret_rate[min_user]) - 1]
+				#print "\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
+				ret_rate[min_user] = new_rate
+				diff = diff - (ret_prb[min_user] - ret_rate[min_user]*1000.0/(bpp[min_user]*8))
+				ret_prb[min_user] = ret_rate[min_user]*1000.0/(bpp[min_user]*8)
+				break
+		print "paris2 downgrade level1"
+	ret_prb_ = []
+	ret_rate_ = []
+	for i in range(len(bpp)):
+		ret_prb_.append(ret_prb[i])
+		ret_rate_.append(ret_rate[i])
+	non_premium = 0
+	for i in range(len(admitted)):
+		if admitted[i] == 1:
+			if ret_prb_[i] == 0:
+				non_premium += 1
+		elif admitted[i] == -1:
+			non_premium += 1
+	for i in range(len(admitted)):
+		if (admitted[i] == 1 and ret_prb_[i] == 0) or admitted[i] == -1:
+			ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
+			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000		
+	return ret_prb_, ret_rate_
+
 
 
 def now(bpp, admitted, new_user, current_premium_user, admssion_scheme):

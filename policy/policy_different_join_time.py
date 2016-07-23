@@ -205,6 +205,7 @@ def generate_file(f, r, j, s, e):
 		fo.write(str(i*1000) + " " + str(max(1, r[i][1][j]*(1+random_))) + "\n")
 		if i and r[i][1][j] in common.br and r[i - 1][1][j] in common.br and r[i][1][j] != r[i - 1][1][j]:
 			switches += 1
+	fo.close()
 	return switches
 
 qoe_total = [0] * len(results)

@@ -17,6 +17,7 @@ n_user = 10
 
 times = int(sys.argv[1])
 for i in [0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16]:
+#for i in [0.04, 0.07, 0.10, 0.13]:
 	x.append(i)
 	tt = 0
 
@@ -24,7 +25,7 @@ for i in [0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16]:
 	for j in range(times):
 		os.system("python policy_different_join_time.py 1 10 %f 180 0 %d.trace"%(i, pid))
 		ls = open("%d.trace"%(pid)).readlines()
-		#os.system("rm %d.trace"%(pid))
+		os.system("rm %d.trace"%(pid))
 		
 		xx = -1
 		for ii in range(n_scheme):
@@ -34,24 +35,25 @@ for i in [0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16]:
 				t_ = ls[xx].split(" ")
 				if jj == 0:
 					admission = t_
+				if jj == 5:
+					qoe[ii][jj] = int(ls[xx])
+					continue
 				for kk in range(n_user):
 					#print ii, jj, kk, t_
 					#qoe[ii][jj][kk] += float(t_[kk])
 					if admission == 0 or int(admission[kk]) >= 1:
 						qoe[ii][jj] += float(t_[kk])
-				if jj == 5:
-					qoe[ii][jj] = int(ls[xx])
 	for ii in range(n_scheme):
 		for jj in range(1, 6):
 			qoe[ii][jj] = qoe[ii][jj]*1.0/qoe[ii][0]
 	qoe_overall.append(qoe)
 
-fig = plt.figure(figsize=(40,6))
-ax1 = fig.add_subplot(151)
-ax2 = fig.add_subplot(152)
-ax3 = fig.add_subplot(153)
-ax4 = fig.add_subplot(154)
-ax5 = fig.add_subplot(155)
+fig = plt.figure(figsize=(24,12))
+ax1 = fig.add_subplot(231)
+ax2 = fig.add_subplot(232)
+ax3 = fig.add_subplot(233)
+ax4 = fig.add_subplot(234)
+ax5 = fig.add_subplot(235)
 ax = [ax1, ax2, ax3, ax4, ax5]
 ylabel = ["Average Bitrate", "Rebuffer", "Qoe: # of Switches", "Rate selection: # of switches", "Downgrade Fraction"]
 for i in range(5):
