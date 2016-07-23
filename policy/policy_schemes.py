@@ -34,7 +34,7 @@ def sqm_admission(admitted, x, bpp):
 	for i in range(x + 1):
 		if admitted[i] == 1:
 			t_prb += br_with_zero[1]*1000.0/(bpp[i]*8)
-	if t_prb <= total_prb*percentage:
+	if t_prb <= total_prb*percentage*1.5: # put it back later
 		admitted[x] = 1
 		#print "accept", x
 	else:
@@ -423,10 +423,10 @@ def paris3(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 		min_degrade, min_user = sys.maxint, -1
 		for i in range(len(bpp)):
 			if ret_prb[i] > available/admitted_:
-				min_user = i
 				new_rate = br_with_zero[br_with_zero.index(ret_rate[min_user]) - 1]
 				if new_rate == 0: continue
-				#print "\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
+				min_user = i
+				print "\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
 				ret_rate[min_user] = new_rate
 				diff = diff - (ret_prb[min_user] - ret_rate[min_user]*1000.0/(bpp[min_user]*8))
 				ret_prb[min_user] = ret_rate[min_user]*1000.0/(bpp[min_user]*8)
@@ -438,10 +438,10 @@ def paris3(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 		min_degrade, min_user = sys.maxint, -1
 		for i in range(len(bpp)):
 			if ret_rate[i] > br[0]:
-				min_user = i
 				new_rate = br_with_zero[br_with_zero.index(ret_rate[min_user]) - 1]
 				if new_rate == 0: continue
-				#print "\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
+				min_user = i
+				print "\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
 				ret_rate[min_user] = new_rate
 				diff = diff - (ret_prb[min_user] - ret_rate[min_user]*1000.0/(bpp[min_user]*8))
 				ret_prb[min_user] = ret_rate[min_user]*1000.0/(bpp[min_user]*8)
@@ -455,7 +455,7 @@ def paris3(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 			if True:
 				min_user = i
 				new_rate = br_with_zero[br_with_zero.index(ret_rate[min_user]) - 1]
-				#print "\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
+				print "\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
 				ret_rate[min_user] = new_rate
 				diff = diff - (ret_prb[min_user] - ret_rate[min_user]*1000.0/(bpp[min_user]*8))
 				ret_prb[min_user] = ret_rate[min_user]*1000.0/(bpp[min_user]*8)
