@@ -4,7 +4,8 @@ n = 6
 normal_n = 30 #number of normal user
 bpp_mid = int((135+292)*0.8/2)
 bpp_min = int(135*0.8) # bpp is bytes per prb
-bpp_max = int(292*0.8)  # this value maps to 712bits/s as TBS
+#bpp_max = int(292*0.8)  # this value maps to 712bits/s as TBS
+bpp_max = int(500*0.8)  # this value maps to 712bits/s as TBS
 total_prb = 12000*4
 percentage = .3
 lock_parameter = 0 #0.1 #0.3
@@ -34,7 +35,7 @@ def sqm_admission(admitted, x, bpp):
 	for i in range(x + 1):
 		if admitted[i] == 1:
 			t_prb += br_with_zero[1]*1000.0/(bpp[i]*8)
-	if t_prb <= total_prb*percentage*1.5: # put it back later
+	if t_prb <= total_prb*percentage:
 		admitted[x] = 1
 		#print "accept", x
 	else:
@@ -373,6 +374,7 @@ def paris2(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 """
 
 def paris3(bpp, admitted, new_user, current_premium_user, admssion_scheme):
+	print "paris3 round starts"
 	if new_user:
 		for i in range(len(admitted)):
 			if admitted[i] == 0 and new_user:
@@ -419,14 +421,14 @@ def paris3(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 		
 	# first downgrade users who use more resources than their fair share to R1 (won't downgrade to R0)
 	while int(diff) > 0:
-		print "paris3 downgrade level1"
+		print "\tparis3 downgrade level1"
 		min_degrade, min_user = sys.maxint, -1
 		for i in range(len(bpp)):
 			if ret_prb[i] > available/admitted_:
-				new_rate = br_with_zero[br_with_zero.index(ret_rate[min_user]) - 1]
+				new_rate = br_with_zero[br_with_zero.index(ret_rate[i]) - 1]
 				if new_rate == 0: continue
 				min_user = i
-				print "\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
+				print "\t\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
 				ret_rate[min_user] = new_rate
 				diff = diff - (ret_prb[min_user] - ret_rate[min_user]*1000.0/(bpp[min_user]*8))
 				ret_prb[min_user] = ret_rate[min_user]*1000.0/(bpp[min_user]*8)
@@ -434,14 +436,14 @@ def paris3(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 		if min_user == -1: break
 	# then downgrade user whose rate is better than R1
 	while int(diff) > 0:
-		print "paris3 downgrade level2"
+		print "\tparis3 downgrade level2"
 		min_degrade, min_user = sys.maxint, -1
 		for i in range(len(bpp)):
 			if ret_rate[i] > br[0]:
-				new_rate = br_with_zero[br_with_zero.index(ret_rate[min_user]) - 1]
+				new_rate = br_with_zero[br_with_zero.index(ret_rate[i]) - 1]
 				if new_rate == 0: continue
 				min_user = i
-				print "\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
+				print "\t\t !!! user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
 				ret_rate[min_user] = new_rate
 				diff = diff - (ret_prb[min_user] - ret_rate[min_user]*1000.0/(bpp[min_user]*8))
 				ret_prb[min_user] = ret_rate[min_user]*1000.0/(bpp[min_user]*8)
@@ -449,13 +451,13 @@ def paris3(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 		if min_user == -1: break
 	# then downgrade user to R0, if we really need to do
 	while int(diff) > 0:
-		print "paris3 downgrade level3"
+		print "\tparis3 downgrade level3"
 		min_degrade, min_user = sys.maxint, -1
 		for i in range(len(bpp)):
-			if True:
+			if ret_rate[i] > 0:
 				min_user = i
-				new_rate = br_with_zero[br_with_zero.index(ret_rate[min_user]) - 1]
-				print "\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
+				new_rate = br_with_zero[br_with_zero.index(ret_rate[i]) - 1]
+				print "\t\t user %d downgrade 1 level from rate %d to rate %d save %d PRBs (PRBs from %d to %d) (now diff %d)"%(min_user, ret_rate[min_user], new_rate, (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)), ret_prb[min_user],  new_rate*1000.0/(bpp[min_user]*8), diff - (ret_prb[min_user] - new_rate*1000.0/(bpp[min_user]*8)))
 				ret_rate[min_user] = new_rate
 				diff = diff - (ret_prb[min_user] - ret_rate[min_user]*1000.0/(bpp[min_user]*8))
 				ret_prb[min_user] = ret_rate[min_user]*1000.0/(bpp[min_user]*8)
