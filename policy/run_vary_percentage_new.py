@@ -16,7 +16,7 @@ n_scheme = 7
 n_user = 10
 
 times = int(sys.argv[1])
-admission = int(sys.argv[2])
+adm = int(sys.argv[2])
 for i in [0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16]:
 #for i in [0.04, 0.07, 0.10, 0.13]:
 	x.append(i)
@@ -24,7 +24,7 @@ for i in [0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16]:
 
 	qoe = [[0 for z in range(6)] for x_ in range(n_scheme)]
 	for j in range(times):
-		os.system("python policy_different_join_time.py 1 10 %f 90 0 %d.trace %d"%(i, pid, admission))
+		os.system("python policy_different_join_time.py 1 10 %f 90 0 %d.trace %d"%(i, pid, adm))
 		ls = open("%d.trace"%(pid)).readlines()
 		os.system("rm %d.trace"%(pid))
 		

@@ -17,7 +17,7 @@ qoe_overall = []
 n_scheme = 7
 
 times = int(sys.argv[1])
-admission = int(sys.argv[2])
+adm = int(sys.argv[2])
 for i in range(5, 21, 3):
 	x.append(i)
 	tt = 0
@@ -27,7 +27,7 @@ for i in range(5, 21, 3):
 	qoe = [[0 for z in range(6)] for x_ in range(n_scheme)]
 	for j in range(times):
 		#os.system("python policy_output.py 1 %d 0.10 90 1 %d.trace"%(i, pid))
-		os.system("python policy_different_join_time.py 1 %d 0.10 90 0 %d.trace %d"%(i, pid, admission))
+		os.system("python policy_different_join_time.py 1 %d 0.10 90 0 %d.trace %d"%(i, pid, adm))
 		ls = open("%d.trace"%(pid)).readlines()
 		os.system("rm %d.trace"%(pid))
 		
