@@ -18,8 +18,8 @@ br_with_zero = [0] + br
 
 def get_downgrade_fraction(r, admitted_now, df_now):
 	for i in range(len(admitted_now)):
-		if admitted_now[i] == 1 and r[1][i] < br[0]:
-			df_now[0] += 1
+		if not r[1][i] in br:
+			df_now[i] += 1
 
 def count_admitted_user(a): # user with 1 is admitted, -1 is rejected, 0 is not seen
 	c = 0

@@ -10,7 +10,7 @@ pid = os.getpid()
 
 #signal range's default is 37%
 #print "python policy.py [scheme] [# premium users] [\% of premium resources] [# normal users] [silent] [signal range]"
-#print "python policy.py [scheme] [# premium users] [\% of premium resources] [# normal users] [silent] [trace name] [duration]"
+#print "python policy.py [scheme] [# premium users] [\% of premium resources] [# normal users] [silent] [trace name] [admission control]"
 #print "\t schemes. 1: random location; 2: same location; 3: good and bad"
 
 scheme = int(sys.argv[1])
@@ -20,8 +20,9 @@ common.normal_n = int(sys.argv[4])
 # common.time = 
 silent = int(sys.argv[5])
 tracename  = sys.argv[6]
-if len(sys.argv) > 7:
-	time = int(sys.argv[7])
+admission_control_scheme = int(sys.argv[7])
+#if len(sys.argv) > 7:
+#	time = int(sys.argv[7])
 #if len(sys.argv) > 6:
 #	r = float(sys.argv[6])
 #	bpp_min = int(bpp_mid*(1-r))
@@ -98,13 +99,13 @@ u_paris = []
 u_paris2 = []
 u_paris3 = []
 u_now = []
-df_sqm = [0] # this is downgrade fraction
-df_sqm2 = [0]
-df_sqm3 = [0]
-df_paris = [0]
-df_paris2 = [0]
-df_paris3 = [0]
-df_now = [0]
+df_sqm = [0] * common.n # this is downgrade fraction
+df_sqm2 = [0] * common.n
+df_sqm3 = [0] * common.n
+df_paris = [0] * common.n
+df_paris2 = [0] * common.n
+df_paris3 = [0] * common.n
+df_now = [0] * common.n
 pre_sqm, pre_sqm2, pre_sqm3, pre_paris, pre_paris2, pre_paris3, pre_now = -1, -1, -1, -1, -1, -1, -1
 u_a_sqm = [] # this is average utility
 u_a_sqm2 = []
@@ -128,7 +129,6 @@ admitted = [admitted_sqm, admitted_sqm2, admitted_sqm3, admitted_paris, admitted
 current_user = 0
 new_user = 0
 leave_user = 0
-admission_control_scheme = 1
 for i in range(max(leave_time)): #common.time):
 	for j in range(common.n):
 		if join_time[j] == i:
@@ -210,8 +210,9 @@ def generate_file(f, r, j, s, e):
 
 qoe_total = [0] * len(results)
 qoe_avg = [0] * len(results)
-qoe = [[[0,0,0,0,0] for y in range(common.n)] for x in range(len(results))] # average bitrate, rebuffer, switches, admitted
+qoe = [[[0,0,0,0,0,0] for y in range(common.n)] for x in range(len(results))] # average bitrate, rebuffer, switches, admitted
 ad = [admitted_sqm, admitted_sqm2, admitted_sqm3, admitted_paris, admitted_paris2, admitted_paris3, admitted_now]
+df = [df_sqm,df_sqm2,df_sqm3,df_paris,df_paris2,df_paris3,df_now]
 for i in range(len(results)):
 	r = results[i]
 	for j in range(common.n):
@@ -227,6 +228,7 @@ for i in range(len(results)):
 			qoe[i][j][2] = float(g.group(4))
 			qoe[i][j][3] = min(1, ad[i][j]) # 2 for admitted but ended, so need to upper bound by 1
 			qoe[i][j][4] = switches
+			qoe[i][j][5] = df[i][j]
 		else:
 			qoe_total[i] += 0
 			print "***", i, j
@@ -235,18 +237,17 @@ for i in range(len(results)):
 	qoe_avg[i] = qoe_total[i]*1.0/common.count_admitted_user(ad[i]) if common.count_admitted_user(ad[i]) else 0
 	os.system("rm temp_trace_%d"%(pid))
 
-df = [df_sqm,df_sqm2,df_sqm3,df_paris,df_paris2,df_paris3,df_now]
 f = open(tracename, "w")
 for i in range(len(results)):
 	r = results[i]
-	ind = [3, 0, 1, 2, 4]
-	for kk in range(5):
+	ind = [3, 0, 1, 2, 4, 5]
+	for kk in range(6):
 		k = ind[kk]
 		text = ""
 		for j in range(common.n):
 			text += str(qoe[i][j][k]) + " "
 		f.write(text[:-1] + "\n")
-	f.write(str(df[i][0]) + "\n")
+	#f.write(str(df[i][0]*1.0/common.time) + "\n")
 f.close()
 
 # plotting
