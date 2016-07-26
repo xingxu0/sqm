@@ -73,7 +73,7 @@ for i in range(5):
 		ax[i].legend(["sqm", "sqm2", "sqm3", "paris", "paris2", "paris3", "now"], 1, ncol=3)
 	ax[i].grid()
 plt.tight_layout()
-plt.savefig("vary_non_premium_user_%d.png"%(admission))
+plt.savefig("vary_non_premium_user_%d.png"%(adm))
 
 fout = open("vary_non_premium_user.txt", "w")
 fout.write(str(qoe_overall) + "\n")
