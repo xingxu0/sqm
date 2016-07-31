@@ -24,8 +24,10 @@ for i in [0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16]:
 
 	qoe = [[0 for z in range(6)] for x_ in range(n_scheme)]
 	for j in range(times):
-		os.system("python policy_different_join_time.py 1 10 %f 90 0 %d.trace %d > error.out 2>&1"%(i, pid, adm))
-		ls = open("%d.trace"%(pid)).readlines()
+		os.system("python policy_different_join_time.py 1 10 %f 90 0 %d.trace %d >> error.out 2>&1"%(i, pid, adm))
+		with open("%d.trace"%(pid)) as f:
+			ls = f.readlines()
+			f.close()
 		os.system("rm %d.trace"%(pid))
 		
 		xx = -1
@@ -69,6 +71,7 @@ for i in range(5):
 		ax[i].plot(x, y, "-x")
 	ax[i].set_xlabel("Premium Resources (1)")
 	ax[i].set_ylabel(ylabel[i])
+	if i == 4: ax[i].set_ylim([0, 50])
 	if i == 0:
 		ax[i].legend(["sqm", "sqm2", "sqm3", "paris", "paris2", "paris3", "now"], 1, ncol=3)
 	ax[i].grid()

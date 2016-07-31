@@ -165,6 +165,7 @@ def sqm_minimum_support(bpp, admitted, new_user, current_premium_user, last, adm
 	sorted_bpp = sorted(bpp.items(), key=operator.itemgetter(1), reverse=True)
 	fairness_rate = 0
 	maximum_fair_support = len(br) - 1 if maximum_fair else 0
+	maximum_fair_support = 1 if maximum_fair else 0
 	for j in range(maximum_fair_support, -1, -1):
 		doable = True
 		used = 0
@@ -244,12 +245,13 @@ def sqm_minimum_support(bpp, admitted, new_user, current_premium_user, last, adm
 	# give extra to any premium user
 	extra = available - allocated_prb
 	extra = 0 # don't use extra
-	for i in range(len(admitted)):
-		if admitted[i] == 1:
-			if ret_prb_[i] != 0:
-				ret_prb_[i] += extra
-				ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000
-				break
+	if extra:
+		for i in range(len(admitted)):
+			if admitted[i] == 1:
+				if ret_prb_[i] != 0:
+					ret_prb_[i] += extra
+					ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000
+					break
 				
 	#print extra, available, non_premium
 	for i in range(len(admitted)):

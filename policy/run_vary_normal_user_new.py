@@ -25,9 +25,10 @@ for i in range(40, 140, 20):
 	qoe = [[0 for z in range(6)] for x_ in range(n_scheme)]
 	for j in range(times):	
 		os.system("python policy_different_join_time.py 1 10 0.10 %d 0 %d.trace %d"%(i, pid, adm))
-		ls = open("%d.trace"%(pid)).readlines()
+		with open("%d.trace"%(pid)) as f:
+			ls = f.readlines()
+			f.close()
 		os.system("rm %d.trace"%(pid))
-		
 		xx = -1
 		for ii in range(n_scheme):
 			admission = 0
@@ -41,6 +42,7 @@ for i in range(40, 140, 20):
 					#qoe[ii][jj][kk] += float(t_[kk])
 					if admission == 0 or int(admission[kk]) >= 1:
 						qoe[ii][jj] += float(t_[kk])
+			
 	for ii in range(n_scheme):
 		for jj in range(1, 6):
 			qoe[ii][jj] = qoe[ii][jj]*1.0/qoe[ii][0]
@@ -69,6 +71,7 @@ for i in range(5):
 		ax[i].plot(x, y, "-x")
 	ax[i].set_xlabel("Number of Non-Premium Users")
 	ax[i].set_ylabel(ylabel[i])
+	if i == 4: ax[i].set_ylim([0, 50])
 	if i == 0:
 		ax[i].legend(["sqm", "sqm2", "sqm3", "paris", "paris2", "paris3", "now"], 1, ncol=3)
 	ax[i].grid()

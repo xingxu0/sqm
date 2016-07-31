@@ -192,20 +192,19 @@ for i in range(max(leave_time)): #common.time):
 #f = open("temp", "w")
 #f.write(str(np.mean(u_sqm)) +" " + str(np.mean(u_sqm2)) +" " + str(np.mean(u_sqm3)) +" " + str(np.mean(u_paris)) + " " + str( np.mean(u_now)) + "\n")
 #f.write(str(np.mean(u_a_sqm)) +" "+ str(np.mean(u_a_sqm2)) +" " + str(np.mean(u_a_sqm3)) +" " +str(np.mean(u_a_paris)) + " " + str( np.mean(u_a_now)) + "\n")
-#f.close()
 
 results = [result_sqm, result_sqm2, result_sqm3, result_paris, result_paris2, result_paris3, result_now]
 
 def generate_file(f, r, j, s, e):
 	randomness = 0.05
 	switches = 0
-	fo = open(f, "w")
-	for i in range(s, e):
-		random_ = 2*(random.random() - 0.5)*randomness
-		fo.write(str(i*1000) + " " + str(max(1, r[i][1][j]*(1+random_))) + "\n")
-		if i and r[i][1][j] in common.br and r[i - 1][1][j] in common.br and r[i][1][j] != r[i - 1][1][j]:
-			switches += 1
-	fo.close()
+	with open(f, "w") as fo:
+		for i in range(s, e):
+			random_ = 2*(random.random() - 0.5)*randomness
+			fo.write(str(i*1000) + " " + str(max(1, r[i][1][j]*(1+random_))) + "\n")
+			if i and r[i][1][j] in common.br and r[i - 1][1][j] in common.br and r[i][1][j] != r[i - 1][1][j]:
+				switches += 1
+		fo.close()
 	return switches
 
 qoe_total = [0] * len(results)
@@ -237,18 +236,17 @@ for i in range(len(results)):
 	qoe_avg[i] = qoe_total[i]*1.0/common.count_admitted_user(ad[i]) if common.count_admitted_user(ad[i]) else 0
 	os.system("rm temp_trace_%d"%(pid))
 
-f = open(tracename, "w")
-for i in range(len(results)):
-	r = results[i]
-	ind = [3, 0, 1, 2, 4, 5]
-	for kk in range(6):
-		k = ind[kk]
-		text = ""
-		for j in range(common.n):
-			text += str(qoe[i][j][k]) + " "
-		f.write(text[:-1] + "\n")
-	#f.write(str(df[i][0]*1.0/common.time) + "\n")
-f.close()
+with open(tracename, "w") as f:			
+	for i in range(len(results)):
+		r = results[i]
+		ind = [3, 0, 1, 2, 4, 5]
+		for kk in range(6):
+			k = ind[kk]
+			text = ""
+			for j in range(common.n):
+				text += str(qoe[i][j][k]) + " "
+			f.write(text[:-1] + "\n")
+	f.close()
 
 # plotting
 fig = plt.figure(figsize=(35,10))
