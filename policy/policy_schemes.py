@@ -405,6 +405,7 @@ def paris3(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 		ret_prb[i] = available/admitted_
 		#need = br[j]*1000.0/(sorted_bpp[i][1]*8)
 		close_j, close_v = 0, sys.maxint
+		#for j in range(1, len(br)):  # try R2 first
 		for j in range(len(br)):
 			t_prb = br[j]*1000.0/(bpp[i]*8)
 			if abs(t_prb - ret_prb[i]) < close_v:
