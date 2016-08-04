@@ -24,7 +24,7 @@ for i in range(40, 140, 20):
 
 	qoe = [[0 for z in range(6)] for x_ in range(n_scheme)]
 	for j in range(times):	
-		os.system("python policy_different_join_time.py 1 10 0.10 %d 0 %d.trace %d"%(i, pid, adm))
+		os.system("python policy_handover.py 1 10 0.10 %d 0 %d.trace %d"%(i, pid, adm))
 		with open("%d.trace"%(pid)) as f:
 			ls = f.readlines()
 			f.close()

@@ -38,8 +38,10 @@ result_paris2 = []
 result_paris3 = []
 result_now = []
 bpp = {}
+handover = {}
 bpp_legend = []
-randomness = 0.02
+randomness = 0.05
+randomness_edge = 0.20
 filename = ""
 issue = 0
 
@@ -53,6 +55,7 @@ def get_same_location():
 	x = random.randint(common.bpp_min, common.bpp_max)
 	for i in range(common.n):
 		bpp[i] = x
+		handover[i] = -1
 		bpp_legend.append(str(bpp[i]))
 
 def get_random_location():
@@ -61,6 +64,7 @@ def get_random_location():
 	bpp_legend = []
 	for i in range(common.n):
 		bpp[i] = random.randint(common.bpp_min, common.bpp_max)
+		handover[i] = -1
 		bpp_legend.append(str(bpp[i]))
 
 def get_two_types_users():
@@ -73,6 +77,7 @@ def get_two_types_users():
 		else:
 			bpp[i] = random.randint(common.bpp_min, int(common.bpp_min*1.1))
 		bpp_legend.append(str(bpp[i]))
+		handover[i] = -1
 
 #generate join time
 
@@ -117,6 +122,7 @@ u_a_now = []
 last_r = []
 last_r2 = []
 last_r3 = []
+last_p3 = []
 admitted_sqm = [0] * common.n
 admitted_sqm2 = [0] * common.n
 admitted_sqm3 = [0] * common.n   # with minimum support
@@ -139,7 +145,22 @@ for i in range(max(leave_time)): #common.time):
 			for ad in admitted:
 				ad[j] = 2 # 2 means already leave
 	for j in range(common.n):
-		bpp[j] = bpp[j]*(1 + 2*(random.random() - 0.5)*randomness)
+		if handover[j] == -1:
+			if bpp[j] > 50:
+				bpp[j] = bpp[j]*(1 + 2*(random.random() - 0.5)*randomness)
+			else:
+				#bpp[j] = bpp[j]*(1 + 2*(random.random() - 0.5)*randomness_edge)
+				bpp[j] = bpp[j]*(1 + 1*(random.random())*randomness) # always improving
+			if bpp[j] < common.handover_trigger:
+				print "handover for user", j, "with rate", bpp[j]
+				handover[j] = 0
+		else:
+			bpp[j] = common.handover_trace[handover[j]]
+			print "\thandover for user", j, "with rate", bpp[j]
+			handover[j] += 1
+			if handover[j] == len(common.handover_trace):
+				handover[j] = -1
+		
 	r1, r2, r3 = common.sqm(bpp, admitted_sqm, new_user, current_user, last_r, admission_control_scheme)
 	u_sqm.append(sum(r2)*1.0)#/count_admitted_user(admitted_sqm))
 	u_a_sqm.append(sum(r2)*1.0/common.count_admitted_user(admitted_sqm) if common.count_admitted_user(admitted_sqm) else 0 )
@@ -173,11 +194,12 @@ for i in range(max(leave_time)): #common.time):
 	result_paris2.append(r)
 	common.get_downgrade_fraction(r, admitted_paris2, df_paris2)
 	
-	r = common.paris3(bpp, admitted_paris3, new_user, current_user, admission_control_scheme)
-	u_paris3.append(sum(r[1])*1.0)#/count_admitted_user(admitted_paris))
-	u_a_paris3.append(sum(r[1])*1.0/common.count_admitted_user(admitted_paris3) if common.count_admitted_user(admitted_paris3) else 0)
-	result_paris3.append(r)
-	common.get_downgrade_fraction(r, admitted_paris3, df_paris3)
+	r1, r2, r3 = common.paris3(bpp, admitted_paris3, new_user, current_user, last_p3, admission_control_scheme)
+	u_paris3.append(sum(r2)*1.0)#/count_admitted_user(admitted_paris))
+	u_a_paris3.append(sum(r2)*1.0/common.count_admitted_user(admitted_paris3) if common.count_admitted_user(admitted_paris3) else 0)
+	result_paris3.append([r1, r2])
+	last_p3 = copy.deepcopy(r3)
+	common.get_downgrade_fraction([r1, r2], admitted_paris3, df_paris3)
 	
 	r = common.now(bpp, admitted_now, new_user, current_user, admission_control_scheme)
 	u_now.append(sum(r[1])*1.0)#/count_admitted_user(admitted_now))
