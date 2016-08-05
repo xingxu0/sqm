@@ -41,6 +41,7 @@ bpp = {}
 handover = {}
 bpp_legend = []
 randomness = 0.05
+randomness = float(sys.argv[8])
 randomness_edge = 0.20
 filename = ""
 issue = 0
@@ -123,6 +124,7 @@ last_r = []
 last_r2 = []
 last_r3 = []
 last_p3 = []
+last_p2 = []
 admitted_sqm = [0] * common.n
 admitted_sqm2 = [0] * common.n
 admitted_sqm3 = [0] * common.n   # with minimum support
@@ -188,11 +190,12 @@ for i in range(max(leave_time)): #common.time):
 	result_paris.append(r)
 	common.get_downgrade_fraction(r, admitted_paris, df_paris)
 	
-	r = common.paris2(bpp, admitted_paris2, new_user, current_user, admission_control_scheme)
-	u_paris2.append(sum(r[1])*1.0)#/count_admitted_user(admitted_paris))
-	u_a_paris2.append(sum(r[1])*1.0/common.count_admitted_user(admitted_paris2) if common.count_admitted_user(admitted_paris2) else 0)
-	result_paris2.append(r)
-	common.get_downgrade_fraction(r, admitted_paris2, df_paris2)
+	r1, r2, r3 = common.paris2(bpp, admitted_paris2, new_user, current_user, last_p2, admission_control_scheme)
+	u_paris2.append(sum(r2)*1.0)#/count_admitted_user(admitted_paris))
+	u_a_paris2.append(sum(r2)*1.0/common.count_admitted_user(admitted_paris2) if common.count_admitted_user(admitted_paris2) else 0)
+	result_paris2.append([r1, r2])
+	last_p2 = copy.deepcopy(r3)
+	common.get_downgrade_fraction([r1, r2], admitted_paris2, df_paris2)
 	
 	r1, r2, r3 = common.paris3(bpp, admitted_paris3, new_user, current_user, last_p3, admission_control_scheme)
 	u_paris3.append(sum(r2)*1.0)#/count_admitted_user(admitted_paris))

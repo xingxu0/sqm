@@ -18,13 +18,14 @@ n_user = 10
 
 times = int(sys.argv[1])
 adm = int(sys.argv[2])
+randomness = float(sys.argv[3])
 for i in range(40, 140, 20):
 	x.append(i)
 	tt = 0
 
 	qoe = [[0 for z in range(6)] for x_ in range(n_scheme)]
 	for j in range(times):	
-		os.system("python policy_handover.py 1 10 0.10 %d 0 %d.trace %d"%(i, pid, adm))
+		os.system("python policy_handover.py 1 10 0.10 %d 0 %d.trace %d %f"%(i, pid, adm, randomness))
 		with open("%d.trace"%(pid)) as f:
 			ls = f.readlines()
 			f.close()
@@ -76,7 +77,7 @@ for i in range(5):
 		ax[i].legend(["sqm", "sqm2", "sqm3", "paris", "paris2", "paris3", "now"], 1, ncol=3)
 	ax[i].grid()
 plt.tight_layout()
-plt.savefig("vary_non_premium_user_%d.png"%(adm))
+plt.savefig("vary_non_premium_user_%d_%f.png"%(adm, randomness))
 
 fout = open("vary_non_premium_user.txt", "w")
 fout.write(str(qoe_overall) + "\n")

@@ -18,6 +18,7 @@ n_scheme = 7
 
 times = int(sys.argv[1])
 adm = int(sys.argv[2])
+randomness = float(sys.argv[3])
 for i in range(5, 21, 3):
 	x.append(i)
 	tt = 0
@@ -27,7 +28,7 @@ for i in range(5, 21, 3):
 	qoe = [[0 for z in range(6)] for x_ in range(n_scheme)]
 	for j in range(times):
 		#os.system("python policy_output.py 1 %d 0.10 90 1 %d.trace"%(i, pid))
-		os.system("python policy_handover.py 1 %d 0.10 90 0 %d.trace %d"%(i, pid, adm))
+		os.system("python policy_handover.py 1 %d 0.10 150 0 %d.trace %d %f"%(i, pid, adm, randomness))
 		with open("%d.trace"%(pid)) as f:
 			ls = f.readlines()
 			f.close()
@@ -82,7 +83,7 @@ for i in range(5):
 		ax[i].legend(["sqm", "sqm2", "sqm3", "paris", "paris2", "paris3", "now"], 1, ncol=3)
 	ax[i].grid()
 plt.tight_layout()
-plt.savefig("vary_premium_user_%d.png"%(adm))
+plt.savefig("vary_premium_user_%d_%f.png"%(adm, randomness))
 
 fout = open("vary_premium_user.txt", "w")
 fout.write(str(qoe_overall) + "\n")
