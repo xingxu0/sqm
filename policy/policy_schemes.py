@@ -120,7 +120,7 @@ def sqm(bpp, admitted, new_user, current_premium_user, last, admssion_scheme):
 		ret_prb_.append(ret_prb[i])
 		ret_rate_.append(ret_rate[i])
 	# to lock it a bit to avoid fluctruation
-	if last != []:
+	if False and last != []:
 		if last[1] != ret_rate_:
 			diff = 0
 			for i in range(len(last[1])):
@@ -136,6 +136,7 @@ def sqm(bpp, admitted, new_user, current_premium_user, last, admssion_scheme):
 					#print "\tusing last",diff, last[1], ret_rate_, abs((np.mean(ret_rate_) - np.mean(last[1]))/np.mean(ret_rate_))
 					ret_prb_ = copy.deepcopy(last[0])
 					ret_rate_ = copy.deepcopy(last[1])
+	print "sqm1", ret_rate
 	premium_allocation = [copy.deepcopy(ret_prb_), copy.deepcopy(ret_rate_)]
 	#return ret_prb_, ret_rate_, premium_allocation
 	non_premium = 0
@@ -252,9 +253,9 @@ def sqm_minimum_support(bpp, admitted, new_user, current_premium_user, last, adm
 			non_premium += 1
 	# give extra to any premium user
 	extra = available - allocated_prb
-	print "sqm3 wasted", extra, "out of ", available, "total resources"
-	extra = 0 # don't use extra
-	if extra*1.0/available > 0.05:
+	#print "sqm3 wasted", extra, "out of ", available, "total resources"
+	#extra = 0 # don't use extra
+	if extra > 0: #*1.0/available > 0.05:
 		min_rate, min_user = sys.maxint, 0
 		for i in range(len(admitted)):
 			if admitted[i] == 1:
@@ -386,8 +387,83 @@ def paris2(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 	return ret_prb_, ret_rate_
 """
 
+alpha = 0
+def utility(a, b):
+	return a - alpha*abs(a-b)
+
 def paris3(bpp, admitted, new_user, current_premium_user, last, admssion_scheme):
-	print "paris3 round starts"
+	#print "paris3 round starts"
+	if new_user:
+		for i in range(len(admitted)):
+			if admitted[i] == 0 and new_user:
+				if admssion_scheme == 1:
+					sqm_admission(admitted, i, bpp)
+				elif admssion_scheme == 2:
+					sqm_admission2(admitted, i, bpp)
+				elif admssion_scheme == 3:
+					sqm_admission3(admitted, i, bpp)
+				else:
+					paris_admission(admitted, i, bpp)
+				new_user -= 1
+	available = int(round(total_prb*percentage))
+	v = [[0 for i in range(available)] for j in range(len(admitted))]
+	v_r = [[{} for i in range(available)] for j in range(len(admitted))]
+	for i in range(len(admitted)):
+		for j in range(available):
+			if admitted[i] != 1: 
+				if i:
+					v[i][j] = v[i - 1][j]
+					v_r[i][j] = copy.deepcopy(v_r[i - 1][j])
+				continue
+			if j:
+				v[i][j] = v[i][j - 1]
+				v_r[i][j] = copy.deepcopy(v_r[i][j - 1])
+			for k in range(len(br_with_zero)):
+				p = br_with_zero[k]*1000.0/(bpp[i]*8)
+				u = utility(br_with_zero[k], last[1][i] if last != [] else br_with_zero[k])
+				if i:
+					if p <= j and v[i - 1][j - int(round(p))] + u > v[i][j]:
+						v[i][j] = v[i - 1][j - int(round(p))] + u
+						v_r[i][j] = copy.deepcopy(v_r[i - 1][j - int(round(p))])
+						v_r[i][j][i] = br_with_zero[k]
+				else:
+					if p <= j:
+						v[i][j] = u
+						v_r[i][j][i] = br_with_zero[k]
+	ret_prb = {}
+	ret_rate = {}
+	for i in range(len(bpp)):
+		ret_prb[i] = 0
+		ret_rate[i] = 0
+		if admitted[i] != 1:
+			continue
+		ret_rate[i] = v_r[len(admitted) - 1][available - 1][i] if i in v_r[len(admitted) - 1][available - 1] else 0
+		ret_prb[i] = ret_rate[i]*1000.0/(bpp[i]*8)
+	
+	print "paris3", ret_rate
+	print "\t", bpp
+	ret_prb_ = []
+	ret_rate_ = []
+	for i in range(len(bpp)):
+		ret_prb_.append(ret_prb[i])
+		ret_rate_.append(ret_rate[i])
+	premium_allocation = [copy.deepcopy(ret_prb_), copy.deepcopy(ret_rate_)]	
+	non_premium = 0
+	for i in range(len(admitted)):
+		if admitted[i] == 1:
+			if ret_prb_[i] == 0:
+				non_premium += 1
+		elif admitted[i] == -1:
+			non_premium += 1
+	for i in range(len(admitted)):
+		if (admitted[i] == 1 and ret_prb_[i] == 0) or admitted[i] == -1:
+			ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
+			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000		
+	return ret_prb_, ret_rate_, premium_allocation
+
+# below paris3_previous is changed on 08/07
+def paris3_previous(bpp, admitted, new_user, current_premium_user, last, admssion_scheme):
+	#print "paris3 round starts"
 	if new_user:
 		for i in range(len(admitted)):
 			if admitted[i] == 0 and new_user:
@@ -532,6 +608,7 @@ def paris3(bpp, admitted, new_user, current_premium_user, last, admssion_scheme)
 			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000		
 	return ret_prb_, ret_rate_, premium_allocation
 
+
 def paris2(bpp, admitted, new_user, current_premium_user, last, admssion_scheme):
 	if new_user:
 		for i in range(len(admitted)):
@@ -593,7 +670,7 @@ def paris2(bpp, admitted, new_user, current_premium_user, last, admssion_scheme)
 				ret_prb[min_user] = ret_rate[min_user]*1000.0/(bpp[min_user]*8)
 				break
 		if min_user == -1: break
-		print "paris2 downgrade level1"
+		#print "paris2 downgrade level1"
 		
 	# then downgrade from R2 to R1 (for all the users)
 	while int(diff) > 0:
@@ -609,7 +686,7 @@ def paris2(bpp, admitted, new_user, current_premium_user, last, admssion_scheme)
 				ret_prb[min_user] = ret_rate[min_user]*1000.0/(bpp[min_user]*8)
 				break
 		if min_user == -1: break
-		print "paris2 downgrade level1"
+		#print "paris2 downgrade level1"
 	
 	# lastly downgrade from R1 to R0 (for users who used more then the fair share)
 	while int(diff) > 0:
@@ -625,7 +702,7 @@ def paris2(bpp, admitted, new_user, current_premium_user, last, admssion_scheme)
 				ret_prb[min_user] = ret_rate[min_user]*1000.0/(bpp[min_user]*8)
 				break
 		if min_user == -1: break
-		print "paris2 downgrade level1"
+		#print "paris2 downgrade level1"
 	
 	# lastly downgrade from R1 to R0 (for all the users)
 	while int(diff) > 0:
@@ -641,7 +718,7 @@ def paris2(bpp, admitted, new_user, current_premium_user, last, admssion_scheme)
 				ret_prb[min_user] = ret_rate[min_user]*1000.0/(bpp[min_user]*8)
 				break
 		if min_user == -1: break
-		print "paris2 downgrade level1"
+		#print "paris2 downgrade level1"
 		
 	ret_prb_ = []
 	ret_rate_ = []
