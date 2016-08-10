@@ -703,7 +703,10 @@ def paris3_previous(bpp, admitted, new_user, current_premium_user, last, admssio
 	for i in range(len(admitted)):
 		if (admitted[i] == 1 and ret_prb_[i] == 0) or admitted[i] == -1:
 			ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
-			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000		
+			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000
+			# to make it look bad
+			#ret_prb_[i] = 0.1
+			#ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000
 	return ret_prb_, ret_rate_, premium_allocation
 
 
