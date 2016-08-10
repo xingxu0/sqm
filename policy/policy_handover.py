@@ -197,7 +197,7 @@ for i in range(max(leave_time)): #common.time):
 	last_p2 = copy.deepcopy(r3)
 	common.get_downgrade_fraction([r1, r2], admitted_paris2, df_paris2)
 	
-	r1, r2, r3 = common.paris3(bpp, admitted_paris3, new_user, current_user, last_p3, admission_control_scheme)
+	r1, r2, r3 = common.paris3(bpp, admitted_paris3, new_user, current_user, last_p3, admission_control_scheme, result_paris3)
 	u_paris3.append(sum(r2)*1.0)#/count_admitted_user(admitted_paris))
 	u_a_paris3.append(sum(r2)*1.0/common.count_admitted_user(admitted_paris3) if common.count_admitted_user(admitted_paris3) else 0)
 	result_paris3.append([r1, r2])

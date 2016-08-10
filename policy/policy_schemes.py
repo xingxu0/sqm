@@ -1,4 +1,5 @@
-import operator, copy, numpy as np, sys
+import operator, copy, numpy as np, sys, math
+from scipy.optimize import minimize, rosen, rosen_der
 
 n = 6
 normal_n = 30 #number of normal user
@@ -387,11 +388,36 @@ def paris2(bpp, admitted, new_user, current_premium_user, admssion_scheme):
 	return ret_prb_, ret_rate_
 """
 
-alpha = 0
-def utility(a, b):
-	return a - alpha*abs(a-b)
+alpha = 0.1
+def utility(a, b, c):
+	return (math.log(a) if a > 0 else 0) - alpha*abs(a/1000.0-b/1000.0)*c
 
-def paris3(bpp, admitted, new_user, current_premium_user, last, admssion_scheme):
+c = []
+r = []
+s = []
+ava = 0
+def f(xs):
+	global r
+	ret = 0
+	for i in range(len(xs)):
+		x = xs[i]
+		ret += (math.log(x) if x > 1 else 0) - 0.1*(math.sqrt(pow(x - r[i], 2)) + 1)*s[i]
+	return -ret
+
+def con_fun(xs):
+	global c, ava
+	ret = 0
+	for i in range(len(xs)):
+		ret += xs[i]*1000.0/(c[i]*8)
+	return ava - ret
+
+def get_low(x):
+	for i in range(len(br_with_zero)):
+		if br_with_zero[i] > x: break
+	return max(0, i - 1)
+
+def paris3(bpp, admitted, new_user, current_premium_user, last, admssion_scheme, result):
+	global s, r, c, ava
 	#print "paris3 round starts"
 	if new_user:
 		for i in range(len(admitted)):
@@ -405,7 +431,74 @@ def paris3(bpp, admitted, new_user, current_premium_user, last, admssion_scheme)
 				else:
 					paris_admission(admitted, i, bpp)
 				new_user -= 1
+		
 	available = int(round(total_prb*percentage))
+	ava = available
+	
+	c[:] = []
+	r[:] = []
+	rr = []
+	bnds = []
+	s[:] = []
+	for i in range(len(admitted)):
+		if admitted[i] == 1:
+			c.append(bpp[i])
+			rr.append(4800)
+			if len(result):
+				r.append(result[-1][1][i])
+			else:
+				r.append(4800)
+			bnds.append((br_with_zero[0], br_with_zero[-1]))
+			switch = 0
+			temp = 0
+			for ii in range(len(result) - 2, -1, -1):
+				temp += 1
+				if result[ii][1][i] != result[ii + 1][1][i]:
+					switch += 1
+				if temp == 30: break
+			s.append(switch)
+	cons = ({'type': 'ineq', 'fun': con_fun})
+	#print r, bnds, cons
+	res = minimize(f, rr, args=(), method="SLSQP", bounds=bnds, constraints=cons)#, tol=1e-6, options={'disp': True ,'ftol':1e-6, 'eps' : 0.001})
+	print "paris3 0", r
+	ttt = []
+	for xx in res["x"]: ttt.append(int(xx))
+	print "paris3 0", ttt
+	print " "
+	
+	ret_prb = {}
+	ret_rate = {}
+	t = 0
+	s = []
+	used = 0
+	for i in range(len(bpp)):
+		ret_prb[i] = 0
+		ret_rate[i] = 0
+		if admitted[i] != 1:
+			continue
+		low = get_low(res["x"][t])
+		t += 1
+		ret_rate[i] = br_with_zero[low]
+		ret_prb[i] = ret_rate[i]*1000.0/(bpp[i]*8)
+		used += ret_prb[i]
+		ext = ((br_with_zero[low + 1] if low + 1 < len(br_with_zero) else sys.maxint)- br_with_zero[low])*1000.0/(bpp[i]*8)
+		s.append((ext, i))
+		
+	#print "paris3 1", ret_rate, used, available
+	s_ = sorted(s)
+	for i in range(len(s_)):
+		if s_[i][0] + used < available:
+			used += s_[i][0]
+			ii = s_[i][1]
+			ind = br_with_zero.index(ret_rate[ii])
+			if ind + 1 < len(br_with_zero):
+				ret_rate[ii] = br_with_zero[ind + 1]
+				ret_prb[ii] = ret_rate[ii]*1000.0/(bpp[ii]*8)
+				#print "\t upgrade", ii, "used", s_[i][0], "from", br_with_zero[ind], "to", br_with_zero[ind + 1]
+		else:
+			break
+	# below dynamic to find optimal
+	"""
 	v = [[0 for i in range(available)] for j in range(len(admitted))]
 	v_r = [[{} for i in range(available)] for j in range(len(admitted))]
 	for i in range(len(admitted)):
@@ -420,7 +513,14 @@ def paris3(bpp, admitted, new_user, current_premium_user, last, admssion_scheme)
 				v_r[i][j] = copy.deepcopy(v_r[i][j - 1])
 			for k in range(len(br_with_zero)):
 				p = br_with_zero[k]*1000.0/(bpp[i]*8)
-				u = utility(br_with_zero[k], last[1][i] if last != [] else br_with_zero[k])
+				temp = 0
+				switch = 0
+				for ii in range(len(result) - 2, -1, -1):
+					temp += 1
+					if result[ii][1][i] != result[ii + 1][1][i]:
+						switch += 1
+					if temp == 30: break
+				u = utility(br_with_zero[k], last[1][i] if last != [] else br_with_zero[k], switch)
 				if i:
 					if p <= j and v[i - 1][j - int(round(p))] + u > v[i][j]:
 						v[i][j] = v[i - 1][j - int(round(p))] + u
@@ -430,8 +530,6 @@ def paris3(bpp, admitted, new_user, current_premium_user, last, admssion_scheme)
 					if p <= j:
 						v[i][j] = u
 						v_r[i][j][i] = br_with_zero[k]
-	ret_prb = {}
-	ret_rate = {}
 	for i in range(len(bpp)):
 		ret_prb[i] = 0
 		ret_rate[i] = 0
@@ -439,9 +537,9 @@ def paris3(bpp, admitted, new_user, current_premium_user, last, admssion_scheme)
 			continue
 		ret_rate[i] = v_r[len(admitted) - 1][available - 1][i] if i in v_r[len(admitted) - 1][available - 1] else 0
 		ret_prb[i] = ret_rate[i]*1000.0/(bpp[i]*8)
+	"""
 	
-	print "paris3", ret_rate
-	print "\t", bpp
+	#print "paris3 2", ret_rate, used, available
 	ret_prb_ = []
 	ret_rate_ = []
 	for i in range(len(bpp)):
