@@ -253,6 +253,12 @@ for i in range(len(results)):
 			qoe[i][j][3] = min(1, ad[i][j]) # 2 for admitted but ended, so need to upper bound by 1
 			qoe[i][j][4] = switches
 			qoe[i][j][5] = df[i][j]
+			# handle downgrade fraction, penalty downgraded user on Average Bitrate
+			if i == 0 or i == 1 or i == 2 or i == 4 or i == 5:
+				if df[i][j]:
+					print "penalty", i, j, ":", qoe[i][j][0], df[i][j],
+					qoe[i][j][0] = qoe[i][j][0]*(1.0 - df[i][j]*1.0/common.time)
+					print qoe[i][j][0]
 		else:
 			qoe_total[i] += 0
 			print "***", i, j
@@ -354,7 +360,7 @@ for ii in range(len(results)): # for each scheme
 		if qoe[ii][i][3] != -1:
 			total[3] += 1
 	
-	text = "Total: DF: %d\nAD: %d A: %.0f R: %.4f S: %d BRS: %d"%(df[ii][0], total[3], total[0], total[1], total[2], total[4])
+	text = "Total: DF: %d\nAD: %d A: %.0f R: %.4f S: %d BRS: %d"%(sum(df[ii]), total[3], total[0], total[1], total[2], total[4])
 	axesu[ii].text(0.01, 0.9 - common.n*(1.0/(common.n+1)), text, transform=axesu[ii].transAxes, verticalalignment='top', fontsize=15, bbox=props)
 	
 	axesu[ii].plot(x, results_u[ii])

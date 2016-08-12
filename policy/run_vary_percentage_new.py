@@ -74,11 +74,11 @@ for i in range(5):
 	ax[i].set_ylabel(ylabel[i])
 	if i == 4: ax[i].set_ylim([0, 50])
 	if i == 0:
-		ax[i].legend(["sqm", "sqm2", "sqm3", "paris", "paris2", "paris3", "now"], 1, ncol=3)
+		ax[i].legend(["sqm", "sqm2", "sqm3", "paris", "paris2", "avis", "now"], 1, ncol=3)
 	ax[i].grid()
 plt.tight_layout()
 plt.savefig("vary_premium_resource_%d_%f.png"%(adm, randomness))
 
-fout = open("vary_premium_resource.txt", "w")
+fout = open("vary_premium_resource_%d_%f.raw"%(adm, randomness), "w")
 fout.write(str(qoe_overall) + "\n")
 fout.close()

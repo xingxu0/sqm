@@ -12,6 +12,7 @@ total_prb = 12000*4
 percentage = .3
 lock_parameter = 0.10
 time = 600
+penalty_downgrade = False
 
 label = ["N","R1", "R2", "R3", "R4", "R5"]
 
@@ -150,6 +151,8 @@ def sqm(bpp, admitted, new_user, current_premium_user, last, admssion_scheme):
 	for i in range(len(admitted)):
 		if (admitted[i] == 1 and ret_prb_[i] == 0) or admitted[i] == -1:
 			ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
+			if penalty_downgrade:
+				ret_prb_[i] = 10 #total_prb*(1-percentage)*1.0/(non_premium+normal_n)
 			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000
 	return ret_prb_, ret_rate_, premium_allocation
 
@@ -270,6 +273,8 @@ def sqm_minimum_support(bpp, admitted, new_user, current_premium_user, last, adm
 	for i in range(len(admitted)):
 		if (admitted[i] == 1 and ret_prb_[i] == 0) or admitted[i] == -1:
 			ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
+			if penalty_downgrade:
+				ret_prb_[i] = 10 #total_prb*(1-percentage)*1.0/(non_premium+normal_n)
 			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000
 	return ret_prb_, ret_rate_, premium_allocation
 
@@ -556,7 +561,9 @@ def paris3(bpp, admitted, new_user, current_premium_user, last, admssion_scheme,
 	for i in range(len(admitted)):
 		if (admitted[i] == 1 and ret_prb_[i] == 0) or admitted[i] == -1:
 			ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
-			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000		
+			if penalty_downgrade:
+				ret_prb_[i] = 10 #total_prb*(1-percentage)*1.0/(non_premium+normal_n)
+			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000
 	return ret_prb_, ret_rate_, premium_allocation
 
 # below paris3_previous is changed on 08/07
@@ -849,6 +856,8 @@ def paris2(bpp, admitted, new_user, current_premium_user, last, admssion_scheme)
 	for i in range(len(admitted)):
 		if (admitted[i] == 1 and ret_prb_[i] == 0) or admitted[i] == -1:
 			ret_prb_[i] = total_prb*(1-percentage)*1.0/(non_premium+normal_n)
+			if penalty_downgrade:
+				ret_prb_[i] = 10 #total_prb*(1-percentage)*1.0/(non_premium+normal_n)
 			ret_rate_[i] = ret_prb_[i]*bpp[i]*8/1000		
 	return ret_prb_, ret_rate_, premium_allocation
 
