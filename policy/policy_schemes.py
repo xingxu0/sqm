@@ -5,9 +5,9 @@ n = 6
 normal_n = 30 #number of normal user
 min_v = 80
 bpp_mid = int((min_v+292)*0.8/2)
-bpp_min = int(min_v*0.8) # bpp is bytes per prb
-#bpp_max = int(292*0.8)  # this value maps to 712bits/s as TBS
-bpp_max = int(500*0.8)  # this value maps to 712bits/s as TBS
+bpp_min = int(min_v*0.8) # bpp is bytes per prb                 # 64
+#bpp_max = int(292*0.8)  # this value maps to 712bits/s as TBS   
+bpp_max = int(500*0.8)  # this value maps to 712bits/s as TBS   # 400
 total_prb = 12000*4
 percentage = .3
 lock_parameter = 0.10
@@ -19,8 +19,8 @@ label = ["N","R1", "R2", "R3", "R4", "R5"]
 br = [350, 700, 1200, 2400, 4800]
 br_with_zero = [0] + br
 
-handover_trigger = 0 # 120
-handover_trace = [100, 90, 60, 1, 1, 150]
+handover_trigger = 120
+handover_trace = [90, 30, 15, 1, 1, 1, 1, 150]
 
 def get_downgrade_fraction(r, admitted_now, df_now):
 	for i in range(len(admitted_now)):

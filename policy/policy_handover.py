@@ -53,7 +53,7 @@ def get_same_location():
 	global bpp_legend, filename
 	filename = "same_signal"
 	bpp_legend = []
-	x = random.randint(common.bpp_min, common.bpp_max)
+	x = random.randint(common.bpp_min, common.bpp_max/3)
 	for i in range(common.n):
 		bpp[i] = x
 		handover[i] = -1
@@ -148,11 +148,11 @@ for i in range(max(leave_time)): #common.time):
 				ad[j] = 2 # 2 means already leave
 	for j in range(common.n):
 		if handover[j] == -1:
-			if bpp[j] > 50:
-				bpp[j] = bpp[j]*(1 + 2*(random.random() - 0.5)*randomness)
-			else:
+			#if bpp[j] > 50:
+			bpp[j] = bpp[j]*(1 + 2*(random.random() - 0.5)*randomness)
+			#else:
 				#bpp[j] = bpp[j]*(1 + 2*(random.random() - 0.5)*randomness_edge)
-				bpp[j] = bpp[j]*(1 + 1*(random.random())*randomness) # always improving
+				#bpp[j] = bpp[j]*(1 + 1*(random.random())*randomness) # always improving
 			if bpp[j] < common.handover_trigger:
 				print "handover for user", j, "with rate", bpp[j]
 				handover[j] = 0
@@ -256,9 +256,9 @@ for i in range(len(results)):
 			# handle downgrade fraction, penalty downgraded user on Average Bitrate
 			if i == 0 or i == 1 or i == 2 or i == 4 or i == 5:
 				if df[i][j]:
-					print "penalty", i, j, ":", qoe[i][j][0], df[i][j],
+					#print "penalty", i, j, ":", qoe[i][j][0], df[i][j],
 					qoe[i][j][0] = qoe[i][j][0]*(1.0 - df[i][j]*1.0/common.time)
-					print qoe[i][j][0]
+					#print qoe[i][j][0]
 		else:
 			qoe_total[i] += 0
 			print "***", i, j

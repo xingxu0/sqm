@@ -27,8 +27,9 @@ for i in range(5, 21, 3):
 	n_user = i
 	qoe = [[0 for z in range(6)] for x_ in range(n_scheme)]
 	for j in range(times):
+		normal_user = 10*0.9/(0.1*1.0/i)
 		#os.system("python policy_output.py 1 %d 0.10 90 1 %d.trace"%(i, pid))
-		os.system("python policy_handover.py 1 %d 0.10 150 0 %d.trace %d %f"%(i, pid, adm, randomness))
+		os.system("python policy_handover.py 1 %d 0.10 %d 0 %d.trace %d %f"%(i, normal_user, pid, adm, randomness))
 		with open("%d.trace"%(pid)) as f:
 			ls = f.readlines()
 			f.close()
